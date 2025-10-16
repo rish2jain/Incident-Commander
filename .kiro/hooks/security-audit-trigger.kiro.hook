@@ -1,0 +1,21 @@
+{
+  "enabled": true,
+  "name": "Security Audit Trigger",
+  "description": "Run security audits when security-sensitive files are modified",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "src/services/aws.py",
+      "agents/**/agent.py",
+      "**/security.py",
+      "**/auth*.py",
+      "infrastructure/**/*.py",
+      "**/*permissions*.py"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A security-sensitive file has been modified. Run security audit:\n1. Scan for hardcoded secrets or credentials using bandit\n2. Validate IAM role permissions follow least privilege principle\n3. Check for proper input validation and sanitization\n4. Verify encryption at rest and in transit configurations\n5. Validate agent authentication and authorization flows\n6. Check for SQL injection, XSS, and other OWASP top 10 vulnerabilities\n7. Verify audit logging for security events\n8. Test circuit breaker and rate limiting configurations\n9. Validate secure communication between agents\n10. Check dependency vulnerabilities: pip-audit --requirement requirements.txt\n11. Ensure PII redaction and data protection compliance\n12. Generate security report with recommendations"
+  }
+}

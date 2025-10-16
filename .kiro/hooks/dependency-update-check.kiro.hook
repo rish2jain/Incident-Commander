@@ -1,0 +1,14 @@
+{
+  "enabled": true,
+  "name": "Python Dependency Security Check",
+  "description": "Check Python dependencies for security vulnerabilities and compatibility with AWS Bedrock",
+  "version": "1",
+  "when": {
+    "type": "manual",
+    "button_text": "Check Python Dependencies"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Check Python dependencies for the incident commander system:\n1. Run security audit: pip-audit --requirement requirements.txt\n2. Check for outdated packages: pip list --outdated\n3. Validate AWS SDK compatibility with Bedrock services\n4. Check LangGraph and agent framework versions\n5. Verify FastAPI and async library compatibility\n6. Scan for known vulnerabilities: safety check\n7. Validate Docker base image security\n8. Check for conflicting dependency versions\n9. Ensure ML/AI library compatibility (ChromaDB, Pinecone)\n10. Test critical dependencies in virtual environment\n11. Generate dependency security report\n12. Suggest safe upgrade paths for critical security fixes"
+  }
+}

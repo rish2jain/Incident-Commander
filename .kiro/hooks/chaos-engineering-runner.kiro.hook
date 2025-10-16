@@ -1,0 +1,14 @@
+{
+  "enabled": true,
+  "name": "Chaos Engineering Runner",
+  "description": "Run chaos engineering experiments to test system resilience",
+  "version": "1",
+  "when": {
+    "type": "manual",
+    "button_text": "Run Chaos Experiment"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Execute chaos engineering experiment to test system resilience:\n1. Choose appropriate chaos experiment (agent failure, network partition, database slowdown)\n2. Ensure safety guardrails are in place (sandbox environment, rollback mechanisms)\n3. Run chaos experiment using Chaos Toolkit: chaos run chaos-experiment.yaml\n4. Monitor agent behavior during failure injection\n5. Validate circuit breaker activation and fallback mechanisms\n6. Test agent coordination under degraded conditions\n7. Measure system recovery time and data consistency\n8. Check alert generation and escalation procedures\n9. Validate graceful degradation and partial operation modes\n10. Document failure patterns and system weaknesses\n11. Generate resilience report with improvement recommendations\n12. Update incident response playbooks based on findings"
+  }
+}

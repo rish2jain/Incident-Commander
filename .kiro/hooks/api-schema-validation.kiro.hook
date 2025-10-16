@@ -1,0 +1,19 @@
+{
+  "enabled": true,
+  "name": "Agent Communication Schema Validation",
+  "description": "Validate agent communication schemas and update Pydantic models when schemas change",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "src/models/**/*.py",
+      "agents/**/models.py",
+      "**/*schema*.py",
+      "**/*models*.py"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "An agent communication model or schema has been modified. Please:\n1. Validate Pydantic model syntax and field types\n2. Check for breaking changes in agent message formats\n3. Update related agent communication code\n4. Validate event sourcing event schemas\n5. Ensure proper serialization/deserialization\n6. Update agent interface contracts\n7. Run agent communication tests: pytest -q tests/unit/test_models.py\n8. Check for proper error handling in message validation\n9. Verify backward compatibility with existing incidents\n10. Update agent documentation for schema changes\n11. Ensure security validation for sensitive fields"
+  }
+}

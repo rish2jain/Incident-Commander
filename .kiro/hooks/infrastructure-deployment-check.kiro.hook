@@ -1,0 +1,20 @@
+{
+  "enabled": true,
+  "name": "Infrastructure Deployment Check",
+  "description": "Validate infrastructure changes and run deployment checks",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "infrastructure/**/*.py",
+      "cdk.json",
+      "requirements.txt",
+      "docker-compose.yml",
+      "**/Dockerfile"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Infrastructure configuration has been modified. Run deployment validation:\n1. Validate CDK stack syntax: cdk synth --all\n2. Check for breaking changes in infrastructure: cdk diff\n3. Validate Docker configurations and build processes\n4. Test LocalStack compatibility for local development\n5. Check AWS resource quotas and limits\n6. Validate security groups and network configurations\n7. Ensure proper tagging and cost allocation\n8. Check backup and disaster recovery configurations\n9. Validate monitoring and alerting setup\n10. Test infrastructure deployment in staging environment\n11. Generate deployment checklist and rollback plan\n12. Verify compliance with security and governance policies"
+  }
+}

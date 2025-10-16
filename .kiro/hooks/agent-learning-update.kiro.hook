@@ -1,0 +1,20 @@
+{
+  "enabled": true,
+  "name": "Agent Learning Update",
+  "description": "Update agent knowledge base and learning models when incident data changes",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "data/incidents/**/*.json",
+      "agents/**/knowledge.py",
+      "src/models/incident.py",
+      "**/learning*.py",
+      "**/rag*.py"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Agent learning data has been updated. Refresh knowledge base:\n1. Validate new incident data format and completeness\n2. Update vector embeddings in ChromaDB/Pinecone\n3. Refresh agent knowledge graphs and relationships\n4. Retrain prediction models with new incident patterns\n5. Update agent decision trees and resolution playbooks\n6. Validate RAG retrieval accuracy with new data\n7. Test agent learning and adaptation mechanisms\n8. Check for data quality issues or anomalies\n9. Update agent confidence scoring based on historical accuracy\n10. Refresh similarity search indexes\n11. Generate learning effectiveness report\n12. Ensure data privacy and PII redaction compliance"
+  }
+}

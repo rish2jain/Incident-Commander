@@ -1,0 +1,14 @@
+{
+  "enabled": true,
+  "name": "Agent Health Monitor",
+  "description": "Monitor agent health, performance metrics, and system status",
+  "version": "1",
+  "when": {
+    "type": "manual",
+    "button_text": "Check Agent Health"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Perform comprehensive agent health monitoring:\n1. Check all agent service status and connectivity\n2. Validate AWS Bedrock agent configurations and permissions\n3. Test agent communication channels and message bus\n4. Monitor response times against SLA targets (Detection: 30s, Diagnosis: 120s, Resolution: 180s)\n5. Check circuit breaker states and failure counts\n6. Validate event store consistency and version conflicts\n7. Monitor memory usage and vector database performance\n8. Check external service integrations (Datadog, PagerDuty, Slack)\n9. Validate security controls and authentication status\n10. Generate health dashboard with key metrics\n11. Alert on any degraded services or performance issues\n12. Recommend optimization actions if needed"
+  }
+}

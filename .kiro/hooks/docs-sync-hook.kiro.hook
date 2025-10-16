@@ -1,0 +1,14 @@
+{
+  "enabled": true,
+  "name": "Agent Documentation Sync",
+  "description": "Update documentation when agent implementations or system architecture changes",
+  "version": "1",
+  "when": {
+    "type": "manual",
+    "button_text": "Update Documentation"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Update documentation for the incident commander system:\n1. Review recent changes in agent implementations and system architecture\n2. Update README.md with current system capabilities and setup instructions\n3. Update agent-specific documentation in docs/ directory\n4. Refresh API documentation for agent communication interfaces\n5. Update deployment guides and infrastructure documentation\n6. Document new incident response patterns and playbooks\n7. Update security guidelines and compliance documentation\n8. Refresh performance benchmarks and SLA documentation\n9. Update troubleshooting guides and common issues\n10. Document agent learning and knowledge base management\n11. Update integration guides for external services\n12. Ensure documentation reflects current AWS Bedrock capabilities"
+  }
+}

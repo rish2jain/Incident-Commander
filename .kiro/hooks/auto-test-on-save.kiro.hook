@@ -1,0 +1,18 @@
+{
+  "enabled": true,
+  "name": "Agent Test on Save",
+  "description": "Automatically run agent tests when Python files are saved, focusing on agent behavior and integration",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "agents/**/*.py",
+      "src/**/*.py",
+      "tests/**/*.py"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A Python file in the incident commander system has been saved. Run appropriate tests with minimal verbosity:\n1. If this is an agent file, run agent-specific tests: pytest -q tests/unit/test_agents.py -k 'agent_name'\n2. If this is orchestrator code, run workflow tests: pytest -q tests/integration/test_workflows.py\n3. If this is a test file, run it directly: pytest -q path/to/test_file.py\n4. Check for agent communication patterns and state management\n5. Validate event sourcing and concurrency handling\n6. Use pytest -q --tb=short for minimal output\n7. Focus on agent behavior, not just code coverage"
+  }
+}

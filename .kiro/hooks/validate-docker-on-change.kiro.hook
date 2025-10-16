@@ -1,0 +1,20 @@
+{
+  "enabled": true,
+  "name": "Agent Container Validation",
+  "description": "Validate Docker configurations for agent deployment and LocalStack development",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "Dockerfile*",
+      "docker-compose*.yml",
+      "docker-compose*.yaml",
+      "*.dockerfile",
+      "docker/**/*"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Docker configuration for agent system has been modified. Validate:\n1. Check Dockerfile security (non-root user, minimal attack surface)\n2. Validate Python base image versions and security patches\n3. Ensure proper agent dependency installation and caching\n4. Check LocalStack service configurations in docker-compose\n5. Validate agent container networking and communication\n6. Verify health checks for agent services\n7. Check resource limits and scaling configurations\n8. Validate environment variable handling and secrets management\n9. Test container builds: docker build -t incident-commander .\n10. Ensure proper logging and monitoring configurations\n11. Check for AWS service compatibility (Bedrock, DynamoDB)\n12. Validate container orchestration for multi-agent deployment"
+  }
+}

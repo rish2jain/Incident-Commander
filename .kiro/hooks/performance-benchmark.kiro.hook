@@ -1,0 +1,14 @@
+{
+  "enabled": true,
+  "name": "Performance Benchmark Runner",
+  "description": "Run performance benchmarks to validate agent response time SLAs",
+  "version": "1",
+  "when": {
+    "type": "manual",
+    "button_text": "Run Performance Benchmark"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Run performance benchmarks for the incident commander system:\n1. Test agent response times against SLA targets (Detection: 30s, Diagnosis: 120s, Resolution: 180s)\n2. Run load tests with multiple concurrent incidents: locust -f tests/load_test.py\n3. Measure end-to-end incident resolution time (target: <3 minutes)\n4. Test agent coordination under high load\n5. Benchmark vector database query performance (ChromaDB/Pinecone)\n6. Measure event sourcing write/read performance\n7. Test API endpoint response times under load\n8. Validate memory usage and garbage collection patterns\n9. Check AWS service call latencies and throttling\n10. Test agent circuit breaker activation thresholds\n11. Generate performance report with bottleneck analysis\n12. Compare results against baseline metrics and alert on regressions"
+  }
+}

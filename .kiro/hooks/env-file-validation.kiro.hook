@@ -1,0 +1,19 @@
+{
+  "enabled": true,
+  "name": "AWS Environment Configuration Validation",
+  "description": "Validate AWS and agent environment configurations for security and completeness",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      ".env*",
+      "**/.env*",
+      "*.env",
+      "infrastructure/config/*.py"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "AWS environment configuration has been modified. Validate:\n1. Check that AWS credentials are NOT in environment files (use IAM roles)\n2. Validate required AWS service configurations (Bedrock, DynamoDB, S3)\n3. Verify agent-specific environment variables are present\n4. Check LocalStack configuration for local development\n5. Validate external service API keys are properly referenced (not hardcoded)\n6. Ensure environment separation (dev/staging/prod) is maintained\n7. Check that .env files are in .gitignore\n8. Validate monitoring and observability configurations\n9. Verify encryption key references and KMS configurations\n10. Check agent communication endpoint configurations\n11. Ensure proper naming conventions for AWS resources\n12. Validate compliance with security policies"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "enabled": true,
+  "name": "Incident Simulation Runner",
+  "description": "Run incident simulations to test agent coordination and response times",
+  "version": "1",
+  "when": {
+    "type": "manual",
+    "button_text": "Run Incident Simulation"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Run an incident simulation to test the multi-agent system:\n1. Start LocalStack services if not running: docker-compose up -d\n2. Initialize test incident data in DynamoDB\n3. Trigger a simulated incident (database slowdown, cascade failure, or DDoS)\n4. Monitor agent coordination and response times\n5. Validate event sourcing and state transitions\n6. Check agent communication patterns and message flow\n7. Measure end-to-end resolution time (target: <3 minutes)\n8. Verify conflict resolution and consensus mechanisms\n9. Test circuit breaker and fallback behaviors\n10. Generate simulation report with metrics and recommendations\n11. Use chaos engineering to inject realistic failures\n12. Validate security controls and audit logging"
+  }
+}

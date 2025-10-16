@@ -1,0 +1,14 @@
+{
+  "enabled": true,
+  "name": "Agent System Coverage Check",
+  "description": "Run comprehensive tests with coverage for the multi-agent incident response system",
+  "version": "1",
+  "when": {
+    "type": "manual",
+    "button_text": "Check Agent Coverage"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Run comprehensive test coverage analysis for the incident commander system:\n1. Run full test suite with coverage: pytest --cov=src --cov=agents --cov-report=term-missing -q\n2. Focus on critical agent behaviors: detection, diagnosis, resolution\n3. Check event sourcing and state management coverage\n4. Validate agent communication and coordination paths\n5. Identify untested failure scenarios and edge cases\n6. Report coverage for each agent type separately\n7. Check integration test coverage for agent workflows\n8. Validate chaos engineering and resilience test coverage\n9. Ensure security-critical paths are well tested\n10. Suggest specific incident scenarios that need more tests\n11. Target 90%+ coverage for agent core logic, 80%+ overall"
+  }
+}

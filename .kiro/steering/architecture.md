@@ -1,5 +1,17 @@
 # Architecture Guidelines
 
+## Async Implementation Notes
+
+- Use asyncio-friendly clients such as `aioboto3`, `redis.asyncio`, and `aiokinesis` when agents interact with AWS or message buses from the event loop.
+- If a dependency is sync-only, wrap it with `asyncio.to_thread` or run it inside an executor to avoid blocking orchestration tasks.
+- All snippets in this document follow the repository style guide: type hints, snake_case identifiers, and context managers for long-lived connections.
+
+## Local Development Workflow
+
+- Run `docker-compose up -d` to start LocalStack, Redis, and supporting queues; all architecture samples assume these localhost endpoints.
+- Use `awslocal` for provisioning DynamoDB tables, Kinesis streams, and Bedrock stubs; production commands should swap to native `aws` CLI.
+- Configure environment variables via `.env` aligned with `.env.example`, and point SDK clients to LocalStack endpoints during development.
+
 ## Core Architectural Principles
 
 ### Multi-Agent Orchestration
@@ -42,43 +54,55 @@ class AgentSwarm:
 All incident state changes must use event sourcing to prevent race conditions:
 
 ```python
+import aioboto3
+from boto3.dynamodb.conditions import Key
+
+
 class IncidentEventStore:
-    def __init__(self):
-        self.dynamodb = boto3.resource('dynamodb')
-        self.table = self.dynamodb.Table('incident-events')
+    def __init__(self, table_name: str = "incident-events") -> None:
+        self._session = aioboto3.Session()
+        self._table_name = table_name
 
-    def append_event(self, incident_id: str, event: IncidentEvent) -> int:
-        # Use DynamoDB conditional writes for true distributed locking
-        current_version = self.get_current_version(incident_id)
-        new_version = current_version + 1
+    async def append_event(self, incident_id: str, event: IncidentEvent) -> int:
+        """Persist an incident event using optimistic locking."""
+        async with self._session.resource("dynamodb") as dynamodb:
+            table = await dynamodb.Table(self._table_name)
+            current_version = await self.get_current_version(table, incident_id)
+            new_version = current_version + 1
 
-        try:
-            self.table.put_item(
-                Item={
-                    'incident_id': incident_id,
-                    'version': new_version,
-                    'event_data': event.to_dict(),
-                    'timestamp': event.timestamp,
-                    'event_type': event.event_type
-                },
-                ConditionExpression='attribute_not_exists(version) OR version = :expected_version',
-                ExpressionAttributeValues={':expected_version': current_version}
+            try:
+                await table.put_item(
+                    Item={
+                        "incident_id": incident_id,
+                        "version": new_version,
+                        "event_data": event.to_dict(),
+                        "timestamp": event.timestamp,
+                        "event_type": event.event_type,
+                    },
+                    ConditionExpression=(
+                        "attribute_not_exists(version) OR version = :expected_version"
+                    ),
+                    ExpressionAttributeValues={":expected_version": current_version},
+                )
+                return new_version
+            except ClientError as error:
+                if error.response["Error"]["Code"] == "ConditionalCheckFailedException":
+                    raise OptimisticLockException(
+                        f"Version conflict for incident {incident_id}"
+                    ) from error
+                raise
+
+    async def replay_events(self, incident_id: str) -> IncidentState:
+        async with self._session.resource("dynamodb") as dynamodb:
+            table = await dynamodb.Table(self._table_name)
+            response = await table.query(
+                KeyConditionExpression=Key("incident_id").eq(incident_id),
+                ScanIndexForward=True,
             )
-            return new_version
-        except ClientError as e:
-            if e.response['Error']['Code'] == 'ConditionalCheckFailedException':
-                raise OptimisticLockException(f"Version conflict for incident {incident_id}")
-            raise
-
-    def replay_events(self, incident_id: str) -> IncidentState:
-        response = self.table.query(
-            KeyConditionExpression=Key('incident_id').eq(incident_id),
-            ScanIndexForward=True  # Sort by version ascending
-        )
 
         state = IncidentState()
-        for item in response['Items']:
-            event = IncidentEvent.from_dict(item['event_data'])
+        for item in response["Items"]:
+            event = IncidentEvent.from_dict(item["event_data"])
             state = state.apply_event(event)
         return state
 ```
@@ -189,16 +213,18 @@ class AgentCircuitBreaker:
 Use centralized message bus instead of direct agent communication:
 
 ```python
-class ResilientMessageBus:
-    def __init__(self):
-        self.redis_client = Redis()
-        self.retry_policies = {
-            "detection": RetryPolicy(max_retries=3, timeout=30),
-            "diagnosis": RetryPolicy(max_retries=5, timeout=60),
-            "resolution": RetryPolicy(max_retries=2, timeout=120)
-        }
+from collections.abc import Mapping
+from redis.asyncio import Redis
 
-    async def send_with_resilience(self, message, target_agent):
+from src.utils.constants import SHARED_RETRY_POLICIES
+
+
+class ResilientMessageBus:
+    def __init__(self, redis_client: Redis | None = None) -> None:
+        self.redis_client: Redis = redis_client or Redis.from_url("redis://localhost:6379")
+        self.retry_policies: Mapping[str, RetryPolicy] = SHARED_RETRY_POLICIES
+
+    async def send_with_resilience(self, message: AgentMessage, target_agent: str) -> None:
         retry_policy = self.retry_policies[target_agent]
 
         for attempt in range(retry_policy.max_retries):
@@ -208,9 +234,9 @@ class ResilientMessageBus:
                     timeout=retry_policy.timeout
                 )
                 return
-            except Exception as e:
+            except Exception as error:
                 if attempt == retry_policy.max_retries - 1:
-                    await self.send_to_dlq(message, target_agent, str(e))
+                    await self.send_to_dlq(message, target_agent, str(error))
                     raise
                 await asyncio.sleep(retry_policy.get_delay(attempt))
 ```
@@ -441,6 +467,20 @@ class ScalabilityManager:
 - Lambda warming for cold start prevention (<100ms)
 - Async processing for non-critical operations
 - Auto-scaling triggers at 70% resource utilization
+
+## Shared Operational Constants
+
+| Domain | Constant | Value | Referenced By |
+| --- | --- | --- | --- |
+| Consensus | Agent weights | Detection 0.2, Diagnosis 0.4, Prediction 0.3, Resolution 0.1 | Consensus engine, Requirements §6/§19, Design consensus diagrams |
+| Consensus | Autonomous confidence threshold | Escalate when aggregated confidence < 0.7 | Consensus engine, Requirements §6/§19 |
+| Resilience | Circuit breaker policy | 5 consecutive failures → OPEN, 30s cooldown, require 2 successes to fully close | Circuit breaker section, Requirements §20 |
+| Communication | Channel rate limits | Slack 1/sec, PagerDuty 2/min, Email 10/sec | Communication agent, Requirements §5/§17 |
+| Performance | Agent response targets | Detection 30s target/60s max, Diagnosis 120s/180s, Prediction 90s/150s, Resolution 180s/300s, Communication 10s/30s | Performance monitor, Requirements §10 |
+
+> Other documents should reference these canonical values instead of redefining them to avoid drift.
+
+All runtime services should load these constants from `src/utils/constants.py` to stay synchronized across orchestrator code, agents, and documentation.
 
 ## Data Flow Architecture
 

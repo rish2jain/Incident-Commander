@@ -62,6 +62,8 @@
 - **Socket.io**: Real-time agent communication
 - **Streamlit**: Rapid prototyping alternative
 
+> _Status_: The production React dashboard is planned but not yet part of the repository. Prototype UI assets should live under `docs/demo-ui/` until a dedicated `frontend/` package is created.
+
 ## Integrations
 
 ### External Services
@@ -85,6 +87,12 @@
 - **Docker Compose**: Local service orchestration
 - **pyenv**: Python version management
 - **pip**: Package management
+
+## Local Development Workflow
+
+- Start dependencies with `docker-compose up -d`; this provisions LocalStack, Redis, and supporting containers expected by orchestrator services.
+- Use `awslocal` to create DynamoDB tables, Kinesis streams, and Bedrock stubs during development. Swap to native `aws` CLI in staging/production.
+- Populate `.env` from `.env.example`, pointing SDK clients (DynamoDB, S3, Bedrock) at `localhost` endpoints exposed by LocalStack.
 
 ## Common Commands
 

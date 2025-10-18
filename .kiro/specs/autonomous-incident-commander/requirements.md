@@ -4,6 +4,8 @@
 
 The Autonomous Incident Commander is an AI-powered multi-agent system that provides zero-touch incident resolution for cloud infrastructure. The system uses coordinated agent swarms to detect, diagnose, predict, and resolve incidents autonomously, reducing mean time to resolution (MTTR) from 30+ minutes to under 3 minutes. The system targets enterprise DevOps and SRE teams struggling with alert fatigue, increasing incident complexity, skill gaps, and high incident costs.
 
+> Operational thresholds (consensus weights, circuit breaker policy, notification rate limits, and agent SLAs) are defined centrally in *Steering → Architecture → Shared Operational Constants* and should be referenced instead of redefining values in individual requirements.
+
 ## Glossary
 
 - **Incident_Commander_System**: The complete multi-agent orchestration platform for autonomous incident response
@@ -230,9 +232,9 @@ The Autonomous Incident Commander is an AI-powered multi-agent system that provi
 
 #### Acceptance Criteria
 
-1. WHEN integrating with Datadog API, THE Incident_Commander_System SHALL respect 300 requests per hour limit with burst capacity of 50
-2. WHEN using PagerDuty API, THE Communication_Agent SHALL limit requests to 120 per minute with intelligent request batching
-3. WHILE sending Slack notifications, THE Communication_Agent SHALL respect 1 request per second per channel limit
+1. WHEN integrating with Datadog API, THE Incident_Commander_System SHALL respect the Datadog rate limits documented in *Steering → Architecture → Shared Operational Constants*.
+2. WHEN using PagerDuty API, THE Communication_Agent SHALL honor the PagerDuty limits defined in *Steering → Architecture → Shared Operational Constants* with intelligent request batching.
+3. WHILE sending Slack notifications, THE Communication_Agent SHALL respect the Slack per-channel throttling defined in the shared constants.
 4. WHERE external APIs return rate limit errors, THE Incident_Commander_System SHALL implement exponential backoff with maximum 5-minute delay
 5. THE Incident_Commander_System SHALL maintain request queues for each external service with priority-based processing
 
@@ -256,9 +258,9 @@ The Autonomous Incident Commander is an AI-powered multi-agent system that provi
 
 #### Acceptance Criteria
 
-1. WHEN agents provide conflicting recommendations, THE Consensus_Engine SHALL use weighted scoring: Detection_Agent (0.2), Diagnosis_Agent (0.4), Prediction_Agent (0.3), Resolution_Agent (0.1)
+1. WHEN agents provide conflicting recommendations, THE Consensus_Engine SHALL use the standardized agent weighting defined in *Steering → Architecture → Shared Operational Constants*.
 2. WHEN aggregated confidence is below 70%, THE Consensus_Engine SHALL escalate to human operators with complete agent recommendations and reasoning
-3. WHILE all agent confidence scores are below 60% and incident severity is critical, THE Consensus_Engine SHALL execute safest available action with immediate human notification
+3. WHILE all agent confidence scores are below 60% and incident severity is critical, THE Consensus_Engine SHALL execute safest available action with immediate human notification, using the shared confidence thresholds documented in *Steering → Architecture → Shared Operational Constants*.
 4. WHERE agent compromise is detected through behavioral analysis, THE Byzantine_Fault_Detector SHALL isolate the compromised agent and continue with remaining agents at reduced confidence
 5. THE Consensus_Engine SHALL implement decision timeout of 2 minutes with automatic escalation if consensus cannot be reached
 
@@ -268,11 +270,11 @@ The Autonomous Incident Commander is an AI-powered multi-agent system that provi
 
 #### Acceptance Criteria
 
-1. WHEN Circuit_Breaker is activated for any agent, THE Circuit_Breaker SHALL use failure threshold of 5 consecutive failures before opening
-2. WHEN Circuit_Breaker is open, THE Circuit_Breaker SHALL wait 30 seconds before attempting retry in half-open state
-3. WHILE Circuit_Breaker is in half-open state, THE Circuit_Breaker SHALL allow maximum 3 test requests for recovery validation
-4. WHERE Circuit_Breaker recovery is successful, THE Circuit_Breaker SHALL require 2 consecutive successes to fully close circuit
-5. THE Circuit_Breaker SHALL provide real-time status in agent health dashboard with failure counts and state transitions
+1. WHEN Circuit_Breaker is activated for any agent, THE Circuit_Breaker SHALL enforce the failure thresholds defined in the shared operational constants.
+2. WHEN Circuit_Breaker is open, THE Circuit_Breaker SHALL wait the standardized cooldown interval before attempting retry in half-open state.
+3. WHILE Circuit_Breaker is in half-open state, THE Circuit_Breaker SHALL allow no more than the shared-constants half-open probe count for recovery validation.
+4. WHERE Circuit_Breaker recovery is successful, THE Circuit_Breaker SHALL require the documented number of consecutive successes to fully close.
+5. THE Circuit_Breaker SHALL provide real-time status in agent health dashboard with failure counts and state transitions.
 
 ### Requirement 21
 
@@ -280,9 +282,9 @@ The Autonomous Incident Commander is an AI-powered multi-agent system that provi
 
 #### Acceptance Criteria
 
-1. WHEN any agent fails during incident processing, THE Event_Store SHALL enable state recovery from last checkpoint within 30 seconds
+1. WHEN any agent fails during incident processing, THE Event_Store SHALL enable state recovery within the checkpoint recovery window defined in the shared constants.
 2. WHEN replacement agent starts, THE Agent_Swarm SHALL restore agent state from Event_Store and resume processing from consistent state
-3. WHILE agents are processing incidents, THE Event_Store SHALL checkpoint agent state every 30 seconds to prevent data loss
+3. WHILE agents are processing incidents, THE Event_Store SHALL checkpoint agent state at the cadence documented in the shared constants to prevent data loss
 4. WHERE Event_Store becomes unavailable, THE Agent_Swarm SHALL maintain local state for up to 10 minutes and synchronize when recovered
 5. THE Agent_Swarm SHALL escalate to human operators if Event_Store failure exceeds 10 minutes
 

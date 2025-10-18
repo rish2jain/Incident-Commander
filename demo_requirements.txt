@@ -1,0 +1,15 @@
+# Autonomous Incident Commander - Live Demo Requirements
+# Install with: pip install -r demo_requirements.txt
+
+# FastAPI and WebSocket support
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+websockets>=12.0
+
+# Additional utilities
+python-multipart>=0.0.6
+aiofiles>=23.0.0
+
+# Optional: For enhanced logging and monitoring
+rich>=13.0.0
+structlog>=23.0.0

@@ -7,14 +7,20 @@
 All agents must authenticate using AWS IAM roles with least privilege:
 
 ```python
+import boto3
+from typing import Any, Dict
+
+
 class AgentIdentity:
-    def __init__(self, agent_name: str):
+    def __init__(self, agent_name: str) -> None:
+        self.agent_name = agent_name
         self.role_arn = f"arn:aws:iam::account:role/IncidentCommander-{agent_name}"
         self.session = boto3.Session()
-        self.credentials = self.assume_role()
+        self.credentials = self._assume_role()
 
-    def assume_role(self):
-        return self.session.client('sts').assume_role(
+    def _assume_role(self) -> Dict[str, Any]:
+        sts = self.session.client("sts")
+        return sts.assume_role(
             RoleArn=self.role_arn,
             RoleSessionName=f"{self.agent_name}-session"
         )

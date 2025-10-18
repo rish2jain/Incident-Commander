@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Autonomous Incident Commander - Value Dashboard</title>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Inter", sans-serif;
+        background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 100%);
+        color: #ffffff;
+        overflow-x: hidden;
+      }
+
+      .dashboard-header {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 1rem 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .logo i {
+        font-size: 2rem;
+        color: #00d4ff;
+      }
+
+      .logo h1 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #00d4ff, #0099cc);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .system-status {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .status-indicator {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: rgba(0, 212, 255, 0.1);
+        border: 1px solid rgba(0, 212, 255, 0.3);
+        border-radius: 20px;
+      }
+
+      .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #00ff88;
+        animation: pulse 2s infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+      }
+
+      /* Grid Layout */
+      .main-grid {
+        display: grid;
+        grid-template-columns: 2fr 2fr 1.5fr;
+        grid-template-rows: auto auto auto;
+        gap: 1.5rem;
+        padding: 2rem;
+        min-height: calc(100vh - 80px);
+      }
+
+      .card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+      }
+
+      .card:hover {
+        transform: translateY(-2px);
+        border-color: rgba(0, 212, 255, 0.3);
+        box-shadow: 0 8px 32px rgba(0, 212, 255, 0.1);
+      }
+
+      .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+      }
+
+      .card-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #ffffff;
+      }
+
+      .card-icon {
+        font-size: 1.2rem;
+        color: #00d4ff;
+      }
+
+      /* === BUSINESS IMPACT METER (TOP LEFT - PRIORITY #1) === */
+      .business-impact {
+        grid-column: 1;
+        grid-row: 1;
+        background: linear-gradient(135deg, rgba(0, 255, 136, 0.1) 0%, rgba(0, 212, 255, 0.1) 100%);
+        border: 2px solid #00ff88;
+      }
+
+      .impact-value {
+        font-size: 3.5rem;
+        font-weight: 900;
+        color: #00ff88;
+        margin: 1rem 0;
+        font-family: "Courier New", monospace;
+        text-align: center;
+        animation: count-up 2s ease-out;
+      }
+
+      @keyframes count-up {
+        from {
+          opacity: 0;
+          transform: scale(0.5);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+
+      .impact-subtitle {
+        text-align: center;
+        font-size: 0.9rem;
+        color: #888;
+        margin-bottom: 1rem;
+      }
+
+      .impact-details {
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 8px;
+        padding: 1rem;
+        margin-top: 1rem;
+      }
+
+      .impact-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .impact-row:last-child {
+        border-bottom: none;
+      }
+
+      .impact-label {
+        color: #888;
+        font-size: 0.9rem;
+      }
+
+      .impact-value-small {
+        font-weight: 600;
+        color: #ffffff;
+      }
+
+      .savings-bar {
+        width: 100%;
+        height: 30px;
+        background: rgba(255, 0, 0, 0.2);
+        border-radius: 15px;
+        overflow: hidden;
+        margin-top: 1rem;
+        position: relative;
+      }
+
+      .savings-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #00ff88, #00d4ff);
+        border-radius: 15px;
+        transition: width 2s ease-out;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.9rem;
+      }
+
+      /* === MTTR COMPARISON GAUGE (TOP CENTER - PRIORITY #2) === */
+      .mttr-comparison {
+        grid-column: 2;
+        grid-row: 1;
+      }
+
+      .mttr-bars {
+        margin: 1.5rem 0;
+      }
+
+      .mttr-bar-container {
+        margin: 1rem 0;
+      }
+
+      .mttr-bar-label {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+      }
+
+      .mttr-bar {
+        height: 40px;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        padding: 0 1rem;
+        font-weight: 700;
+        transition: width 2s ease-out;
+      }
+
+      .mttr-bar-manual {
+        background: linear-gradient(90deg, #ff6b6b, #ee5a52);
+        width: 100%;
+      }
+
+      .mttr-bar-ai {
+        background: linear-gradient(90deg, #00ff88, #00d4ff);
+        width: 9.3%;
+      }
+
+      .multiplier-badge {
+        background: linear-gradient(135deg, #ffd700, #ffed4e);
+        color: #000;
+        padding: 0.5rem 1.5rem;
+        border-radius: 25px;
+        font-size: 1.5rem;
+        font-weight: 900;
+        text-align: center;
+        margin: 1rem 0;
+        animation: glow 2s ease-in-out infinite;
+      }
+
+      @keyframes glow {
+        0%, 100% {
+          box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+        }
+        50% {
+          box-shadow: 0 0 40px rgba(255, 215, 0, 0.8);
+        }
+      }
+
+      .timeline-mini {
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 8px;
+        padding: 1rem;
+        margin-top: 1rem;
+      }
+
+      .timeline-step {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.5rem 0;
+        font-size: 0.85rem;
+      }
+
+      .timeline-icon {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+      }
+
+      .timeline-time {
+        font-family: "Courier New", monospace;
+        color: #00d4ff;
+        font-weight: 600;
+        width: 50px;
+      }
+
+      /* === AGENT SWARM VISUALIZER (CENTER LARGE - PRIORITY #3) === */
+      .agent-swarm {
+        grid-column: 1 / 3;
+        grid-row: 2;
+        min-height: 400px;
+      }
+
+      .swarm-container {
+        position: relative;
+        width: 100%;
+        height: 300px;
+        margin-top: 1rem;
+      }
+
+      .agent-node {
+        position: absolute;
+        width: 90px;
+        height: 90px;
+        border-radius: 50%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 3px solid;
+      }
+
+      .agent-node:hover {
+        transform: scale(1.15);
+        z-index: 10;
+      }
+
+      .agent-icon {
+        font-size: 1.5rem;
+        margin-bottom: 0.25rem;
+      }
+
+      .agent-status {
+        font-size: 0.7rem;
+        margin-top: 0.25rem;
+      }
+
+      .agent-time {
+        font-size: 0.65rem;
+        color: rgba(255, 255, 255, 0.8);
+      }
+
+      .agent-detection {
+        background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+        border-color: #ff6b6b;
+        top: 20px;
+        left: 80px;
+      }
+
+      .agent-diagnosis {
+        background: linear-gradient(135deg, #4ecdc4, #44a08d);
+        border-color: #4ecdc4;
+        top: 20px;
+        right: 80px;
+      }
+
+      .agent-prediction {
+        background: linear-gradient(135deg, #45b7d1, #96c93d);
+        border-color: #45b7d1;
+        bottom: 20px;
+        left: 80px;
+      }
+
+      .agent-resolution {
+        background: linear-gradient(135deg, #f9ca24, #f0932b);
+        border-color: #f9ca24;
+        bottom: 20px;
+        right: 80px;
+      }
+
+      .consensus-center {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 100px;
+        height: 100px;
+        background: linear-gradient(135deg, #00d4ff, #0099cc);
+        border-radius: 50%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 700;
+        z-index: 5;
+        border: 3px solid #00d4ff;
+      }
+
+      .consensus-icon {
+        font-size: 1.5rem;
+        margin-bottom: 0.25rem;
+      }
+
+      .reasoning-feed {
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 8px;
+        padding: 1rem;
+        margin-top: 1rem;
+        max-height: 150px;
+        overflow-y: auto;
+      }
+
+      .reasoning-item {
+        padding: 0.5rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        font-size: 0.85rem;
+      }
+
+      .reasoning-item:last-child {
+        border-bottom: none;
+      }
+
+      .reasoning-agent {
+        font-weight: 600;
+        margin-right: 0.5rem;
+      }
+
+      /* === SYSTEM HEALTH (TOP RIGHT) === */
+      .system-health {
+        grid-column: 3;
+        grid-row: 1 / 3;
+      }
+
+      .health-section {
+        margin: 1rem 0;
+      }
+
+      .health-title {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #00d4ff;
+        margin-bottom: 0.75rem;
+      }
+
+      .health-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+        font-size: 0.85rem;
+      }
+
+      .health-status {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .health-icon {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #00ff88;
+      }
+
+      .health-icon.warning {
+        background: #ffd700;
+      }
+
+      .health-icon.error {
+        background: #ff6b6b;
+      }
+
+      .health-time {
+        font-family: "Courier New", monospace;
+        color: #888;
+      }
+
+      .uptime-badge {
+        background: linear-gradient(135deg, #00ff88, #00d4ff);
+        padding: 0.75rem 1.5rem;
+        border-radius: 25px;
+        text-align: center;
+        font-weight: 700;
+        font-size: 1.1rem;
+        margin-top: 1rem;
+      }
+
+      /* === INCIDENT TIMELINE (BOTTOM LEFT) === */
+      .incident-timeline {
+        grid-column: 1 / 2;
+        grid-row: 3;
+      }
+
+      .timeline-container {
+        max-height: 300px;
+        overflow-y: auto;
+      }
+
+      .timeline-event {
+        display: flex;
+        gap: 1rem;
+        padding: 0.75rem 0;
+        border-left: 2px solid rgba(0, 212, 255, 0.3);
+        padding-left: 1rem;
+        margin-left: 1rem;
+      }
+
+      .timeline-event:last-child {
+        border-left-color: transparent;
+      }
+
+      .timeline-timestamp {
+        font-family: "Courier New", monospace;
+        font-size: 0.85rem;
+        color: #00d4ff;
+        font-weight: 600;
+        min-width: 70px;
+      }
+
+      .timeline-content {
+        flex: 1;
+      }
+
+      .timeline-agent-icon {
+        font-size: 1rem;
+        margin-right: 0.5rem;
+      }
+
+      .timeline-title {
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-bottom: 0.25rem;
+      }
+
+      .timeline-details {
+        font-size: 0.8rem;
+        color: #888;
+        line-height: 1.4;
+      }
+
+      /* === ZERO-TRUST SECURITY (BOTTOM CENTER) === */
+      .zero-trust {
+        grid-column: 2;
+        grid-row: 3;
+      }
+
+      .security-status {
+        background: rgba(0, 255, 136, 0.1);
+        border: 1px solid #00ff88;
+        border-radius: 8px;
+        padding: 1rem;
+        margin: 1rem 0;
+      }
+
+      .security-row {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.5rem 0;
+        font-size: 0.85rem;
+      }
+
+      .security-check {
+        color: #00ff88;
+        font-size: 1rem;
+      }
+
+      .compliance-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+        margin-top: 1rem;
+      }
+
+      .compliance-badge {
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid #00ff88;
+        border-radius: 8px;
+        padding: 0.75rem;
+        text-align: center;
+        font-size: 0.85rem;
+        font-weight: 600;
+      }
+
+      /* === PREDICTION IMPACT (BOTTOM RIGHT) === */
+      .prediction-impact {
+        grid-column: 3;
+        grid-row: 3;
+      }
+
+      .prediction-warning {
+        background: rgba(255, 215, 0, 0.1);
+        border: 2px solid #ffd700;
+        border-radius: 8px;
+        padding: 1rem;
+        margin: 1rem 0;
+      }
+
+      .prediction-title {
+        font-weight: 700;
+        font-size: 1rem;
+        color: #ffd700;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .prediction-detail {
+        font-size: 0.85rem;
+        padding: 0.25rem 0;
+      }
+
+      .risk-bar {
+        width: 100%;
+        height: 8px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 4px;
+        overflow: hidden;
+        margin-top: 0.5rem;
+      }
+
+      .risk-fill {
+        height: 100%;
+        border-radius: 4px;
+        transition: width 1s ease-out;
+      }
+
+      .risk-high {
+        background: linear-gradient(90deg, #ff6b6b, #ff0000);
+      }
+
+      .risk-medium {
+        background: linear-gradient(90deg, #ffd700, #ffed4e);
+      }
+
+      .risk-low {
+        background: linear-gradient(90deg, #00ff88, #00d4ff);
+      }
+
+      /* Scrollbar Styling */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.05);
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: rgba(0, 212, 255, 0.3);
+        border-radius: 4px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: rgba(0, 212, 255, 0.5);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Dashboard Header -->
+    <header class="dashboard-header">
+      <div class="logo">
+        <i class="fas fa-robot"></i>
+        <h1>Autonomous Incident Commander</h1>
+      </div>
+      <div class="system-status">
+        <div class="status-indicator">
+          <div class="status-dot"></div>
+          <span>5 Agents Active</span>
+        </div>
+        <div class="status-indicator">
+          <i class="fas fa-shield-alt"></i>
+          <span>Byzantine Secure</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Dashboard Grid -->
+    <main class="main-grid">
+      <!-- 1. BUSINESS IMPACT METER (TOP LEFT - PRIORITY #1) -->
+      <section class="card business-impact">
+        <div class="card-header">
+          <h2 class="card-title">💰 BUSINESS IMPACT - REAL-TIME</h2>
+          <i class="fas fa-dollar-sign card-icon"></i>
+        </div>
+
+        <p class="impact-subtitle">Cost Avoidance This Session</p>
+        <div class="impact-value" id="impact-value">$103,360</div>
+
+        <div class="savings-bar">
+          <div class="savings-fill" id="savings-fill" style="width: 90.7%">
+            90.7% Cost Reduction
+          </div>
+        </div>
+
+        <div class="impact-details">
+          <div class="impact-row">
+            <span class="impact-label">🎯 Tier 1 Incident Prevented</span>
+            <span class="impact-value-small">2,000 users</span>
+          </div>
+          <div class="impact-row">
+            <span class="impact-label">💸 Business Impact Rate</span>
+            <span class="impact-value-small">$3,800/min</span>
+          </div>
+          <div class="impact-row">
+            <span class="impact-label">⏱️ Time Saved</span>
+            <span class="impact-value-small">27.2 minutes</span>
+          </div>
+          <div class="impact-row">
+            <span class="impact-label">📊 Manual MTTR Cost</span>
+            <span class="impact-value-small" style="color: #ff6b6b">$114,000</span>
+          </div>
+          <div class="impact-row">
+            <span class="impact-label">📊 AI MTTR Cost</span>
+            <span class="impact-value-small" style="color: #00ff88">$10,640</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. MTTR COMPARISON GAUGE (TOP CENTER - PRIORITY #2) -->
+      <section class="card mttr-comparison">
+        <div class="card-header">
+          <h2 class="card-title">⚡ MEAN TIME TO RESOLUTION (MTTR)</h2>
+          <i class="fas fa-bolt card-icon"></i>
+        </div>
+
+        <div class="mttr-bars">
+          <div class="mttr-bar-container">
+            <div class="mttr-bar-label">
+              <span>Industry Standard</span>
+              <span style="color: #ff6b6b">30 minutes</span>
+            </div>
+            <div class="mttr-bar mttr-bar-manual">Manual: 30 min</div>
+          </div>
+
+          <div class="mttr-bar-container">
+            <div class="mttr-bar-label">
+              <span>Autonomous AI</span>
+              <span style="color: #00ff88">2.8 minutes</span>
+            </div>
+            <div class="mttr-bar mttr-bar-ai">AI: 2.8 min</div>
+          </div>
+        </div>
+
+        <div class="multiplier-badge">🏆 10.7x FASTER</div>
+
+        <div class="timeline-mini">
+          <strong style="margin-bottom: 0.5rem; display: block">Current Incident Timeline:</strong>
+          <div class="timeline-step">
+            <div class="timeline-icon" style="background: #ff6b6b">🔍</div>
+            <span class="timeline-time">0:00</span>
+            <span>Detection (0.8s)</span>
+          </div>
+          <div class="timeline-step">
+            <div class="timeline-icon" style="background: #4ecdc4">🧠</div>
+            <span class="timeline-time">0:01</span>
+            <span>Diagnosis (0.9s)</span>
+          </div>
+          <div class="timeline-step">
+            <div class="timeline-icon" style="background: #45b7d1">🔮</div>
+            <span class="timeline-time">0:02</span>
+            <span>Prediction (1.2s)</span>
+          </div>
+          <div class="timeline-step">
+            <div class="timeline-icon" style="background: #f9ca24">🛠️</div>
+            <span class="timeline-time">0:15</span>
+            <span>Resolution (12.8s)</span>
+          </div>
+          <div class="timeline-step">
+            <div class="timeline-icon" style="background: #6c5ce7">📢</div>
+            <span class="timeline-time">0:18</span>
+            <span>Communication (2.3s)</span>
+          </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 1rem; padding: 1rem; background: rgba(0, 255, 136, 0.1); border-radius: 8px; border: 1px solid #00ff88">
+          <strong style="font-size: 1.1rem; color: #00ff88">✅ RESOLVED IN 2.8 MINUTES</strong>
+        </div>
+      </section>
+
+      <!-- 3. AGENT SWARM VISUALIZER (CENTER LARGE - PRIORITY #3) -->
+      <section class="card agent-swarm">
+        <div class="card-header">
+          <h2 class="card-title">🤖 MULTI-AGENT SWARM - LIVE COORDINATION</h2>
+          <i class="fas fa-network-wired card-icon"></i>
+        </div>
+
+        <div class="swarm-container">
+          <!-- Agent Nodes -->
+          <div class="agent-node agent-detection">
+            <div class="agent-icon">🔍</div>
+            <div>DETECTION</div>
+            <div class="agent-status">✅ ACTIVE</div>
+            <div class="agent-time">0.8s</div>
+          </div>
+
+          <div class="agent-node agent-diagnosis">
+            <div class="agent-icon">🧠</div>
+            <div>DIAGNOSIS</div>
+            <div class="agent-status">✅ ACTIVE</div>
+            <div class="agent-time">0.9s</div>
+          </div>
+
+          <div class="agent-node agent-prediction">
+            <div class="agent-icon">🔮</div>
+            <div>PREDICTION</div>
+            <div class="agent-status">✅ ACTIVE</div>
+            <div class="agent-time">1.2s</div>
+          </div>
+
+          <div class="agent-node agent-resolution">
+            <div class="agent-icon">🛠️</div>
+            <div>RESOLUTION</div>
+            <div class="agent-status">✅ ACTIVE</div>
+            <div class="agent-time">12.8s</div>
+          </div>
+
+          <!-- Consensus Center -->
+          <div class="consensus-center">
+            <div class="consensus-icon">⚖️</div>
+            <div>BYZANTINE</div>
+            <div>CONSENSUS</div>
+            <div style="font-size: 0.7rem; margin-top: 0.25rem">5/5 Agree</div>
+          </div>
+        </div>
+
+        <div class="reasoning-feed">
+          <strong style="margin-bottom: 0.5rem; display: block">💬 AGENT REASONING (Live Feed):</strong>
+          <div class="reasoning-item">
+            <span class="reasoning-agent" style="color: #ff6b6b">🔍 Detection:</span>
+            <span>"50+ database alerts, pattern matches cascade failure"</span>
+          </div>
+          <div class="reasoning-item">
+            <span class="reasoning-agent" style="color: #4ecdc4">🧠 Diagnosis:</span>
+            <span>"Expensive query causing connection pool exhaustion"</span>
+          </div>
+          <div class="reasoning-item">
+            <span class="reasoning-agent" style="color: #45b7d1">🔮 Prediction:</span>
+            <span>"90% probability of full outage in 8 minutes"</span>
+          </div>
+          <div class="reasoning-item">
+            <span class="reasoning-agent" style="color: #f9ca24">🛠️ Resolution:</span>
+            <span>"Executing action template: database_cascade"</span>
+          </div>
+          <div class="reasoning-item">
+            <span class="reasoning-agent" style="color: #6c5ce7">📢 Communication:</span>
+            <span>"Notifying SRE team + execs via Slack/Email"</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. SYSTEM HEALTH (TOP RIGHT) -->
+      <section class="card system-health">
+        <div class="card-header">
+          <h2 class="card-title">💚 SYSTEM HEALTH - LIVE STATUS</h2>
+          <i class="fas fa-heartbeat card-icon"></i>
+        </div>
+
+        <div class="health-section">
+          <div class="health-title">Agents Status:</div>
+          <div class="health-item">
+            <span>🔍 Detection</span>
+            <div class="health-status">
+              <div class="health-icon"></div>
+              <span class="health-time">142ms</span>
+            </div>
+          </div>
+          <div class="health-item">
+            <span>🧠 Diagnosis</span>
+            <div class="health-status">
+              <div class="health-icon"></div>
+              <span class="health-time">165ms</span>
+            </div>
+          </div>
+          <div class="health-item">
+            <span>🔮 Prediction</span>
+            <div class="health-status">
+              <div class="health-icon"></div>
+              <span class="health-time">203ms</span>
+            </div>
+          </div>
+          <div class="health-item">
+            <span>🛠️ Resolution</span>
+            <div class="health-status">
+              <div class="health-icon"></div>
+              <span class="health-time">178ms</span>
+            </div>
+          </div>
+          <div class="health-item">
+            <span>📢 Communication</span>
+            <div class="health-status">
+              <div class="health-icon"></div>
+              <span class="health-time">89ms</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="health-section">
+          <div class="health-title">Infrastructure:</div>
+          <div class="health-item">
+            <span>Bedrock API</span>
+            <div class="health-status">
+              <div class="health-icon"></div>
+              <span>Available</span>
+            </div>
+          </div>
+          <div class="health-item">
+            <span>Event Store</span>
+            <div class="health-status">
+              <div class="health-icon"></div>
+              <span>Healthy</span>
+            </div>
+          </div>
+          <div class="health-item">
+            <span>RAG Memory</span>
+            <div class="health-status">
+              <div class="health-icon"></div>
+              <span>100K indexed</span>
+            </div>
+          </div>
+          <div class="health-item">
+            <span>Consensus</span>
+            <div class="health-status">
+              <div class="health-icon"></div>
+              <span>Byzantine-safe</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="health-section">
+          <div class="health-title">Performance:</div>
+          <div class="health-item">
+            <span>Incidents Today</span>
+            <span class="health-value">1,247</span>
+          </div>
+          <div class="health-item">
+            <span>Avg MTTR</span>
+            <span class="health-value">2.9 min</span>
+          </div>
+          <div class="health-item">
+            <span>Success Rate</span>
+            <span class="health-value" style="color: #00ff88">99.8%</span>
+          </div>
+          <div class="health-item">
+            <span>Circuit Breakers</span>
+            <span class="health-value">0 open</span>
+          </div>
+        </div>
+
+        <div class="uptime-badge">
+          <div>🏆 UPTIME</div>
+          <div style="font-size: 1.3rem; margin-top: 0.25rem">99.92% (30 days)</div>
+        </div>
+      </section>
+
+      <!-- 5. INCIDENT TIMELINE (BOTTOM LEFT) -->
+      <section class="card incident-timeline">
+        <div class="card-header">
+          <h2 class="card-title">📈 INCIDENT TIMELINE</h2>
+          <i class="fas fa-clock card-icon"></i>
+        </div>
+
+        <div style="text-align: center; padding: 0.75rem; background: rgba(255, 107, 107, 0.1); border-radius: 8px; margin-bottom: 1rem; border: 1px solid #ff6b6b">
+          <strong>Database Cascade Failure</strong>
+        </div>
+
+        <div class="timeline-container">
+          <div class="timeline-event">
+            <div class="timeline-timestamp">00:00.0</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                <span class="timeline-agent-icon">🚨</span>
+                Alert Storm Detected (52 alerts)
+              </div>
+              <div class="timeline-details">
+                Business impact: $3,800/min | 2000 users affected
+              </div>
+            </div>
+          </div>
+
+          <div class="timeline-event">
+            <div class="timeline-timestamp">00:00.8</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                <span class="timeline-agent-icon">🔍</span>
+                Detection Agent: Correlated to DB incident
+              </div>
+              <div class="timeline-details">
+                Confidence: 95% | Pattern: cascade_failure
+              </div>
+            </div>
+          </div>
+
+          <div class="timeline-event">
+            <div class="timeline-timestamp">00:01.7</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                <span class="timeline-agent-icon">🧠</span>
+                Diagnosis Agent: Root cause identified
+              </div>
+              <div class="timeline-details">
+                Cause: Expensive query (id: query_8472)<br>
+                Impact: Connection pool exhaustion<br>
+                RAG Match: 87% similar to incident #4829
+              </div>
+            </div>
+          </div>
+
+          <div class="timeline-event">
+            <div class="timeline-timestamp">00:02.9</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                <span class="timeline-agent-icon">🔮</span>
+                Prediction Agent: Forecasting impact
+              </div>
+              <div class="timeline-details">
+                Probability: 90% full outage in 8 min<br>
+                Cost Impact: $30,400 if unresolved
+              </div>
+            </div>
+          </div>
+
+          <div class="timeline-event">
+            <div class="timeline-timestamp">00:03.2</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                <span class="timeline-agent-icon">⚖️</span>
+                Consensus: 5/5 agents agree
+              </div>
+              <div class="timeline-details">
+                Decision: Execute resolution template<br>
+                Template: database_cascade<br>
+                Security: Sandbox validated ✅
+              </div>
+            </div>
+          </div>
+
+          <div class="timeline-event">
+            <div class="timeline-timestamp">00:03.5</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                <span class="timeline-agent-icon">🛠️</span>
+                Resolution Agent: Executing actions
+              </div>
+              <div class="timeline-details">
+                ✅ Set database to read-only mode<br>
+                ✅ Killed expensive query (id: query_8472)<br>
+                ✅ Scaled read replicas (3 → 8)<br>
+                ✅ Validated in sandbox environment
+              </div>
+            </div>
+          </div>
+
+          <div class="timeline-event">
+            <div class="timeline-timestamp">00:16.3</div>
+            <div class="timeline-content">
+              <div class="timeline-title">
+                <span class="timeline-agent-icon">📢</span>
+                Communication Agent: Stakeholders notified
+              </div>
+              <div class="timeline-details">
+                ✅ Slack: #incidents (SRE team)<br>
+                ✅ Email: exec-oncall@company.com<br>
+                ✅ PagerDuty: sev-1 escalation
+              </div>
+            </div>
+          </div>
+
+          <div class="timeline-event" style="border-left-color: #00ff88">
+            <div class="timeline-timestamp" style="color: #00ff88">00:18.0</div>
+            <div class="timeline-content">
+              <div class="timeline-title" style="color: #00ff88">
+                <span class="timeline-agent-icon">✅</span>
+                INCIDENT RESOLVED
+              </div>
+              <div class="timeline-details">
+                Duration: 2.8 minutes<br>
+                Cost Avoided: $103,360<br>
+                SLA: Met (target &lt;3 min)
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. ZERO-TRUST SECURITY (BOTTOM CENTER) -->
+      <section class="card zero-trust">
+        <div class="card-header">
+          <h2 class="card-title">🛡️ ZERO-TRUST SECURITY</h2>
+          <i class="fas fa-shield-alt card-icon"></i>
+        </div>
+
+        <div class="security-status">
+          <strong style="display: block; margin-bottom: 0.5rem">Resolution Action Security:</strong>
+          <div class="security-row">
+            <span class="security-check">✅</span>
+            <span>Sandbox Validation: PASSED</span>
+          </div>
+          <div class="security-row">
+            <span class="security-check">✅</span>
+            <span>IAM Credentials: Just-in-time (11h 42m TTL)</span>
+          </div>
+          <div class="security-row">
+            <span class="security-check">✅</span>
+            <span>Audit Trail: Cryptographically signed</span>
+          </div>
+          <div class="security-row">
+            <span class="security-check">✅</span>
+            <span>Rollback Ready: 3 checkpoints available</span>
+          </div>
+        </div>
+
+        <div style="background: rgba(0, 0, 0, 0.3); border-radius: 8px; padding: 1rem; margin: 1rem 0">
+          <strong style="display: block; margin-bottom: 0.5rem">Current Action:</strong>
+          <div style="font-size: 0.85rem; line-height: 1.6">
+            <div><strong>Action:</strong> Kill expensive database query</div>
+            <div><strong>Sandbox Test:</strong> <span style="color: #00ff88">✅ Success (no side effects)</span></div>
+            <div><strong>Production Exec:</strong> <span style="color: #00ff88">✅ Executed safely</span></div>
+            <div><strong>Validation:</strong> <span style="color: #00ff88">✅ Query terminated, pool recovered</span></div>
+          </div>
+        </div>
+
+        <div class="health-title">Compliance Status:</div>
+        <div class="compliance-grid">
+          <div class="compliance-badge">
+            ✅ SOC2 Type II
+          </div>
+          <div class="compliance-badge">
+            ✅ HIPAA
+          </div>
+          <div class="compliance-badge">
+            ✅ PCI-DSS
+          </div>
+          <div class="compliance-badge">
+            ✅ GDPR
+          </div>
+        </div>
+
+        <div style="background: rgba(0, 212, 255, 0.1); border: 1px solid #00d4ff; border-radius: 8px; padding: 1rem; margin-top: 1rem">
+          <strong style="display: block; margin-bottom: 0.5rem">Byzantine Fault Tolerance:</strong>
+          <div style="font-size: 0.85rem; line-height: 1.6">
+            <div>• Consensus Algorithm: <span style="color: #00ff88">Active</span></div>
+            <div>• Malicious Agent Detection: <span style="color: #00ff88">0 detected</span></div>
+            <div>• Agent Verification: <span style="color: #00ff88">5/5 agents verified ✅</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 7. PREDICTION IMPACT (BOTTOM RIGHT) -->
+      <section class="card prediction-impact">
+        <div class="card-header">
+          <h2 class="card-title">🔮 PREDICTIVE PREVENTION</h2>
+          <i class="fas fa-chart-line card-icon"></i>
+        </div>
+
+        <div class="prediction-warning">
+          <div class="prediction-title">
+            <span>⚠️</span>
+            <span>High Risk Detected</span>
+          </div>
+          <div class="prediction-detail">
+            <strong>Forecast:</strong> Memory leak trend in API service
+          </div>
+          <div class="prediction-detail">
+            <strong>Time to Failure:</strong> 24 minutes
+          </div>
+          <div class="prediction-detail">
+            <strong>Confidence:</strong> 87%
+          </div>
+          <div class="prediction-detail">
+            <strong>Potential Impact:</strong> $76,000 (2000 users, 20 min)
+          </div>
+        </div>
+
+        <div style="background: rgba(0, 0, 0, 0.3); border-radius: 8px; padding: 1rem; margin: 1rem 0">
+          <strong style="display: block; margin-bottom: 0.5rem">🛡️ Preventive Actions Recommended:</strong>
+          <div style="font-size: 0.85rem; line-height: 1.8">
+            <div>1. Restart API service during low traffic</div>
+            <div>2. Increase memory limits temporarily</div>
+            <div>3. Enable swap space as buffer</div>
+          </div>
+        </div>
+
+        <div style="background: rgba(0, 0, 0, 0.3); border-radius: 8px; padding: 1rem">
+          <strong style="display: block; margin-bottom: 0.75rem">Historical Performance (Last 7 Days):</strong>
+          <div style="font-size: 0.85rem; margin-bottom: 0.5rem">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem">
+              <span>Predictions Made:</span>
+              <strong>142</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem">
+              <span>Accuracy:</span>
+              <strong style="color: #00ff88">83%</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem">
+              <span>Incidents Prevented:</span>
+              <strong style="color: #00ff88">24</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between">
+              <span>Cost Avoided:</span>
+              <strong style="color: #00ff88">$1,847,200</strong>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top: 1rem">
+          <strong style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem">📊 Trend Analysis:</strong>
+          <div style="margin: 0.5rem 0">
+            <div style="font-size: 0.8rem; margin-bottom: 0.25rem">CPU Trend: Rising</div>
+            <div class="risk-bar">
+              <div class="risk-fill risk-medium" style="width: 75%"></div>
+            </div>
+          </div>
+          <div style="margin: 0.5rem 0">
+            <div style="font-size: 0.8rem; margin-bottom: 0.25rem">Memory: Critical</div>
+            <div class="risk-bar">
+              <div class="risk-fill risk-high" style="width: 95%"></div>
+            </div>
+          </div>
+          <div style="margin: 0.5rem 0">
+            <div style="font-size: 0.8rem; margin-bottom: 0.25rem">Disk I/O: Normal</div>
+            <div class="risk-bar">
+              <div class="risk-fill risk-low" style="width: 40%"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      // Simulate real-time updates (for demo purposes)
+      function animateValue(element, start, end, duration) {
+        let startTimestamp = null;
+        const step = (timestamp) => {
+          if (!startTimestamp) startTimestamp = timestamp;
+          const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+          const value = Math.floor(progress * (end - start) + start);
+          element.textContent = '$' + value.toLocaleString();
+          if (progress < 1) {
+            window.requestAnimationFrame(step);
+          }
+        };
+        window.requestAnimationFrame(step);
+      }
+
+      // Animate business impact counter on load
+      window.addEventListener('load', () => {
+        const impactElement = document.getElementById('impact-value');
+        animateValue(impactElement, 0, 103360, 2000);
+      });
+
+      // Add pulse animation to active agents
+      setInterval(() => {
+        document.querySelectorAll('.agent-node').forEach(node => {
+          node.style.transform = 'scale(1.05)';
+          setTimeout(() => {
+            node.style.transform = 'scale(1)';
+          }, 200);
+        });
+      }, 3000);
+    </script>
+  </body>
+</html>

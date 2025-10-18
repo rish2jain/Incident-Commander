@@ -453,13 +453,16 @@ class ResilientCommunicationAgent:
 The Consensus Engine uses **AWS Step Functions** with Byzantine fault detection to handle compromised agents:
 
 ```python
+from src.utils.constants import (
+    AUTO_ACTION_CONFIDENCE_THRESHOLD,
+    CONSENSUS_AGENT_WEIGHTS,
+    CONSENSUS_DECISION_TIMEOUT,
+)
+
+
 class DistributedConsensusOrchestrator:
-    AGENT_WEIGHTS = {
-        "detection": 0.2,
-        "diagnosis": 0.4,
-        "prediction": 0.3,
-        "resolution": 0.1
-    }
+    # See Steering → Architecture → Shared Operational Constants for canonical weights
+    AGENT_WEIGHTS = CONSENSUS_AGENT_WEIGHTS
 
     def __init__(self):
         self.step_functions = boto3.client('stepfunctions')
@@ -472,8 +475,8 @@ class DistributedConsensusOrchestrator:
             input=json.dumps({
                 "recommendations": [r.to_dict() for r in recommendations],
                 "agent_weights": self.AGENT_WEIGHTS,
-                "timeout_seconds": 120,
-                "confidence_threshold": 0.7,
+                "timeout_seconds": CONSENSUS_DECISION_TIMEOUT,
+                "confidence_threshold": AUTO_ACTION_CONFIDENCE_THRESHOLD,
                 "incident_severity": self.get_incident_severity()
             })
         )
@@ -517,6 +520,8 @@ class ByzantineFaultTolerantConsensus:
             )
 
         return [r for r in recommendations if r.agent_name not in suspicious_agents]
+
+> Refer to *Steering → Architecture → Shared Operational Constants* for the canonical consensus weights, confidence thresholds, and circuit breaker policies used across specifications.
 
     async def handle_consensus_deadlock(self, recommendations, timeout_seconds=120):
         """Handle scenarios where agents can't reach consensus"""
@@ -883,16 +888,19 @@ class AuditEvent:
 ### Circuit Breaker Implementation
 
 ```python
+from src.utils.constants import CIRCUIT_BREAKER_POLICY
+
+
 class CircuitBreaker:
-    def __init__(self, failure_threshold: int = 5, timeout: int = 30):
-        self.failure_threshold = failure_threshold
-        self.timeout = timeout
+    def __init__(self) -> None:
+        self.failure_threshold = CIRCUIT_BREAKER_POLICY.failure_threshold
+        self.timeout = CIRCUIT_BREAKER_POLICY.open_timeout_seconds
         self.failure_count = 0
         self.state = CircuitState.CLOSED
         self.last_failure_time = None
         self.half_open_attempts = 0
-        self.max_half_open_calls = 3
-        self.success_threshold = 2
+        self.max_half_open_calls = CIRCUIT_BREAKER_POLICY.max_half_open_calls
+        self.success_threshold = CIRCUIT_BREAKER_POLICY.success_threshold
 
     async def call_agent(self, agent_func, *args, **kwargs):
         if self.state == CircuitState.OPEN:
@@ -906,7 +914,10 @@ class CircuitBreaker:
             raise CircuitBreakerOpenError("Half-open call limit exceeded")
 
         try:
-            result = await asyncio.wait_for(agent_func(*args, **kwargs), timeout=30)
+            result = await asyncio.wait_for(
+                agent_func(*args, **kwargs),
+                timeout=CIRCUIT_BREAKER_POLICY.call_timeout_seconds,
+            )
             await self.on_success()
             return result
         except Exception as e:

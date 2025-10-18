@@ -1,0 +1,245 @@
+<!-- Modern Card Component with Glassmorphism -->
+<div class="modern-card">
+  <div class="card-glow"></div>
+  <div class="card-content">
+    <div class="card-header">
+      <div class="card-icon-wrapper">
+        <div class="card-icon">
+          <i class="fas fa-chart-line"></i>
+        </div>
+      </div>
+      <div class="card-title-section">
+        <h3 class="card-title">Performance Metrics</h3>
+        <p class="card-subtitle">Real-time system performance</p>
+      </div>
+      <div class="card-actions">
+        <button class="card-action-btn">
+          <i class="fas fa-expand"></i>
+        </button>
+      </div>
+    </div>
+    <div class="card-body">
+      <!-- Card content goes here -->
+    </div>
+  </div>
+</div>
+
+<style>
+  .modern-card {
+    position: relative;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 0;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+
+  .modern-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(0, 102, 255, 0.8),
+      transparent
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .modern-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(0, 102, 255, 0.3);
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 20px 25px rgba(0, 0, 0, 0.15), 0 10px 10px rgba(0, 0, 0, 0.04),
+      0 0 40px rgba(0, 102, 255, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  }
+
+  .modern-card:hover::before {
+    opacity: 1;
+  }
+
+  .card-glow {
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(
+      circle,
+      rgba(0, 102, 255, 0.03) 0%,
+      transparent 70%
+    );
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+  }
+
+  .modern-card:hover .card-glow {
+    opacity: 1;
+  }
+
+  .card-content {
+    position: relative;
+    z-index: 1;
+    padding: 1.5rem;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .card-icon-wrapper {
+    flex-shrink: 0;
+  }
+
+  .card-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #0066ff, #0052cc);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    color: white;
+    box-shadow: 0 4px 12px rgba(0, 102, 255, 0.3);
+    transition: all 0.3s ease;
+  }
+
+  .modern-card:hover .card-icon {
+    transform: scale(1.05);
+    box-shadow: 0 6px 16px rgba(0, 102, 255, 0.4);
+  }
+
+  .card-title-section {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .card-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #ffffff;
+    margin: 0 0 0.25rem 0;
+    line-height: 1.4;
+  }
+
+  .card-subtitle {
+    font-size: 0.875rem;
+    color: #a0aec0;
+    margin: 0;
+    line-height: 1.4;
+  }
+
+  .card-actions {
+    flex-shrink: 0;
+  }
+
+  .card-action-btn {
+    width: 32px;
+    height: 32px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #a0aec0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .card-action-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(0, 102, 255, 0.3);
+    color: #0066ff;
+    transform: scale(1.05);
+  }
+
+  .card-body {
+    /* Content styling goes here */
+  }
+
+  /* Animation variants */
+  .modern-card.animate-in {
+    animation: cardSlideIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  @keyframes cardSlideIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  /* Size variants */
+  .modern-card.compact {
+    padding: 0;
+  }
+
+  .modern-card.compact .card-content {
+    padding: 1rem;
+  }
+
+  .modern-card.compact .card-header {
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+  }
+
+  .modern-card.large {
+    padding: 0;
+  }
+
+  .modern-card.large .card-content {
+    padding: 2rem;
+  }
+
+  /* Color variants */
+  .modern-card.success {
+    border-color: rgba(0, 208, 132, 0.2);
+  }
+
+  .modern-card.success:hover {
+    border-color: rgba(0, 208, 132, 0.4);
+    box-shadow: 0 20px 25px rgba(0, 0, 0, 0.15), 0 10px 10px rgba(0, 0, 0, 0.04),
+      0 0 40px rgba(0, 208, 132, 0.1);
+  }
+
+  .modern-card.warning {
+    border-color: rgba(255, 165, 2, 0.2);
+  }
+
+  .modern-card.warning:hover {
+    border-color: rgba(255, 165, 2, 0.4);
+    box-shadow: 0 20px 25px rgba(0, 0, 0, 0.15), 0 10px 10px rgba(0, 0, 0, 0.04),
+      0 0 40px rgba(255, 165, 2, 0.1);
+  }
+
+  .modern-card.danger {
+    border-color: rgba(255, 71, 87, 0.2);
+  }
+
+  .modern-card.danger:hover {
+    border-color: rgba(255, 71, 87, 0.4);
+    box-shadow: 0 20px 25px rgba(0, 0, 0, 0.15), 0 10px 10px rgba(0, 0, 0, 0.04),
+      0 0 40px rgba(255, 71, 87, 0.1);
+  }
+</style>

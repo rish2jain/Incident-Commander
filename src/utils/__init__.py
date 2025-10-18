@@ -1,0 +1,1 @@
+"""Shared utilities for the Incident Commander system."""

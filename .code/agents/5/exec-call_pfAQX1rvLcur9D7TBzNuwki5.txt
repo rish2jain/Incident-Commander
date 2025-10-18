@@ -1,0 +1,2679 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.11.9, pytest-8.4.2, pluggy-1.6.0
+rootdir: /Users/rish2jain/Documents/Incident Commander
+plugins: asyncio-1.2.0, anyio-4.11.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 4 items
+
+tests/integration/test_api_health.py EE                                  [ 50%]
+tests/unit/test_message_bus_failover.py FF                               [100%]
+
+==================================== ERRORS ====================================
+________ ERROR at setup of test_health_endpoint_reports_runtime_status _________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108e033d0>
+
+    @pytest.fixture
+    def client(monkeypatch):
+>       import src.main as main
+
+tests/integration/test_api_health.py:74: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    """
+    FastAPI application entry point for the Incident Commander system.
+    """
+    
+    import asyncio
+    import json
+    from contextlib import asynccontextmanager, suppress
+    from typing import Dict, Any, Optional, Awaitable, Set
+    
+    from fastapi import FastAPI, HTTPException, Depends, WebSocket, WebSocketDisconnect
+    from fastapi.middleware.cors import CORSMiddleware
+    from fastapi.responses import JSONResponse
+    import uvicorn
+    
+    from src.utils.config import config
+    from src.utils.logging import get_logger, IncidentCommanderLogger
+    from src.utils.exceptions import IncidentCommanderError
+    from src.models.incident import Incident, IncidentSeverity, ServiceTier, BusinessImpact, IncidentMetadata
+    from src.orchestrator.swarm_coordinator import get_swarm_coordinator
+    from src.services.aws import AWSServiceFactory
+    from src.services.rag_memory import ScalableRAGMemory
+    from src.services.system_health_monitor import get_system_health_monitor
+    from src.services.meta_incident_handler import get_meta_incident_handler
+    from src.services.byzantine_consensus import get_byzantine_consensus_engine
+    from src.services.performance_optimizer import get_performance_optimizer
+    from src.services.scaling_manager import get_scaling_manager
+    from src.services.cost_optimizer import get_cost_optimizer
+    from src.services.circuit_breaker import circuit_breaker_manager
+    from src.services.rate_limiter import bedrock_rate_limiter, external_service_rate_limiter
+    from src.services.realtime_integration import get_realtime_broadcaster
+    from agents.detection.agent import RobustDetectionAgent
+    from agents.diagnosis.agent import HardenedDiagnosisAgent
+    from agents.prediction.agent import PredictionAgent
+    from agents.resolution.agent import SecureResolutionAgent
+    from agents.communication.agent import ResilientCommunicationAgent
+    from datetime import datetime, timedelta
+    
+    
+    # Configure logging
+    IncidentCommanderLogger.configure(level="INFO")
+    logger = get_logger("main")
+    
+    process_start_time: datetime = datetime.utcnow()
+    aws_factory: Optional[AWSServiceFactory] = None
+    coordinator_instance: Optional["AgentSwarmCoordinator"] = None
+    rag_memory_instance: Optional[ScalableRAGMemory] = None
+    health_monitor_instance = None
+    meta_incident_handler_instance = None
+    byzantine_consensus_instance = None
+    performance_optimizer_instance = None
+    scaling_manager_instance = None
+    cost_optimizer_instance = None
+    _background_tasks: Set[asyncio.Task] = set()
+    
+    
+    def schedule_background_task(coro: Awaitable[Any], *, description: str) -> None:
+        """Schedule and track a background coroutine with logging."""
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            logger.error(f"Cannot schedule background task '{description}' outside event loop")
+            return
+    
+        task = loop.create_task(coro, name=description)
+        _background_tasks.add(task)
+    
+        def _on_done(completed: asyncio.Task) -> None:
+            _background_tasks.discard(completed)
+            try:
+                completed.result()
+            except asyncio.CancelledError:
+                logger.info(f"Background task '{description}' cancelled during shutdown")
+            except Exception as exc:
+                logger.error(f"Background task '{description}' failed: {exc}", exc_info=True)
+    
+        task.add_done_callback(_on_done)
+    
+    
+    async def _cancel_background_tasks() -> None:
+        if not _background_tasks:
+            return
+    
+        logger.info(f"Cancelling {len(_background_tasks)} background task(s)")
+        for task in list(_background_tasks):
+            task.cancel()
+    
+        with suppress(Exception):
+            await asyncio.gather(*_background_tasks, return_exceptions=True)
+    
+        _background_tasks.clear()
+    
+    
+    def _runtime_uptime_seconds() -> float:
+        return max(0.0, (datetime.utcnow() - process_start_time).total_seconds())
+    
+    
+    async def _shutdown_services() -> None:
+        """Shutdown services and background work gracefully."""
+        global aws_factory
+        global coordinator_instance
+        global rag_memory_instance
+        global health_monitor_instance
+        global meta_incident_handler_instance
+        global byzantine_consensus_instance
+        global performance_optimizer_instance
+        global scaling_manager_instance
+        global cost_optimizer_instance
+    
+        await _cancel_background_tasks()
+    
+        if health_monitor_instance is not None:
+            with suppress(Exception):
+                await health_monitor_instance.stop_monitoring()
+            health_monitor_instance = None
+    
+        if coordinator_instance is not None:
+            with suppress(Exception):
+                await coordinator_instance.shutdown()
+            coordinator_instance = None
+    
+        if aws_factory is not None:
+            with suppress(Exception):
+                await aws_factory.cleanup()
+            aws_factory = None
+    
+        rag_memory_instance = None
+        meta_incident_handler_instance = None
+        byzantine_consensus_instance = None
+        performance_optimizer_instance = None
+        scaling_manager_instance = None
+        cost_optimizer_instance = None
+    
+    
+    def get_aws_factory_instance() -> AWSServiceFactory:
+        """Get shared AWS service factory, creating if necessary."""
+        global aws_factory
+        if aws_factory is None:
+            aws_factory = AWSServiceFactory()
+        return aws_factory
+    
+    
+    def get_coordinator_instance() -> "AgentSwarmCoordinator":
+        """Get shared coordinator instance, ensuring dependencies are initialized."""
+        global coordinator_instance
+        if coordinator_instance is None:
+            coordinator_instance = get_swarm_coordinator(service_factory=get_aws_factory_instance())
+        return coordinator_instance
+    
+    
+    def get_health_monitor_instance():
+        """Get shared system health monitor."""
+        global health_monitor_instance
+        if health_monitor_instance is None:
+            health_monitor_instance = get_system_health_monitor(get_aws_factory_instance())
+        return health_monitor_instance
+    
+    
+    def get_meta_handler_instance():
+        """Get shared meta-incident handler."""
+        global meta_incident_handler_instance
+        if meta_incident_handler_instance is None:
+            meta_incident_handler_instance = get_meta_incident_handler(
+                get_aws_factory_instance(),
+                get_health_monitor_instance()
+            )
+        return meta_incident_handler_instance
+    
+    
+    def get_byzantine_consensus_instance():
+        """Get shared Byzantine consensus engine."""
+        global byzantine_consensus_instance
+        if byzantine_consensus_instance is None:
+            byzantine_consensus_instance = get_byzantine_consensus_engine(get_aws_factory_instance())
+        return byzantine_consensus_instance
+    
+    @asynccontextmanager
+    async def lifespan(app: FastAPI):
+        """Application lifespan manager with proper resource management."""
+        global process_start_time
+        global aws_factory
+        global coordinator_instance
+        global rag_memory_instance
+        global health_monitor_instance
+        global meta_incident_handler_instance
+        global byzantine_consensus_instance
+        global performance_optimizer_instance
+        global scaling_manager_instance
+        global cost_optimizer_instance
+    
+        logger.info("Starting Incident Commander system")
+        process_start_time = datetime.utcnow()
+    
+        try:
+            config.validate_required_config()
+            logger.info("Configuration validation passed")
+    
+            aws_factory = AWSServiceFactory()
+            coordinator_instance = get_swarm_coordinator(service_factory=aws_factory)
+            rag_memory_instance = ScalableRAGMemory()
+    
+            health_monitor_instance = get_system_health_monitor(aws_factory)
+            await health_monitor_instance.start_monitoring()
+            logger.info("System health monitoring started")
+    
+            meta_incident_handler_instance = get_meta_incident_handler(aws_factory, health_monitor_instance)
+    
+            byzantine_consensus_instance = get_byzantine_consensus_engine(aws_factory)
+            logger.info("Byzantine consensus engine initialized")
+    
+            performance_optimizer_instance = await get_performance_optimizer()
+            scaling_manager_instance = await get_scaling_manager()
+            cost_optimizer_instance = await get_cost_optimizer()
+    
+            logger.info("Performance optimization services initialized")
+            logger.info("- Performance Optimizer: Connection pooling, caching, memory optimization")
+            logger.info("- Scaling Manager: Auto-scaling, load balancing, geographic distribution")
+            logger.info("- Cost Optimizer: Cost-aware scaling, intelligent model selection, Lambda warming")
+    
+            detection_agent = RobustDetectionAgent("primary_detection")
+            diagnosis_agent = HardenedDiagnosisAgent("primary_diagnosis")
+            prediction_agent = PredictionAgent(aws_factory, rag_memory_instance, "primary_prediction")
+            resolution_agent = SecureResolutionAgent(aws_factory, "primary_resolution")
+            communication_agent = ResilientCommunicationAgent("primary_communication")
+    
+            await coordinator_instance.register_agent(detection_agent)
+            await coordinator_instance.register_agent(diagnosis_agent)
+            await coordinator_instance.register_agent(prediction_agent)
+            await coordinator_instance.register_agent(resolution_agent)
+            await coordinator_instance.register_agent(communication_agent)
+    
+            logger.info("All agents initialized and registered (Detection, Diagnosis, Prediction, Resolution, Communication)")
+    
+            is_healthy = await coordinator_instance.health_check()
+            if is_healthy:
+                logger.info("System health check passed")
+            else:
+                logger.warning("System health check reported degraded state")
+    
+        except Exception as exc:
+            logger.error("Failed to initialize Incident Commander system: %s", exc, exc_info=True)
+            await _shutdown_services()
+            raise
+    
+        try:
+            yield
+        finally:
+            logger.info("Shutting down Incident Commander system")
+            await _shutdown_services()
+            logger.info("Incident Commander system shutdown complete")
+    
+    
+    # Create FastAPI application
+    app = FastAPI(
+        title="Autonomous Incident Commander",
+        description="Multi-agent system for autonomous incident detection, diagnosis, and resolution",
+        version="0.1.0",
+        lifespan=lifespan
+    )
+    
+    # Add CORS middleware
+    # Production-ready CORS configuration
+    def get_allowed_origins():
+        """Get allowed origins based on environment."""
+        if config.environment == "development":
+            return ["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:8080"]
+        elif config.environment == "staging":
+            return ["https://staging-incident-commander.example.com"]
+        else:  # production
+            return [
+                "https://incident-commander.example.com",
+                "https://demo.incident-commander.example.com"
+            ]
+    
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=get_allowed_origins(),
+        allow_credentials=True,
+        allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allow_headers=["Content-Type", "Authorization", "X-Requested-With"],
+        expose_headers=["X-Total-Count", "X-Request-ID"],
+    )
+    
+    # Security Headers Middleware
+    from fastapi import Request, Response
+    from starlette.middleware.base import BaseHTTPMiddleware
+    
+    class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+        """Add security headers to all responses."""
+    
+        async def dispatch(self, request: Request, call_next):
+            response = await call_next(request)
+    
+            # Security headers for production deployment
+            security_headers = {
+                "X-Content-Type-Options": "nosniff",
+                "X-Frame-Options": "DENY",
+                "X-XSS-Protection": "1; mode=block",
+                "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+                "Content-Security-Policy": (
+                    "default-src 'self'; "
+                    "script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; "
+                    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; "
+                    "font-src 'self' https://fonts.gstatic.com; "
+                    "img-src 'self' data: https:; "
+                    "connect-src 'self' ws: wss:; "
+                    "frame-ancestors 'none';"
+                ),
+                "Referrer-Policy": "strict-origin-when-cross-origin",
+                "Permissions-Policy": (
+                    "geolocation=(), microphone=(), camera=(), "
+                    "payment=(), usb=(), magnetometer=(), gyroscope=()"
+                ),
+                "X-Request-ID": f"req-{request.headers.get('x-request-id', 'unknown')}"
+            }
+    
+            # Apply headers
+            for header, value in security_headers.items():
+                response.headers[header] = value
+    
+            return response
+    
+    # Add security headers middleware
+    app.add_middleware(SecurityHeadersMiddleware)
+    
+    
+    @app.exception_handler(IncidentCommanderError)
+    async def incident_commander_exception_handler(request, exc: IncidentCommanderError):
+        """Handle custom exceptions."""
+        logger.error(f"Incident Commander error: {exc}")
+        return JSONResponse(
+            status_code=500,
+            content={"error": str(exc), "type": type(exc).__name__}
+        )
+    
+    
+    @app.get("/")
+    async def root():
+        """Root endpoint."""
+        return {
+            "message": "Autonomous Incident Commander API",
+            "version": "0.1.0",
+            "status": "operational"
+        }
+    
+    
+    @app.get("/health")
+    async def health_check():
+        """Health check endpoint."""
+        coordinator = get_coordinator_instance()
+        agent_health = coordinator.get_agent_health_status()
+        unhealthy_agents = {
+            name: status for name, status in agent_health.items()
+            if not status.get("is_healthy", True)
+        }
+    
+        monitor = health_monitor_instance or get_health_monitor_instance()
+        health_snapshot = monitor.get_current_health_status()
+    
+        meta_handler = meta_incident_handler_instance or get_meta_handler_instance()
+        meta_incidents_active = meta_handler.get_active_meta_incidents()
+    
+        cb_dashboard = circuit_breaker_manager.get_health_dashboard()
+    
+        services = {
+            "api": "healthy",
+            "agents": "healthy" if not unhealthy_agents else "degraded",
+            "message_bus": "healthy" if cb_dashboard["unhealthy_services"] == 0 else "degraded",
+            "health_monitor": health_snapshot.get("overall_status", "unknown"),
+            "meta_incidents": "healthy" if not meta_incidents_active else "attention_required"
+        }
+    
+        status = "healthy"
+        if (
+            services["agents"] != "healthy"
+            or services["message_bus"] != "healthy"
+            or services["health_monitor"] not in {"healthy", "unknown"}
+            or services["meta_incidents"] != "healthy"
+        ):
+            status = "degraded"
+    
+        return {
+            "status": status,
+            "timestamp": datetime.utcnow().isoformat(),
+            "environment": config.environment,
+            "uptime_seconds": _runtime_uptime_seconds(),
+            "services": services,
+            "unhealthy_agents": unhealthy_agents,
+            "circuit_breakers": {
+                "healthy_services": cb_dashboard["healthy_services"],
+                "degraded_services": cb_dashboard["degraded_services"],
+                "unhealthy_services": cb_dashboard["unhealthy_services"],
+                "total_services": cb_dashboard["total_circuit_breakers"]
+            },
+            "meta_incidents": meta_incidents_active
+        }
+    
+    
+    @app.get("/status")
+    async def system_status():
+        """Get detailed system status."""
+        coordinator = get_coordinator_instance()
+        agent_health = coordinator.get_agent_health_status()
+        processing_metrics = coordinator.get_processing_metrics()
+    
+        cb_dashboard = circuit_breaker_manager.get_health_dashboard()
+        bedrock_status = bedrock_rate_limiter.get_status()
+    
+        meta_handler = meta_incident_handler_instance or get_meta_handler_instance()
+        meta_stats = meta_handler.get_meta_incident_statistics()
+        meta_active = meta_handler.get_active_meta_incidents()
+    
+        return {
+            "system": {
+                "environment": config.environment,
+                "version": "0.1.0",
+                "uptime_seconds": _runtime_uptime_seconds(),
+                "timestamp": datetime.utcnow().isoformat(),
+                "background_tasks": len(_background_tasks)
+            },
+            "agents": agent_health,
+            "metrics": processing_metrics,
+            "infrastructure": {
+                "circuit_breakers": cb_dashboard,
+                "rate_limiters": {
+                    "bedrock": bedrock_status,
+                    "external_services": {
+                        "slack": external_service_rate_limiter.get_service_status("slack"),
+                        "pagerduty": external_service_rate_limiter.get_service_status("pagerduty")
+                    }
+                }
+            },
+            "health_monitor": get_health_monitor_instance().get_current_health_status(),
+            "meta_incidents": {
+                "active": meta_active,
+                "statistics": meta_stats
+            }
+        }
+    
+    
+    @app.post("/incidents/trigger")
+    async def trigger_incident(incident_data: Dict[str, Any]):
+        """
+        Trigger a new incident for processing.
+    
+        This endpoint processes incidents through the agent swarm.
+        """
+        try:
+            # Create incident from request data
+            business_impact = BusinessImpact(
+                service_tier=ServiceTier(incident_data.get("service_tier", "tier_2")),
+                affected_users=incident_data.get("affected_users", 0),
+                revenue_impact_per_minute=incident_data.get("revenue_impact_per_minute", 0.0)
+            )
+    
+            metadata = IncidentMetadata(
+                source_system=incident_data.get("source_system", "manual"),
+                tags=incident_data.get("tags", {})
+            )
+    
+            incident = Incident(
+                title=incident_data["title"],
+                description=incident_data["description"],
+                severity=IncidentSeverity(incident_data.get("severity", "medium")),
+                business_impact=business_impact,
+                metadata=metadata
+            )
+    
+            coordinator = get_coordinator_instance()
+            broadcaster = get_realtime_broadcaster()
+    
+            schedule_background_task(
+                broadcaster.simulate_full_incident_processing(incident),
+                description=f"incident-broadcast-{incident.id}"
+            )
+            schedule_background_task(
+                coordinator.process_incident(incident),
+                description=f"incident-process-{incident.id}"
+            )
+    
+            logger.info(f"Triggered incident: {incident.id}")
+    
+            return {
+                "incident_id": incident.id,
+                "status": "processing",
+                "message": "Incident is being processed by agent swarm",
+                "estimated_completion_minutes": 3,
+                "cost_per_minute": business_impact.calculate_cost_per_minute()
+            }
+    
+        except Exception as e:
+            logger.error(f"Failed to trigger incident: {e}")
+            raise HTTPException(status_code=400, detail=str(e))
+    
+    
+    @app.get("/incidents/{incident_id}")
+    async def get_incident(incident_id: str):
+        """Get incident details and processing status."""
+        try:
+            from src.orchestrator.swarm_coordinator import get_swarm_coordinator
+            coordinator = get_swarm_coordinator()
+    
+            # Get incident status from coordinator
+            status = coordinator.get_incident_status(incident_id)
+    
+            if not status:
+                raise HTTPException(status_code=404, detail="Incident not found")
+    
+            return {
+                "incident_id": incident_id,
+                **status
+            }
+    
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"Failed to get incident {incident_id}: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
+    
+    
+    @app.get("/incidents/{incident_id}/timeline")
+    async def get_incident_timeline(incident_id: str):
+        """Get incident processing timeline."""
+        try:
+            from src.orchestrator.swarm_coordinator import get_swarm_coordinator
+            coordinator = get_swarm_coordinator()
+    
+            # Get incident status
+            status = coordinator.get_incident_status(incident_id)
+    
+            if not status:
+                raise HTTPException(status_code=404, detail="Incident not found")
+    
+            # Build timeline from agent executions
+            timeline = []
+    
+            # Add incident start
+            timeline.append({
+                "timestamp": status["start_time"],
+                "event": "incident_started",
+                "description": "Incident processing started",
+                "phase": "detection"
+            })
+    
+            # Add agent execution events
+            for agent_name, execution in status["agent_executions"].items():
+                if execution["status"] == "completed":
+                    timeline.append({
+                        "timestamp": status["start_time"],  # Would be execution start time in real implementation
+                        "event": "agent_completed",
+                        "description": f"{execution['agent_type']} agent completed",
+                        "agent": agent_name,
+                        "duration_seconds": execution["duration_seconds"],
+                        "recommendations_count": execution["recommendations_count"]
+                    })
+                elif execution["status"] == "failed":
+                    timeline.append({
+                        "timestamp": status["start_time"],
+                        "event": "agent_failed",
+                        "description": f"{execution['agent_type']} agent failed: {execution['error']}",
+                        "agent": agent_name,
+                        "error": execution["error"]
+                    })
+    
+            # Add consensus event
+            if status["consensus_decision"]:
+                timeline.append({
+                    "timestamp": status["end_time"] or status["start_time"],
+                    "event": "consensus_reached",
+                    "description": f"Consensus reached: {status['consensus_decision']['selected_action']}",
+                    "confidence": status["consensus_decision"]["final_confidence"],
+                    "requires_approval": status["consensus_decision"]["requires_human_approval"]
+                })
+    
+            # Sort timeline by timestamp
+            timeline.sort(key=lambda x: x["timestamp"])
+    
+            return {
+                "incident_id": incident_id,
+                "timeline": timeline,
+                "total_events": len(timeline),
+                "processing_duration_seconds": status["duration_seconds"]
+            }
+    
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"Failed to get timeline for incident {incident_id}: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
+    
+    
+    @app.get("/agents/status")
+    async def get_agents_status():
+        """Get status of all registered agents."""
+        try:
+            from src.orchestrator.swarm_coordinator import get_swarm_coordinator
+            coordinator = get_swarm_coordinator()
+    
+            agent_status = coordinator.get_agent_health_status()
+            processing_metrics = coordinator.get_processing_metrics()
+    
+            return {
+                "agents": agent_status,
+                "metrics": processing_metrics,
+                "timestamp": datetime.utcnow().isoformat()
+            }
+    
+        except Exception as e:
+            logger.error(f"Failed to get agent status: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
+    
+    
+    @app.post("/demo/scenarios/{scenario_name}")
+    async def run_demo_scenario(scenario_name: str):
+        """
+        Run a predefined demo scenario.
+    
+        Available scenarios: database_cascade, ddos_attack, memory_leak, api_overload, storage_failure
+        """
+        valid_scenarios = ["database_cascade", "ddos_attack", "memory_leak", "api_overload", "storage_failure"]
+    
+        if scenario_name not in valid_scenarios:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid scenario. Available: {valid_scenarios}"
+            )
+    
+        # Create demo incident based on scenario
+        scenario_configs = {
+            "database_cascade": {
+                "title": "Database Connection Pool Exhaustion",
+                "description": "Critical database connection pool exhaustion causing cascade failures across payment processing services",
+                "severity": "critical",
+                "service_tier": "tier_1",
+                "affected_users": 50000,
+                "revenue_impact_per_minute": 2000.0,
+                "tags": {"scenario": "database_cascade", "demo": "true", "complexity": "high"}
+            },
+            "ddos_attack": {
+                "title": "Distributed Denial of Service Attack",
+                "description": "Large-scale DDoS attack overwhelming API gateway and causing service degradation",
+                "severity": "high",
+                "service_tier": "tier_1",
+                "affected_users": 25000,
+                "revenue_impact_per_minute": 1500.0,
+                "tags": {"scenario": "ddos_attack", "demo": "true", "complexity": "medium"}
+            },
+            "memory_leak": {
+                "title": "Application Memory Leak",
+                "description": "Memory leak in user service causing gradual performance degradation and eventual service crashes",
+                "severity": "medium",
+                "service_tier": "tier_2",
+                "affected_users": 5000,
+                "revenue_impact_per_minute": 300.0,
+                "tags": {"scenario": "memory_leak", "demo": "true", "complexity": "low"}
+            },
+            "api_overload": {
+                "title": "API Rate Limit Exceeded",
+                "description": "Sudden traffic spike causing API rate limits to be exceeded, resulting in service degradation",
+                "severity": "high",
+                "service_tier": "tier_1",
+                "affected_users": 15000,
+                "revenue_impact_per_minute": 800.0,
+                "tags": {"scenario": "api_overload", "demo": "true", "complexity": "medium"}
+            },
+            "storage_failure": {
+                "title": "Distributed Storage System Failure",
+                "description": "Multiple storage nodes failing simultaneously, causing data availability issues",
+                "severity": "critical",
+                "service_tier": "tier_1",
+                "affected_users": 75000,
+                "revenue_impact_per_minute": 3000.0,
+                "tags": {"scenario": "storage_failure", "demo": "true", "complexity": "high"}
+            }
+        }
+    
+        scenario_config = scenario_configs[scenario_name]
+    
+        try:
+            # Trigger the demo incident
+            incident_response = await trigger_incident(scenario_config)
+    
+            logger.info(f"Running demo scenario: {scenario_name}")
+    
+            return {
+                "scenario": scenario_name,
+                "status": "started",
+                "incident_id": incident_response["incident_id"],
+                "estimated_duration_minutes": 3,
+                "cost_per_minute": incident_response["cost_per_minute"],
+                "description": scenario_config["description"],
+                "complexity": scenario_config["tags"]["complexity"],
+                "demo_features": {
+                    "real_time_mttr": True,
+                    "cost_accumulation": True,
+                    "agent_coordination": True,
+                    "consensus_visualization": True
+                }
+            }
+    
+        except Exception as e:
+            logger.error(f"Failed to run demo scenario {scenario_name}: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
+    
+    
+    @app.get("/demo/scenarios")
+    async def list_demo_scenarios():
+        """List all available demo scenarios with descriptions."""
+        scenarios = {
+            "database_cascade": {
+                "name": "Database Connection Pool Exhaustion",
+                "complexity": "high",
+                "estimated_duration": "2-3 minutes",
+                "business_impact": "Critical - $2000/minute",
+                "description": "Demonstrates agent coordination for complex database cascade failures"
+            },
+            "ddos_attack": {
+                "name": "Distributed Denial of Service Attack",
+                "complexity": "medium",
+                "estimated_duration": "2-3 minutes",
+                "business_impact": "High - $1500/minute",
+                "description": "Shows rapid detection and mitigation of external attacks"
+            },
+            "memory_leak": {
+                "name": "Application Memory Leak",
+                "complexity": "low",
+                "estimated_duration": "1-2 minutes",
+                "business_impact": "Medium - $300/minute",
+                "description": "Illustrates predictive capabilities and gradual issue resolution"
+            },
+            "api_overload": {
+                "name": "API Rate Limit Exceeded",
+                "complexity": "medium",
+                "estimated_duration": "2 minutes",
+                "business_impact": "High - $800/minute",
+                "description": "Demonstrates auto-scaling and load balancing responses"
+            },
+            "storage_failure": {
+                "name": "Distributed Storage System Failure",
+                "complexity": "high",
+                "estimated_duration": "3-4 minutes",
+                "business_impact": "Critical - $3000/minute",
+                "description": "Shows multi-agent coordination for complex infrastructure failures"
+            }
+        }
+    
+        return {
+            "available_scenarios": scenarios,
+            "total_scenarios": len(scenarios),
+            "demo_capabilities": [
+                "Real-time MTTR tracking",
+                "Business impact calculation",
+                "Agent coordination visualization",
+                "Consensus decision making",
+                "Automated resolution actions"
+            ]
+        }
+    
+    
+    @app.get("/demo/status")
+    async def get_demo_status():
+        """Get current demo environment status."""
+        from src.orchestrator.swarm_coordinator import get_swarm_coordinator
+    
+        coordinator = get_swarm_coordinator()
+    
+        # Get active demo incidents
+        active_demos = []
+        for incident_id, state in coordinator.processing_states.items():
+            if (state.incident.metadata.tags.get("demo") == "true" and
+                state.phase not in ["completed", "failed"]):
+                active_demos.append({
+                    "incident_id": incident_id,
+                    "scenario": state.incident.metadata.tags.get("scenario"),
+                    "phase": state.phase.value,
+                    "duration_seconds": state.total_duration_seconds,
+                    "cost_accumulated": state.incident.business_impact.calculate_total_cost(
+                        state.total_duration_seconds / 60.0
+                    )
+                })
+    
+        # Get system health for demo
+        agent_status = coordinator.get_agent_health_status()
+        processing_metrics = coordinator.get_processing_metrics()
+    
+        return {
+            "demo_environment": {
+                "status": "ready" if len(active_demos) == 0 else "running_demo",
+                "active_demos": active_demos,
+                "total_active": len(active_demos)
+            },
+            "system_health": {
+                "agents_healthy": sum(1 for status in agent_status.values() if status["is_healthy"]),
+                "total_agents": len(agent_status),
+                "consensus_engine": "operational",
+                "message_bus": "operational"
+            },
+            "performance_metrics": {
+                "average_mttr_seconds": processing_metrics.get("average_processing_time", 0),
+                "success_rate": processing_metrics.get("success_rate", 0),
+                "total_incidents_processed": processing_metrics.get("total_incidents", 0)
+            },
+            "timestamp": datetime.utcnow().isoformat()
+        }
+    
+    
+    # WebSocket Endpoint for Real-time Dashboard Updates
+    
+    @app.websocket("/ws")
+    async def websocket_endpoint(websocket: WebSocket):
+        """
+        WebSocket endpoint for real-time dashboard communication.
+    
+        Provides real-time streaming of:
+        - Incident processing updates
+        - Agent action notifications
+        - System metrics and health status
+        - Performance data for demo visualization
+        """
+        from src.services.websocket_manager import get_websocket_manager
+    
+        manager = get_websocket_manager()
+    
+        try:
+            # Accept connection and register client
+            await manager.connect(websocket, {
+                "user_agent": websocket.headers.get("user-agent", "unknown"),
+                "origin": websocket.headers.get("origin", "unknown")
+            })
+    
+            # Keep connection alive and handle incoming messages
+            while True:
+                try:
+                    # Wait for messages from client (heartbeat, etc.)
+                    data = await websocket.receive_text()
+    
+                    # Handle client messages (optional - for heartbeat/ping)
+                    try:
+                        message = json.loads(data)
+                        if message.get("type") == "ping":
+                            await manager.send_to_connection(websocket, {
+                                "type": "pong",
+                                "data": {"timestamp": datetime.utcnow().isoformat()}
+                            })
+                    except json.JSONDecodeError:
+                        # Ignore malformed messages
+                        pass
+    
+                except WebSocketDisconnect:
+                    break
+                except Exception as e:
+                    logger.error(f"WebSocket error: {e}")
+                    break
+    
+        except Exception as e:
+            logger.error(f"WebSocket connection error: {e}")
+        finally:
+            await manager.disconnect(websocket)
+    
+    
+    # Milestone 2 Endpoints - System Health Monitoring and Byzantine Consensus
+    
+    @app.get("/system/health/detailed")
+    async def get_detailed_system_health():
+        """Get detailed system health status including meta-incidents."""
+        try:
+            health_monitor = get_health_monitor_instance()
+            meta_handler = get_meta_handler_instance()
+    
+            # Get current health status
+            health_status = health_monitor.get_current_health_status()
+    
+            # Get meta-incidents
+            meta_incidents = meta_handler.get_active_meta_incidents()
+            meta_stats = meta_handler.get_meta_incident_statistics()
+    
+            return {
+                "system_health": health_status,
+                "meta_incidents": {
+                    "active": meta_incidents,
+                    "statistics": meta_stats
+                },
+                "monitoring": {
+                    "is_active": health_monitor.is_monitoring,
+                    "monitoring_interval_seconds": health_monitor.monitoring_interval.total_seconds(),
+                    "metrics_retention_hours": health_monitor.metric_retention_period.total_seconds() / 3600
+                },
+                "timestamp": datetime.utcnow().isoformat()
+            }
+    
+        except Exception as e:
+            logger.error(f"Failed to get detailed system health: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
+    
+    
+    @app.get("/consensus/byzantine/status")
+    async def get_byzantine_consensus_status():
+        """Get Byzantine consensus engine status and statistics."""
+        try:
+            byzantine_consensus = get_byzantine_consensus_instance()
+    
+            # Get Byzantine consensus statistics
+            stats = byzantine_consensus.get_byzantine_statistics()
+    
+            # Get agent reputation scores
+            reputation_scores = byzantine_consensus.agent_reputation
+    
+            return {
+                "byzantine_consensus": {
+                    "engine_status": "operational",
+                    "statistics": stats,
+                    "agent_reputation": dict(reputation_scores),
+                    "configuration": {
+                        "byzantine_threshold": byzantine_consensus.byzantine_threshold,
+                        "confidence_threshold": byzantine_consensus.confidence_threshold,
+                        "min_agreement_threshold": byzantine_consensus.min_agreement_threshold
+                    }
+                },
+                "recent_consensus_rounds": [
+                    {
+                        "round_id": round.round_id,
+                        "incident_id": round.incident_id,
+                        "consensus_reached": round.consensus_reached,
+                        "byzantine_agents_detected": len(round.byzantine_agents),
+                        "participating_agents": len(round.participating_agents),
+                        "final_confidence": round.final_confidence,
+                        "duration_ms": round.round_duration_ms
+                    }
+                    for round in byzantine_consensus.consensus_rounds[-10:]  # Last 10 rounds
+                ],
+                "timestamp": datetime.utcnow().isoformat()
+            }
+    
+        except Exception as e:
+            logger.error(f"Failed to get Byzantine consensus status: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
+    
+    
+    @app.post("/system/health/trigger-meta-incident")
+    async def trigger_meta_incident_test(meta_incident_data: Dict[str, Any]):
+        """
+        Trigger a test meta-incident for demonstration purposes.
+    
+        This endpoint is for testing the meta-incident handling system.
+        """
+        try:
+            from src.services.system_health_monitor import MetaIncident, IncidentSeverity
+            from src.services.meta_incident_handler import get_meta_incident_handler
+            from src.services.aws import AWSServiceFactory
+    
+            aws_factory = AWSServiceFactory()
+            health_monitor = get_system_health_monitor(aws_factory)
+            meta_handler = get_meta_incident_handler(aws_factory, health_monitor)
+    
+            # Create test meta-incident
+            meta_incident = MetaIncident(
+                id=f"test_meta_{int(datetime.utcnow().timestamp())}",
+                title=meta_incident_data.get("title", "Test Meta-Incident"),
+                description=meta_incident_data.get("description", "Test meta-incident for demonstration"),
+                severity=IncidentSeverity(meta_incident_data.get("severity", "medium")),
+                affected_components=meta_incident_data.get("affected_components", ["test_component"]),
+                detected_at=datetime.utcnow(),
+                root_cause=meta_incident_data.get("root_cause"),
+                recovery_actions=meta_incident_data.get("recovery_actions", ["test_action"]),
+                status="active"
+            )
+    
+            # Process the meta-incident
+            incident = await meta_handler.process_meta_incident(meta_incident)
+    
+            return {
+                "meta_incident_id": meta_incident.id,
+                "incident_created": incident is not None,
+                "incident_id": incident.id if incident else None,
+                "status": "triggered",
+                "auto_resolution_enabled": meta_handler.auto_resolution_enabled,
+                "message": "Test meta-incident triggered successfully"
+            }
+    
+        except Exception as e:
+            logger.error(f"Failed to trigger test meta-incident: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
+    
+    
+    @app.get("/system/metrics/performance")
+    async def get_performance_metrics():
+        """Get comprehensive system performance metrics."""
+        try:
+            from src.orchestrator.swarm_coordinator import get_swarm_coordinator
+            from src.services.consensus import get_consensus_engine
+            from src.services.system_health_monitor import get_system_health_monitor
+            from src.services.aws import AWSServiceFactory
+    
+            coordinator = get_swarm_coordinator()
+            consensus_engine = get_consensus_engine()
+            aws_factory = AWSServiceFactory()
+            health_monitor = get_system_health_monitor(aws_factory)
+    
+            # Get processing metrics
+            processing_metrics = coordinator.get_processing_metrics()
+    
+            # Get consensus statistics
+            consensus_stats = consensus_engine.get_consensus_statistics()
+    
+            # Get current health status
+            health_status = health_monitor.get_current_health_status()
+    
+            return {
+                "performance_metrics": {
+                    "incident_processing": processing_metrics,
+                    "consensus_engine": consensus_stats,
+                    "system_health": health_status,
+                    "agent_performance": {
+                        agent_name: {
+                            "is_healthy": status["is_healthy"],
+                            "processing_count": status.get("processing_count", 0),
+                            "error_count": status.get("error_count", 0),
+                            "last_activity": status.get("last_activity")
+                        }
+                        for agent_name, status in coordinator.get_agent_health_status().items()
+                    }
+                },
+                "milestone_2_features": {
+                    "byzantine_consensus": "operational",
+                    "system_health_monitoring": "operational",
+                    "meta_incident_handling": "operational",
+                    "automated_recovery": "operational"
+                },
+                "timestamp": datetime.utcnow().isoformat()
+            }
+    
+        except Exception as e:
+            logger.error(f"Failed to get performance metrics: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
+    
+    
+    # Task 15 Endpoints - Performance Optimization and Scalability
+    
+    @app.get("/performance/metrics")
+    async def get_performance_optimization_metrics():
+        """Get comprehensive performance optimization metrics."""
+        try:
+            from src.services.performance_optimizer import get_performance_optimizer
+            from src.services.scaling_manager import get_scaling_manager
+            from src.services.cost_optimizer import get_cost_optimizer
+    
+            performance_optimizer = await get_performance_optimizer()
+            scaling_manager = await get_scaling_manager()
+            cost_optimizer = await get_cost_optimizer()
+    
+            # Get metrics from all optimization services
+            perf_metrics = await performance_optimizer.get_performance_metrics()
+            scaling_metrics = await scaling_manager.get_scaling_metrics()
+            cost_metrics = await cost_optimizer.get_cost_metrics()
+    
+            return {
+                "performance_optimization": {
+                    "connection_pools": perf_metrics.connection_pool_utilization,
+                    "cache_hit_rates": perf_metrics.cache_hit_rates,
+                    "memory_usage_percent": perf_metrics.memory_usage_percent,
+                    "gc_collections": perf_metrics.gc_collections,
+                    "query_response_times": {
+                        query_type: {
+                            "count": len(times),
+                            "avg_seconds": sum(times) / len(times) if times else 0,
+                            "max_seconds": max(times) if times else 0
+                        }
+                        for query_type, times in perf_metrics.query_response_times.items()
+                    },
+                    "optimization_actions": perf_metrics.optimization_actions_taken[-10:]  # Last 10 actions
+                },
+                "scaling": {
+                    "incidents_per_minute": scaling_metrics.total_incidents_per_minute,
+                    "agent_utilization": scaling_metrics.agent_utilization,
+                    "load_distribution": scaling_metrics.load_distribution,
+                    "scaling_actions": scaling_metrics.scaling_actions[-10:],  # Last 10 actions
+                    "failover_events": scaling_metrics.failover_events,
+                    "cross_region_latency": scaling_metrics.cross_region_latency
+                },
+                "cost_optimization": {
+                    "current_hourly_cost": cost_metrics.current_hourly_cost,
+                    "projected_daily_cost": cost_metrics.projected_daily_cost,
+                    "cost_by_service": cost_metrics.cost_by_service,
+                    "cost_by_model": cost_metrics.cost_by_model,
+                    "cost_savings_achieved": cost_metrics.cost_savings_achieved,
+                    "lambda_warm_cost": cost_metrics.lambda_warm_cost,
+                    "scaling_cost": cost_metrics.scaling_cost,
+                    "optimization_actions": cost_metrics.optimization_actions[-10:]  # Last 10 actions
+                },
+                "task_15_status": {
+                    "performance_optimizer": "operational",
+                    "scaling_manager": "operational",
+                    "cost_optimizer": "operational",
+                    "features_implemented": [
+                        "Connection pooling for external services",
+                        "Intelligent caching with multiple strategies",
+                        "Memory optimization and garbage collection",
+                        "Auto-scaling based on incident volume",
+                        "Load balancing with multiple strategies",
+                        "Geographic distribution and failover",
+                        "Cost-aware scaling decisions",
+                        "Intelligent model selection",
+                        "Predictive Lambda warming",
+                        "Cost monitoring and optimization"
+                    ]
+                },
+                "timestamp": datetime.utcnow().isoformat()
+            }
+    
+        except Exception as e:
+            logger.error(f"Failed to get performance optimization metrics: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
+    
+    
+    @app.get("/performance/recommendations")
+    async def get_performance_recommendations():
+        """Get performance optimization recommendations."""
+        try:
+            from src.services.performance_optimizer import get_performance_optimizer
+            from src.services.cost_optimizer import get_cost_optimizer
+    
+            performance_optimizer = await get_performance_optimizer()
+            cost_optimizer = await get_cost_optimizer()
+    
+            # Get recommendations from optimization services
+            perf_recommendations = await performance_optimizer.get_optimization_recommendations()
+            cost_recommendations = await cost_optimizer.get_cost_recommendations()
+    
+            return {
+                "performance_recommendations": perf_recommendations,
+                "cost_recommendations": cost_recommendations,
+                "summary": {
+                    "total_recommendations": len(perf_recommendations) + len(cost_recommendations),
+                    "performance_issues": len(perf_recommendations),
+                    "cost_optimization_opportunities": len(cost_recommendations)
+                },
+                "timestamp": datetime.utcnow().isoformat()
+            }
+    
+        except Exception as e:
+            logger.error(f"Failed to get performance recommendations: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
+    
+    
+    @app.get("/scaling/status")
+    async def get_scaling_status():
+        """Get current scaling status and replica information."""
+        try:
+            from src.services.scaling_manager import get_scaling_manager
+    
+            scaling_manager = await get_scaling_manager()
+    
+            # Get replica status and scaling metrics
+            replica_status = await scaling_manager.get_replica_status()
+            scaling_metrics = await scaling_manager.get_scaling_metrics()
+    
+            return {
+                "replica_status": replica_status,
+                "scaling_metrics": {
+                    "incidents_per_minute": scaling_metrics.total_incidents_per_minute,
+                    "agent_utilization": scaling_metrics.agent_utilization,
+                    "recent_scaling_actions": scaling_metrics.scaling_actions[-5:],  # Last 5 actions
+                    "failover_events": scaling_metrics.failover_events
+                },
+                "scaling_policies": {
+                    agent_type: {
+                        "min_replicas": policy.min_replicas,
+                        "max_replicas": policy.max_replicas,
+                        "target_utilization": policy.target_utilization,
+                        "scale_up_threshold": policy.scale_up_threshold,
+                        "scale_down_threshold": policy.scale_down_threshold,
+                        "cooldown_period": policy.cooldown_period
+                    }
+                    for agent_type, policy in scaling_manager.scaling_policies.items()
+                },
+                "geographic_distribution": {
+                    region: len([r for replicas in replica_status.values() for r in replicas if r["region"] == region])
+                    for region in scaling_manager.regions
+                },
+                "timestamp": datetime.utcnow().isoformat()
+            }
+    
+        except Exception as e:
+            logger.error(f"Failed to get scaling status: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
+    
+    
+    @app.post("/scaling/optimize")
+    async def optimize_scaling():
+        """Trigger scaling optimization based on current load."""
+        try:
+            from src.services.scaling_manager import get_scaling_manager
+            from src.services.cost_optimizer import get_cost_optimizer
+    
+            scaling_manager = await get_scaling_manager()
+            cost_optimizer = await get_cost_optimizer()
+    
+            # Calculate current utilization
+            current_load = {}
+            for agent_type in scaling_manager.scaling_policies.keys():
+                utilization = await scaling_manager._calculate_agent_utilization(agent_type)
+                current_load[agent_type] = utilization
+    
+            # Get cost-aware scaling recommendations
+            recommendations = await cost_optimizer.optimize_scaling_costs(current_load)
+    
+            # Apply scaling recommendations (in a real implementation, this would be more sophisticated)
+            actions_taken = []
+    
+            for scale_up_rec in recommendations["scale_up"]:
+                agent_type = scale_up_rec["agent_type"]
+                success = await scaling_manager._scale_up_agent(agent_type)
+                if success:
+                    actions_taken.append(f"Scaled up {agent_type}")
+    
+            for scale_down_rec in recommendations["scale_down"]:
+                agent_type = scale_down_rec["agent_type"]
+                success = await scaling_manager._scale_down_agent(agent_type)
+                if success:
+                    actions_taken.append(f"Scaled down {agent_type}")
+    
+            return {
+                "optimization_triggered": True,
+                "current_load": current_load,
+                "recommendations": recommendations,
+                "actions_taken": actions_taken,
+                "cost_impact": recommendations["cost_impact"],
+                "timestamp": datetime.utcnow().isoformat()
+            }
+    
+        except Exception as e:
+            logger.error(f"Failed to optimize scaling: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
+    
+    
+    @app.post("/cost/optimize")
+    async def optimize_costs():
+        """Trigger cost optimization analysis and actions."""
+        try:
+            from src.services.cost_optimizer import get_cost_optimizer
+    
+            cost_optimizer = await get_cost_optimizer()
+    
+            # Get current cost metrics
+            cost_metrics = await cost_optimizer.get_cost_metrics()
+    
+            # Generate optimization recommendations
+            recommendations = await cost_optimizer.get_cost_recommendations()
+    
+            # Apply automatic optimizations
+            applied_optimizations = []
+            for recommendation in recommendations:
+                if recommendation.get("auto_apply", False):
+                    await cost_optimizer._apply_cost_optimization(recommendation)
+                    applied_optimizations.append(recommendation)
+    
+            return {
+                "cost_optimization_triggered": True,
+                "current_metrics": {
+                    "hourly_cost": cost_metrics.current_hourly_cost,
+                    "daily_projection": cost_metrics.projected_daily_cost,
+                    "cost_threshold": cost_optimizer.current_cost_threshold.value
+                },
+                "recommendations": recommendations,
+                "applied_optimizations": applied_optimizations,
+                "potential_savings": sum(r.get("potential_savings", 0) for r in recommendations),
+                "timestamp": datetime.utcnow().isoformat()
+            }
+    
+        except Exception as e:
+            logger.error(f"Failed to optimize costs: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
+    
+    
+    @app.post("/lambda/warm")
+>   async def warm_lambda_functions(functions: Optional[List[str]] = None):
+                                                        ^^^^
+E   NameError: name 'List' is not defined
+
+src/main.py:1275: NameError
+_____________ ERROR at setup of test_system_status_returns_metrics _____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x109932710>
+
+    @pytest.fixture
+    def client(monkeypatch):
+>       import src.main as main
+
+tests/integration/test_api_health.py:74: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    """
+    FastAPI application entry point for the Incident Commander system.
+    """
+    
+    import asyncio
+    import json
+    from contextlib import asynccontextmanager, suppress
+    from typing import Dict, Any, Optional, Awaitable, Set
+    
+    from fastapi import FastAPI, HTTPException, Depends, WebSocket, WebSocketDisconnect
+    from fastapi.middleware.cors import CORSMiddleware
+    from fastapi.responses import JSONResponse
+    import uvicorn
+    
+    from src.utils.config import config
+    from src.utils.logging import get_logger, IncidentCommanderLogger
+    from src.utils.exceptions import IncidentCommanderError
+    from src.models.incident import Incident, IncidentSeverity, ServiceTier, BusinessImpact, IncidentMetadata
+    from src.orchestrator.swarm_coordinator import get_swarm_coordinator
+    from src.services.aws import AWSServiceFactory
+    from src.services.rag_memory import ScalableRAGMemory
+    from src.services.system_health_monitor import get_system_health_monitor
+    from src.services.meta_incident_handler import get_meta_incident_handler
+    from src.services.byzantine_consensus import get_byzantine_consensus_engine
+    from src.services.performance_optimizer import get_performance_optimizer
+    from src.services.scaling_manager import get_scaling_manager
+    from src.services.cost_optimizer import get_cost_optimizer
+    from src.services.circuit_breaker import circuit_breaker_manager
+    from src.services.rate_limiter import bedrock_rate_limiter, external_service_rate_limiter
+    from src.services.realtime_integration import get_realtime_broadcaster
+    from agents.detection.agent import RobustDetectionAgent
+    from agents.diagnosis.agent import HardenedDiagnosisAgent
+    from agents.prediction.agent import PredictionAgent
+    from agents.resolution.agent import SecureResolutionAgent
+    from agents.communication.agent import ResilientCommunicationAgent
+    from datetime import datetime, timedelta
+    
+    
+    # Configure logging
+    IncidentCommanderLogger.configure(level="INFO")
+    logger = get_logger("main")
+    
+    process_start_time: datetime = datetime.utcnow()
+    aws_factory: Optional[AWSServiceFactory] = None
+    coordinator_instance: Optional["AgentSwarmCoordinator"] = None
+    rag_memory_instance: Optional[ScalableRAGMemory] = None
+    health_monitor_instance = None
+    meta_incident_handler_instance = None
+    byzantine_consensus_instance = None
+    performance_optimizer_instance = None
+    scaling_manager_instance = None
+    cost_optimizer_instance = None
+    _background_tasks: Set[asyncio.Task] = set()
+    
+    
+    def schedule_background_task(coro: Awaitable[Any], *, description: str) -> None:
+        """Schedule and track a background coroutine with logging."""
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            logger.error(f"Cannot schedule background task '{description}' outside event loop")
+            return
+    
+        task = loop.create_task(coro, name=description)
+        _background_tasks.add(task)
+    
+        def _on_done(completed: asyncio.Task) -> None:
+            _background_tasks.discard(completed)
+            try:
+                completed.result()
+            except asyncio.CancelledError:
+                logger.info(f"Background task '{description}' cancelled during shutdown")
+            except Exception as exc:
+                logger.error(f"Background task '{description}' failed: {exc}", exc_info=True)
+    
+        task.add_done_callback(_on_done)
+    
+    
+    async def _cancel_background_tasks() -> None:
+        if not _background_tasks:
+            return
+    
+        logger.info(f"Cancelling {len(_background_tasks)} background task(s)")
+        for task in list(_background_tasks):
+            task.cancel()
+    
+        with suppress(Exception):
+            await asyncio.gather(*_background_tasks, return_exceptions=True)
+    
+        _background_tasks.clear()
+    
+    
+    def _runtime_uptime_seconds() -> float:
+        return max(0.0, (datetime.utcnow() - process_start_time).total_seconds())
+    
+    
+    async def _shutdown_services() -> None:
+        """Shutdown services and background work gracefully."""
+        global aws_factory
+        global coordinator_instance
+        global rag_memory_instance
+        global health_monitor_instance
+        global meta_incident_handler_instance
+        global byzantine_consensus_instance
+        global performance_optimizer_instance
+        global scaling_manager_instance
+        global cost_optimizer_instance
+    
+        await _cancel_background_tasks()
+    
+        if health_monitor_instance is not None:
+            with suppress(Exception):
+                await health_monitor_instance.stop_monitoring()
+            health_monitor_instance = None
+    
+        if coordinator_instance is not None:
+            with suppress(Exception):
+                await coordinator_instance.shutdown()
+            coordinator_instance = None
+    
+        if aws_factory is not None:
+            with suppress(Exception):
+                await aws_factory.cleanup()
+            aws_factory = None
+    
+        rag_memory_instance = None
+        meta_incident_handler_instance = None
+        byzantine_consensus_instance = None
+        performance_optimizer_instance = None
+        scaling_manager_instance = None
+        cost_optimizer_instance = None
+    
+    
+    def get_aws_factory_instance() -> AWSServiceFactory:
+        """Get shared AWS service factory, creating if necessary."""
+        global aws_factory
+        if aws_factory is None:
+            aws_factory = AWSServiceFactory()
+        return aws_factory
+    
+    
+    def get_coordinator_instance() -> "AgentSwarmCoordinator":
+        """Get shared coordinator instance, ensuring dependencies are initialized."""
+        global coordinator_instance
+        if coordinator_instance is None:
+            coordinator_instance = get_swarm_coordinator(service_factory=get_aws_factory_instance())
+        return coordinator_instance
+    
+    
+    def get_health_monitor_instance():
+        """Get shared system health monitor."""
+        global health_monitor_instance
+        if health_monitor_instance is None:
+            health_monitor_instance = get_system_health_monitor(get_aws_factory_instance())
+        return health_monitor_instance
+    
+    
+    def get_meta_handler_instance():
+        """Get shared meta-incident handler."""
+        global meta_incident_handler_instance
+        if meta_incident_handler_instance is None:
+            meta_incident_handler_instance = get_meta_incident_handler(
+                get_aws_factory_instance(),
+                get_health_monitor_instance()
+            )
+        return meta_incident_handler_instance
+    
+    
+    def get_byzantine_consensus_instance():
+        """Get shared Byzantine consensus engine."""
+        global byzantine_consensus_instance
+        if byzantine_consensus_instance is None:
+            byzantine_consensus_instance = get_byzantine_consensus_engine(get_aws_factory_instance())
+        return byzantine_consensus_instance
+    
+    @asynccontextmanager
+    async def lifespan(app: FastAPI):
+        """Application lifespan manager with proper resource management."""
+        global process_start_time
+        global aws_factory
+        global coordinator_instance
+        global rag_memory_instance
+        global health_monitor_instance
+        global meta_incident_handler_instance
+        global byzantine_consensus_instance
+        global performance_optimizer_instance
+        global scaling_manager_instance
+        global cost_optimizer_instance
+    
+        logger.info("Starting Incident Commander system")
+        process_start_time = datetime.utcnow()
+    
+        try:
+            config.validate_required_config()
+            logger.info("Configuration validation passed")
+    
+            aws_factory = AWSServiceFactory()
+            coordinator_instance = get_swarm_coordinator(service_factory=aws_factory)
+            rag_memory_instance = ScalableRAGMemory()
+    
+            health_monitor_instance = get_system_health_monitor(aws_factory)
+            await health_monitor_instance.start_monitoring()
+            logger.info("System health monitoring started")
+    
+            meta_incident_handler_instance = get_meta_incident_handler(aws_factory, health_monitor_instance)
+    
+            byzantine_consensus_instance = get_byzantine_consensus_engine(aws_factory)
+            logger.info("Byzantine consensus engine initialized")
+    
+            performance_optimizer_instance = await get_performance_optimizer()
+            scaling_manager_instance = await get_scaling_manager()
+            cost_optimizer_instance = await get_cost_optimizer()
+    
+            logger.info("Performance optimization services initialized")
+            logger.info("- Performance Optimizer: Connection pooling, caching, memory optimization")
+            logger.info("- Scaling Manager: Auto-scaling, load balancing, geographic distribution")
+            logger.info("- Cost Optimizer: Cost-aware scaling, intelligent model selection, Lambda warming")
+    
+            detection_agent = RobustDetectionAgent("primary_detection")
+            diagnosis_agent = HardenedDiagnosisAgent("primary_diagnosis")
+            prediction_agent = PredictionAgent(aws_factory, rag_memory_instance, "primary_prediction")
+            resolution_agent = SecureResolutionAgent(aws_factory, "primary_resolution")
+            communication_agent = ResilientCommunicationAgent("primary_communication")
+    
+            await coordinator_instance.register_agent(detection_agent)
+            await coordinator_instance.register_agent(diagnosis_agent)
+            await coordinator_instance.register_agent(prediction_agent)
+            await coordinator_instance.register_agent(resolution_agent)
+            await coordinator_instance.register_agent(communication_agent)
+    
+            logger.info("All agents initialized and registered (Detection, Diagnosis, Prediction, Resolution, Communication)")
+    
+            is_healthy = await coordinator_instance.health_check()
+            if is_healthy:
+                logger.info("System health check passed")
+            else:
+                logger.warning("System health check reported degraded state")
+    
+        except Exception as exc:
+            logger.error("Failed to initialize Incident Commander system: %s", exc, exc_info=True)
+            await _shutdown_services()
+            raise
+    
+        try:
+            yield
+        finally:
+            logger.info("Shutting down Incident Commander system")
+            await _shutdown_services()
+            logger.info("Incident Commander system shutdown complete")
+    
+    
+    # Create FastAPI application
+    app = FastAPI(
+        title="Autonomous Incident Commander",
+        description="Multi-agent system for autonomous incident detection, diagnosis, and resolution",
+        version="0.1.0",
+        lifespan=lifespan
+    )
+    
+    # Add CORS middleware
+    # Production-ready CORS configuration
+    def get_allowed_origins():
+        """Get allowed origins based on environment."""
+        if config.environment == "development":
+            return ["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:8080"]
+        elif config.environment == "staging":
+            return ["https://staging-incident-commander.example.com"]
+        else:  # production
+            return [
+                "https://incident-commander.example.com",
+                "https://demo.incident-commander.example.com"
+            ]
+    
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=get_allowed_origins(),
+        allow_credentials=True,
+        allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allow_headers=["Content-Type", "Authorization", "X-Requested-With"],
+        expose_headers=["X-Total-Count", "X-Request-ID"],
+    )
+    
+    # Security Headers Middleware
+    from fastapi import Request, Response
+    from starlette.middleware.base import BaseHTTPMiddleware
+    
+    class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+        """Add security headers to all responses."""
+    
+        async def dispatch(self, request: Request, call_next):
+            response = await call_next(request)
+    
+            # Security headers for production deployment
+            security_headers = {
+                "X-Content-Type-Options": "nosniff",
+                "X-Frame-Options": "DENY",
+                "X-XSS-Protection": "1; mode=block",
+                "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+                "Content-Security-Policy": (
+                    "default-src 'self'; "
+                    "script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; "
+                    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; "
+                    "font-src 'self' https://fonts.gstatic.com; "
+                    "img-src 'self' data: https:; "
+                    "connect-src 'self' ws: wss:; "
+                    "frame-ancestors 'none';"
+                ),
+                "Referrer-Policy": "strict-origin-when-cross-origin",
+                "Permissions-Policy": (
+                    "geolocation=(), microphone=(), camera=(), "
+                    "payment=(), usb=(), magnetometer=(), gyroscope=()"
+                ),
+                "X-Request-ID": f"req-{request.headers.get('x-request-id', 'unknown')}"
+            }
+    
+            # Apply headers
+            for header, value in security_headers.items():
+                response.headers[header] = value
+    
+            return response
+    
+    # Add security headers middleware
+    app.add_middleware(SecurityHeadersMiddleware)
+    
+    
+    @app.exception_handler(IncidentCommanderError)
+    async def incident_commander_exception_handler(request, exc: IncidentCommanderError):
+        """Handle custom exceptions."""
+        logger.error(f"Incident Commander error: {exc}")
+        return JSONResponse(
+            status_code=500,
+            content={"error": str(exc), "type": type(exc).__name__}
+        )
+    
+    
+    @app.get("/")
+    async def root():
+        """Root endpoint."""
+        return {
+            "message": "Autonomous Incident Commander API",
+            "version": "0.1.0",
+            "status": "operational"
+        }
+    
+    
+    @app.get("/health")
+    async def health_check():
+        """Health check endpoint."""
+        coordinator = get_coordinator_instance()
+        agent_health = coordinator.get_agent_health_status()
+        unhealthy_agents = {
+            name: status for name, status in agent_health.items()
+            if not status.get("is_healthy", True)
+        }
+    
+        monitor = health_monitor_instance or get_health_monitor_instance()
+        health_snapshot = monitor.get_current_health_status()
+    
+        meta_handler = meta_incident_handler_instance or get_meta_handler_instance()
+        meta_incidents_active = meta_handler.get_active_meta_incidents()
+    
+        cb_dashboard = circuit_breaker_manager.get_health_dashboard()
+    
+        services = {
+            "api": "healthy",
+            "agents": "healthy" if not unhealthy_agents else "degraded",
+            "message_bus": "healthy" if cb_dashboard["unhealthy_services"] == 0 else "degraded",
+            "health_monitor": health_snapshot.get("overall_status", "unknown"),
+            "meta_incidents": "healthy" if not meta_incidents_active else "attention_required"
+        }
+    
+        status = "healthy"
+        if (
+            services["agents"] != "healthy"
+            or services["message_bus"] != "healthy"
+            or services["health_monitor"] not in {"healthy", "unknown"}
+            or services["meta_incidents"] != "healthy"
+        ):
+            status = "degraded"
+    
+        return {
+            "status": status,
+            "timestamp": datetime.utcnow().isoformat(),
+            "environment": config.environment,
+            "uptime_seconds": _runtime_uptime_seconds(),
+            "services": services,
+            "unhealthy_agents": unhealthy_agents,
+            "circuit_breakers": {
+                "healthy_services": cb_dashboard["healthy_services"],
+                "degraded_services": cb_dashboard["degraded_services"],
+                "unhealthy_services": cb_dashboard["unhealthy_services"],
+                "total_services": cb_dashboard["total_circuit_breakers"]
+            },
+            "meta_incidents": meta_incidents_active
+        }
+    
+    
+    @app.get("/status")
+    async def system_status():
+        """Get detailed system status."""
+        coordinator = get_coordinator_instance()
+        agent_health = coordinator.get_agent_health_status()
+        processing_metrics = coordinator.get_processing_metrics()
+    
+        cb_dashboard = circuit_breaker_manager.get_health_dashboard()
+        bedrock_status = bedrock_rate_limiter.get_status()
+    
+        meta_handler = meta_incident_handler_instance or get_meta_handler_instance()
+        meta_stats = meta_handler.get_meta_incident_statistics()
+        meta_active = meta_handler.get_active_meta_incidents()
+    
+        return {
+            "system": {
+                "environment": config.environment,
+                "version": "0.1.0",
+                "uptime_seconds": _runtime_uptime_seconds(),
+                "timestamp": datetime.utcnow().isoformat(),
+                "background_tasks": len(_background_tasks)
+            },
+            "agents": agent_health,
+            "metrics": processing_metrics,
+            "infrastructure": {
+                "circuit_breakers": cb_dashboard,
+                "rate_limiters": {
+                    "bedrock": bedrock_status,
+                    "external_services": {
+                        "slack": external_service_rate_limiter.get_service_status("slack"),
+                        "pagerduty": external_service_rate_limiter.get_service_status("pagerduty")
+                    }
+                }
+            },
+            "health_monitor": get_health_monitor_instance().get_current_health_status(),
+            "meta_incidents": {
+                "active": meta_active,
+                "statistics": meta_stats
+            }
+        }
+    
+    
+    @app.post("/incidents/trigger")
+    async def trigger_incident(incident_data: Dict[str, Any]):
+        """
+        Trigger a new incident for processing.
+    
+        This endpoint processes incidents through the agent swarm.
+        """
+        try:
+            # Create incident from request data
+            business_impact = BusinessImpact(
+                service_tier=ServiceTier(incident_data.get("service_tier", "tier_2")),
+                affected_users=incident_data.get("affected_users", 0),
+                revenue_impact_per_minute=incident_data.get("revenue_impact_per_minute", 0.0)
+            )
+    
+            metadata = IncidentMetadata(
+                source_system=incident_data.get("source_system", "manual"),
+                tags=incident_data.get("tags", {})
+            )
+    
+            incident = Incident(
+                title=incident_data["title"],
+                description=incident_data["description"],
+                severity=IncidentSeverity(incident_data.get("severity", "medium")),
+                business_impact=business_impact,
+                metadata=metadata
+            )
+    
+            coordinator = get_coordinator_instance()
+            broadcaster = get_realtime_broadcaster()
+    
+            schedule_background_task(
+                broadcaster.simulate_full_incident_processing(incident),
+                description=f"incident-broadcast-{incident.id}"
+            )
+            schedule_background_task(
+                coordinator.process_incident(incident),
+                description=f"incident-process-{incident.id}"
+            )
+    
+            logger.info(f"Triggered incident: {incident.id}")
+    
+            return {
+                "incident_id": incident.id,
+                "status": "processing",
+                "message": "Incident is being processed by agent swarm",
+                "estimated_completion_minutes": 3,
+                "cost_per_minute": business_impact.calculate_cost_per_minute()
+            }
+    
+        except Exception as e:
+            logger.error(f"Failed to trigger incident: {e}")
+            raise HTTPException(status_code=400, detail=str(e))
+    
+    
+    @app.get("/incidents/{incident_id}")
+    async def get_incident(incident_id: str):
+        """Get incident details and processing status."""
+        try:
+            from src.orchestrator.swarm_coordinator import get_swarm_coordinator
+            coordinator = get_swarm_coordinator()
+    
+            # Get incident status from coordinator
+            status = coordinator.get_incident_status(incident_id)
+    
+            if not status:
+                raise HTTPException(status_code=404, detail="Incident not found")
+    
+            return {
+                "incident_id": incident_id,
+                **status
+            }
+    
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"Failed to get incident {incident_id}: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
+    
+    
+    @app.get("/incidents/{incident_id}/timeline")
+    async def get_incident_timeline(incident_id: str):
+        """Get incident processing timeline."""
+        try:
+            from src.orchestrator.swarm_coordinator import get_swarm_coordinator
+            coordinator = get_swarm_coordinator()
+    
+            # Get incident status
+            status = coordinator.get_incident_status(incident_id)
+    
+            if not status:
+                raise HTTPException(status_code=404, detail="Incident not found")
+    
+            # Build timeline from agent executions
+            timeline = []
+    
+            # Add incident start
+            timeline.append({
+                "timestamp": status["start_time"],
+                "event": "incident_started",
+                "description": "Incident processing started",
+                "phase": "detection"
+            })
+    
+            # Add agent execution events
+            for agent_name, execution in status["agent_executions"].items():
+                if execution["status"] == "completed":
+                    timeline.append({
+                        "timestamp": status["start_time"],  # Would be execution start time in real implementation
+                        "event": "agent_completed",
+                        "description": f"{execution['agent_type']} agent completed",
+                        "agent": agent_name,
+                        "duration_seconds": execution["duration_seconds"],
+                        "recommendations_count": execution["recommendations_count"]
+                    })
+                elif execution["status"] == "failed":
+                    timeline.append({
+                        "timestamp": status["start_time"],
+                        "event": "agent_failed",
+                        "description": f"{execution['agent_type']} agent failed: {execution['error']}",
+                        "agent": agent_name,
+                        "error": execution["error"]
+                    })
+    
+            # Add consensus event
+            if status["consensus_decision"]:
+                timeline.append({
+                    "timestamp": status["end_time"] or status["start_time"],
+                    "event": "consensus_reached",
+                    "description": f"Consensus reached: {status['consensus_decision']['selected_action']}",
+                    "confidence": status["consensus_decision"]["final_confidence"],
+                    "requires_approval": status["consensus_decision"]["requires_human_approval"]
+                })
+    
+            # Sort timeline by timestamp
+            timeline.sort(key=lambda x: x["timestamp"])
+    
+            return {
+                "incident_id": incident_id,
+                "timeline": timeline,
+                "total_events": len(timeline),
+                "processing_duration_seconds": status["duration_seconds"]
+            }
+    
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"Failed to get timeline for incident {incident_id}: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
+    
+    
+    @app.get("/agents/status")
+    async def get_agents_status():
+        """Get status of all registered agents."""
+        try:
+            from src.orchestrator.swarm_coordinator import get_swarm_coordinator
+            coordinator = get_swarm_coordinator()
+    
+            agent_status = coordinator.get_agent_health_status()
+            processing_metrics = coordinator.get_processing_metrics()
+    
+            return {
+                "agents": agent_status,
+                "metrics": processing_metrics,
+                "timestamp": datetime.utcnow().isoformat()
+            }
+    
+        except Exception as e:
+            logger.error(f"Failed to get agent status: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
+    
+    
+    @app.post("/demo/scenarios/{scenario_name}")
+    async def run_demo_scenario(scenario_name: str):
+        """
+        Run a predefined demo scenario.
+    
+        Available scenarios: database_cascade, ddos_attack, memory_leak, api_overload, storage_failure
+        """
+        valid_scenarios = ["database_cascade", "ddos_attack", "memory_leak", "api_overload", "storage_failure"]
+    
+        if scenario_name not in valid_scenarios:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid scenario. Available: {valid_scenarios}"
+            )
+    
+        # Create demo incident based on scenario
+        scenario_configs = {
+            "database_cascade": {
+                "title": "Database Connection Pool Exhaustion",
+                "description": "Critical database connection pool exhaustion causing cascade failures across payment processing services",
+                "severity": "critical",
+                "service_tier": "tier_1",
+                "affected_users": 50000,
+                "revenue_impact_per_minute": 2000.0,
+                "tags": {"scenario": "database_cascade", "demo": "true", "complexity": "high"}
+            },
+            "ddos_attack": {
+                "title": "Distributed Denial of Service Attack",
+                "description": "Large-scale DDoS attack overwhelming API gateway and causing service degradation",
+                "severity": "high",
+                "service_tier": "tier_1",
+                "affected_users": 25000,
+                "revenue_impact_per_minute": 1500.0,
+                "tags": {"scenario": "ddos_attack", "demo": "true", "complexity": "medium"}
+            },
+            "memory_leak": {
+                "title": "Application Memory Leak",
+                "description": "Memory leak in user service causing gradual performance degradation and eventual service crashes",
+                "severity": "medium",
+                "service_tier": "tier_2",
+                "affected_users": 5000,
+                "revenue_impact_per_minute": 300.0,
+                "tags": {"scenario": "memory_leak", "demo": "true", "complexity": "low"}
+            },
+            "api_overload": {
+                "title": "API Rate Limit Exceeded",
+                "description": "Sudden traffic spike causing API rate limits to be exceeded, resulting in service degradation",
+                "severity": "high",
+                "service_tier": "tier_1",
+                "affected_users": 15000,
+                "revenue_impact_per_minute": 800.0,
+                "tags": {"scenario": "api_overload", "demo": "true", "complexity": "medium"}
+            },
+            "storage_failure": {
+                "title": "Distributed Storage System Failure",
+                "description": "Multiple storage nodes failing simultaneously, causing data availability issues",
+                "severity": "critical",
+                "service_tier": "tier_1",
+                "affected_users": 75000,
+                "revenue_impact_per_minute": 3000.0,
+                "tags": {"scenario": "storage_failure", "demo": "true", "complexity": "high"}
+            }
+        }
+    
+        scenario_config = scenario_configs[scenario_name]
+    
+        try:
+            # Trigger the demo incident
+            incident_response = await trigger_incident(scenario_config)
+    
+            logger.info(f"Running demo scenario: {scenario_name}")
+    
+            return {
+                "scenario": scenario_name,
+                "status": "started",
+                "incident_id": incident_response["incident_id"],
+                "estimated_duration_minutes": 3,
+                "cost_per_minute": incident_response["cost_per_minute"],
+                "description": scenario_config["description"],
+                "complexity": scenario_config["tags"]["complexity"],
+                "demo_features": {
+                    "real_time_mttr": True,
+                    "cost_accumulation": True,
+                    "agent_coordination": True,
+                    "consensus_visualization": True
+                }
+            }
+    
+        except Exception as e:
+            logger.error(f"Failed to run demo scenario {scenario_name}: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
+    
+    
+    @app.get("/demo/scenarios")
+    async def list_demo_scenarios():
+        """List all available demo scenarios with descriptions."""
+        scenarios = {
+            "database_cascade": {
+                "name": "Database Connection Pool Exhaustion",
+                "complexity": "high",
+                "estimated_duration": "2-3 minutes",
+                "business_impact": "Critical - $2000/minute",
+                "description": "Demonstrates agent coordination for complex database cascade failures"
+            },
+            "ddos_attack": {
+                "name": "Distributed Denial of Service Attack",
+                "complexity": "medium",
+                "estimated_duration": "2-3 minutes",
+                "business_impact": "High - $1500/minute",
+                "description": "Shows rapid detection and mitigation of external attacks"
+            },
+            "memory_leak": {
+                "name": "Application Memory Leak",
+                "complexity": "low",
+                "estimated_duration": "1-2 minutes",
+                "business_impact": "Medium - $300/minute",
+                "description": "Illustrates predictive capabilities and gradual issue resolution"
+            },
+            "api_overload": {
+                "name": "API Rate Limit Exceeded",
+                "complexity": "medium",
+                "estimated_duration": "2 minutes",
+                "business_impact": "High - $800/minute",
+                "description": "Demonstrates auto-scaling and load balancing responses"
+            },
+            "storage_failure": {
+                "name": "Distributed Storage System Failure",
+                "complexity": "high",
+                "estimated_duration": "3-4 minutes",
+                "business_impact": "Critical - $3000/minute",
+                "description": "Shows multi-agent coordination for complex infrastructure failures"
+            }
+        }
+    
+        return {
+            "available_scenarios": scenarios,
+            "total_scenarios": len(scenarios),
+            "demo_capabilities": [
+                "Real-time MTTR tracking",
+                "Business impact calculation",
+                "Agent coordination visualization",
+                "Consensus decision making",
+                "Automated resolution actions"
+            ]
+        }
+    
+    
+    @app.get("/demo/status")
+    async def get_demo_status():
+        """Get current demo environment status."""
+        from src.orchestrator.swarm_coordinator import get_swarm_coordinator
+    
+        coordinator = get_swarm_coordinator()
+    
+        # Get active demo incidents
+        active_demos = []
+        for incident_id, state in coordinator.processing_states.items():
+            if (state.incident.metadata.tags.get("demo") == "true" and
+                state.phase not in ["completed", "failed"]):
+                active_demos.append({
+                    "incident_id": incident_id,
+                    "scenario": state.incident.metadata.tags.get("scenario"),
+                    "phase": state.phase.value,
+                    "duration_seconds": state.total_duration_seconds,
+                    "cost_accumulated": state.incident.business_impact.calculate_total_cost(
+                        state.total_duration_seconds / 60.0
+                    )
+                })
+    
+        # Get system health for demo
+        agent_status = coordinator.get_agent_health_status()
+        processing_metrics = coordinator.get_processing_metrics()
+    
+        return {
+            "demo_environment": {
+                "status": "ready" if len(active_demos) == 0 else "running_demo",
+                "active_demos": active_demos,
+                "total_active": len(active_demos)
+            },
+            "system_health": {
+                "agents_healthy": sum(1 for status in agent_status.values() if status["is_healthy"]),
+                "total_agents": len(agent_status),
+                "consensus_engine": "operational",
+                "message_bus": "operational"
+            },
+            "performance_metrics": {
+                "average_mttr_seconds": processing_metrics.get("average_processing_time", 0),
+                "success_rate": processing_metrics.get("success_rate", 0),
+                "total_incidents_processed": processing_metrics.get("total_incidents", 0)
+            },
+            "timestamp": datetime.utcnow().isoformat()
+        }
+    
+    
+    # WebSocket Endpoint for Real-time Dashboard Updates
+    
+    @app.websocket("/ws")
+    async def websocket_endpoint(websocket: WebSocket):
+        """
+        WebSocket endpoint for real-time dashboard communication.
+    
+        Provides real-time streaming of:
+        - Incident processing updates
+        - Agent action notifications
+        - System metrics and health status
+        - Performance data for demo visualization
+        """
+        from src.services.websocket_manager import get_websocket_manager
+    
+        manager = get_websocket_manager()
+    
+        try:
+            # Accept connection and register client
+            await manager.connect(websocket, {
+                "user_agent": websocket.headers.get("user-agent", "unknown"),
+                "origin": websocket.headers.get("origin", "unknown")
+            })
+    
+            # Keep connection alive and handle incoming messages
+            while True:
+                try:
+                    # Wait for messages from client (heartbeat, etc.)
+                    data = await websocket.receive_text()
+    
+                    # Handle client messages (optional - for heartbeat/ping)
+                    try:
+                        message = json.loads(data)
+                        if message.get("type") == "ping":
+                            await manager.send_to_connection(websocket, {
+                                "type": "pong",
+                                "data": {"timestamp": datetime.utcnow().isoformat()}
+                            })
+                    except json.JSONDecodeError:
+                        # Ignore malformed messages
+                        pass
+    
+                except WebSocketDisconnect:
+                    break
+                except Exception as e:
+                    logger.error(f"WebSocket error: {e}")
+                    break
+    
+        except Exception as e:
+            logger.error(f"WebSocket connection error: {e}")
+        finally:
+            await manager.disconnect(websocket)
+    
+    
+    # Milestone 2 Endpoints - System Health Monitoring and Byzantine Consensus
+    
+    @app.get("/system/health/detailed")
+    async def get_detailed_system_health():
+        """Get detailed system health status including meta-incidents."""
+        try:
+            health_monitor = get_health_monitor_instance()
+            meta_handler = get_meta_handler_instance()
+    
+            # Get current health status
+            health_status = health_monitor.get_current_health_status()
+    
+            # Get meta-incidents
+            meta_incidents = meta_handler.get_active_meta_incidents()
+            meta_stats = meta_handler.get_meta_incident_statistics()
+    
+            return {
+                "system_health": health_status,
+                "meta_incidents": {
+                    "active": meta_incidents,
+                    "statistics": meta_stats
+                },
+                "monitoring": {
+                    "is_active": health_monitor.is_monitoring,
+                    "monitoring_interval_seconds": health_monitor.monitoring_interval.total_seconds(),
+                    "metrics_retention_hours": health_monitor.metric_retention_period.total_seconds() / 3600
+                },
+                "timestamp": datetime.utcnow().isoformat()
+            }
+    
+        except Exception as e:
+            logger.error(f"Failed to get detailed system health: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
+    
+    
+    @app.get("/consensus/byzantine/status")
+    async def get_byzantine_consensus_status():
+        """Get Byzantine consensus engine status and statistics."""
+        try:
+            byzantine_consensus = get_byzantine_consensus_instance()
+    
+            # Get Byzantine consensus statistics
+            stats = byzantine_consensus.get_byzantine_statistics()
+    
+            # Get agent reputation scores
+            reputation_scores = byzantine_consensus.agent_reputation
+    
+            return {
+                "byzantine_consensus": {
+                    "engine_status": "operational",
+                    "statistics": stats,
+                    "agent_reputation": dict(reputation_scores),
+                    "configuration": {
+                        "byzantine_threshold": byzantine_consensus.byzantine_threshold,
+                        "confidence_threshold": byzantine_consensus.confidence_threshold,
+                        "min_agreement_threshold": byzantine_consensus.min_agreement_threshold
+                    }
+                },
+                "recent_consensus_rounds": [
+                    {
+                        "round_id": round.round_id,
+                        "incident_id": round.incident_id,
+                        "consensus_reached": round.consensus_reached,
+                        "byzantine_agents_detected": len(round.byzantine_agents),
+                        "participating_agents": len(round.participating_agents),
+                        "final_confidence": round.final_confidence,
+                        "duration_ms": round.round_duration_ms
+                    }
+                    for round in byzantine_consensus.consensus_rounds[-10:]  # Last 10 rounds
+                ],
+                "timestamp": datetime.utcnow().isoformat()
+            }
+    
+        except Exception as e:
+            logger.error(f"Failed to get Byzantine consensus status: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
+    
+    
+    @app.post("/system/health/trigger-meta-incident")
+    async def trigger_meta_incident_test(meta_incident_data: Dict[str, Any]):
+        """
+        Trigger a test meta-incident for demonstration purposes.
+    
+        This endpoint is for testing the meta-incident handling system.
+        """
+        try:
+            from src.services.system_health_monitor import MetaIncident, IncidentSeverity
+            from src.services.meta_incident_handler import get_meta_incident_handler
+            from src.services.aws import AWSServiceFactory
+    
+            aws_factory = AWSServiceFactory()
+            health_monitor = get_system_health_monitor(aws_factory)
+            meta_handler = get_meta_incident_handler(aws_factory, health_monitor)
+    
+            # Create test meta-incident
+            meta_incident = MetaIncident(
+                id=f"test_meta_{int(datetime.utcnow().timestamp())}",
+                title=meta_incident_data.get("title", "Test Meta-Incident"),
+                description=meta_incident_data.get("description", "Test meta-incident for demonstration"),
+                severity=IncidentSeverity(meta_incident_data.get("severity", "medium")),
+                affected_components=meta_incident_data.get("affected_components", ["test_component"]),
+                detected_at=datetime.utcnow(),
+                root_cause=meta_incident_data.get("root_cause"),
+                recovery_actions=meta_incident_data.get("recovery_actions", ["test_action"]),
+                status="active"
+            )
+    
+            # Process the meta-incident
+            incident = await meta_handler.process_meta_incident(meta_incident)
+    
+            return {
+                "meta_incident_id": meta_incident.id,
+                "incident_created": incident is not None,
+                "incident_id": incident.id if incident else None,
+                "status": "triggered",
+                "auto_resolution_enabled": meta_handler.auto_resolution_enabled,
+                "message": "Test meta-incident triggered successfully"
+            }
+    
+        except Exception as e:
+            logger.error(f"Failed to trigger test meta-incident: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
+    
+    
+    @app.get("/system/metrics/performance")
+    async def get_performance_metrics():
+        """Get comprehensive system performance metrics."""
+        try:
+            from src.orchestrator.swarm_coordinator import get_swarm_coordinator
+            from src.services.consensus import get_consensus_engine
+            from src.services.system_health_monitor import get_system_health_monitor
+            from src.services.aws import AWSServiceFactory
+    
+            coordinator = get_swarm_coordinator()
+            consensus_engine = get_consensus_engine()
+            aws_factory = AWSServiceFactory()
+            health_monitor = get_system_health_monitor(aws_factory)
+    
+            # Get processing metrics
+            processing_metrics = coordinator.get_processing_metrics()
+    
+            # Get consensus statistics
+            consensus_stats = consensus_engine.get_consensus_statistics()
+    
+            # Get current health status
+            health_status = health_monitor.get_current_health_status()
+    
+            return {
+                "performance_metrics": {
+                    "incident_processing": processing_metrics,
+                    "consensus_engine": consensus_stats,
+                    "system_health": health_status,
+                    "agent_performance": {
+                        agent_name: {
+                            "is_healthy": status["is_healthy"],
+                            "processing_count": status.get("processing_count", 0),
+                            "error_count": status.get("error_count", 0),
+                            "last_activity": status.get("last_activity")
+                        }
+                        for agent_name, status in coordinator.get_agent_health_status().items()
+                    }
+                },
+                "milestone_2_features": {
+                    "byzantine_consensus": "operational",
+                    "system_health_monitoring": "operational",
+                    "meta_incident_handling": "operational",
+                    "automated_recovery": "operational"
+                },
+                "timestamp": datetime.utcnow().isoformat()
+            }
+    
+        except Exception as e:
+            logger.error(f"Failed to get performance metrics: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
+    
+    
+    # Task 15 Endpoints - Performance Optimization and Scalability
+    
+    @app.get("/performance/metrics")
+    async def get_performance_optimization_metrics():
+        """Get comprehensive performance optimization metrics."""
+        try:
+            from src.services.performance_optimizer import get_performance_optimizer
+            from src.services.scaling_manager import get_scaling_manager
+            from src.services.cost_optimizer import get_cost_optimizer
+    
+            performance_optimizer = await get_performance_optimizer()
+            scaling_manager = await get_scaling_manager()
+            cost_optimizer = await get_cost_optimizer()
+    
+            # Get metrics from all optimization services
+            perf_metrics = await performance_optimizer.get_performance_metrics()
+            scaling_metrics = await scaling_manager.get_scaling_metrics()
+            cost_metrics = await cost_optimizer.get_cost_metrics()
+    
+            return {
+                "performance_optimization": {
+                    "connection_pools": perf_metrics.connection_pool_utilization,
+                    "cache_hit_rates": perf_metrics.cache_hit_rates,
+                    "memory_usage_percent": perf_metrics.memory_usage_percent,
+                    "gc_collections": perf_metrics.gc_collections,
+                    "query_response_times": {
+                        query_type: {
+                            "count": len(times),
+                            "avg_seconds": sum(times) / len(times) if times else 0,
+                            "max_seconds": max(times) if times else 0
+                        }
+                        for query_type, times in perf_metrics.query_response_times.items()
+                    },
+                    "optimization_actions": perf_metrics.optimization_actions_taken[-10:]  # Last 10 actions
+                },
+                "scaling": {
+                    "incidents_per_minute": scaling_metrics.total_incidents_per_minute,
+                    "agent_utilization": scaling_metrics.agent_utilization,
+                    "load_distribution": scaling_metrics.load_distribution,
+                    "scaling_actions": scaling_metrics.scaling_actions[-10:],  # Last 10 actions
+                    "failover_events": scaling_metrics.failover_events,
+                    "cross_region_latency": scaling_metrics.cross_region_latency
+                },
+                "cost_optimization": {
+                    "current_hourly_cost": cost_metrics.current_hourly_cost,
+                    "projected_daily_cost": cost_metrics.projected_daily_cost,
+                    "cost_by_service": cost_metrics.cost_by_service,
+                    "cost_by_model": cost_metrics.cost_by_model,
+                    "cost_savings_achieved": cost_metrics.cost_savings_achieved,
+                    "lambda_warm_cost": cost_metrics.lambda_warm_cost,
+                    "scaling_cost": cost_metrics.scaling_cost,
+                    "optimization_actions": cost_metrics.optimization_actions[-10:]  # Last 10 actions
+                },
+                "task_15_status": {
+                    "performance_optimizer": "operational",
+                    "scaling_manager": "operational",
+                    "cost_optimizer": "operational",
+                    "features_implemented": [
+                        "Connection pooling for external services",
+                        "Intelligent caching with multiple strategies",
+                        "Memory optimization and garbage collection",
+                        "Auto-scaling based on incident volume",
+                        "Load balancing with multiple strategies",
+                        "Geographic distribution and failover",
+                        "Cost-aware scaling decisions",
+                        "Intelligent model selection",
+                        "Predictive Lambda warming",
+                        "Cost monitoring and optimization"
+                    ]
+                },
+                "timestamp": datetime.utcnow().isoformat()
+            }
+    
+        except Exception as e:
+            logger.error(f"Failed to get performance optimization metrics: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
+    
+    
+    @app.get("/performance/recommendations")
+    async def get_performance_recommendations():
+        """Get performance optimization recommendations."""
+        try:
+            from src.services.performance_optimizer import get_performance_optimizer
+            from src.services.cost_optimizer import get_cost_optimizer
+    
+            performance_optimizer = await get_performance_optimizer()
+            cost_optimizer = await get_cost_optimizer()
+    
+            # Get recommendations from optimization services
+            perf_recommendations = await performance_optimizer.get_optimization_recommendations()
+            cost_recommendations = await cost_optimizer.get_cost_recommendations()
+    
+            return {
+                "performance_recommendations": perf_recommendations,
+                "cost_recommendations": cost_recommendations,
+                "summary": {
+                    "total_recommendations": len(perf_recommendations) + len(cost_recommendations),
+                    "performance_issues": len(perf_recommendations),
+                    "cost_optimization_opportunities": len(cost_recommendations)
+                },
+                "timestamp": datetime.utcnow().isoformat()
+            }
+    
+        except Exception as e:
+            logger.error(f"Failed to get performance recommendations: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
+    
+    
+    @app.get("/scaling/status")
+    async def get_scaling_status():
+        """Get current scaling status and replica information."""
+        try:
+            from src.services.scaling_manager import get_scaling_manager
+    
+            scaling_manager = await get_scaling_manager()
+    
+            # Get replica status and scaling metrics
+            replica_status = await scaling_manager.get_replica_status()
+            scaling_metrics = await scaling_manager.get_scaling_metrics()
+    
+            return {
+                "replica_status": replica_status,
+                "scaling_metrics": {
+                    "incidents_per_minute": scaling_metrics.total_incidents_per_minute,
+                    "agent_utilization": scaling_metrics.agent_utilization,
+                    "recent_scaling_actions": scaling_metrics.scaling_actions[-5:],  # Last 5 actions
+                    "failover_events": scaling_metrics.failover_events
+                },
+                "scaling_policies": {
+                    agent_type: {
+                        "min_replicas": policy.min_replicas,
+                        "max_replicas": policy.max_replicas,
+                        "target_utilization": policy.target_utilization,
+                        "scale_up_threshold": policy.scale_up_threshold,
+                        "scale_down_threshold": policy.scale_down_threshold,
+                        "cooldown_period": policy.cooldown_period
+                    }
+                    for agent_type, policy in scaling_manager.scaling_policies.items()
+                },
+                "geographic_distribution": {
+                    region: len([r for replicas in replica_status.values() for r in replicas if r["region"] == region])
+                    for region in scaling_manager.regions
+                },
+                "timestamp": datetime.utcnow().isoformat()
+            }
+    
+        except Exception as e:
+            logger.error(f"Failed to get scaling status: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
+    
+    
+    @app.post("/scaling/optimize")
+    async def optimize_scaling():
+        """Trigger scaling optimization based on current load."""
+        try:
+            from src.services.scaling_manager import get_scaling_manager
+            from src.services.cost_optimizer import get_cost_optimizer
+    
+            scaling_manager = await get_scaling_manager()
+            cost_optimizer = await get_cost_optimizer()
+    
+            # Calculate current utilization
+            current_load = {}
+            for agent_type in scaling_manager.scaling_policies.keys():
+                utilization = await scaling_manager._calculate_agent_utilization(agent_type)
+                current_load[agent_type] = utilization
+    
+            # Get cost-aware scaling recommendations
+            recommendations = await cost_optimizer.optimize_scaling_costs(current_load)
+    
+            # Apply scaling recommendations (in a real implementation, this would be more sophisticated)
+            actions_taken = []
+    
+            for scale_up_rec in recommendations["scale_up"]:
+                agent_type = scale_up_rec["agent_type"]
+                success = await scaling_manager._scale_up_agent(agent_type)
+                if success:
+                    actions_taken.append(f"Scaled up {agent_type}")
+    
+            for scale_down_rec in recommendations["scale_down"]:
+                agent_type = scale_down_rec["agent_type"]
+                success = await scaling_manager._scale_down_agent(agent_type)
+                if success:
+                    actions_taken.append(f"Scaled down {agent_type}")
+    
+            return {
+                "optimization_triggered": True,
+                "current_load": current_load,
+                "recommendations": recommendations,
+                "actions_taken": actions_taken,
+                "cost_impact": recommendations["cost_impact"],
+                "timestamp": datetime.utcnow().isoformat()
+            }
+    
+        except Exception as e:
+            logger.error(f"Failed to optimize scaling: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
+    
+    
+    @app.post("/cost/optimize")
+    async def optimize_costs():
+        """Trigger cost optimization analysis and actions."""
+        try:
+            from src.services.cost_optimizer import get_cost_optimizer
+    
+            cost_optimizer = await get_cost_optimizer()
+    
+            # Get current cost metrics
+            cost_metrics = await cost_optimizer.get_cost_metrics()
+    
+            # Generate optimization recommendations
+            recommendations = await cost_optimizer.get_cost_recommendations()
+    
+            # Apply automatic optimizations
+            applied_optimizations = []
+            for recommendation in recommendations:
+                if recommendation.get("auto_apply", False):
+                    await cost_optimizer._apply_cost_optimization(recommendation)
+                    applied_optimizations.append(recommendation)
+    
+            return {
+                "cost_optimization_triggered": True,
+                "current_metrics": {
+                    "hourly_cost": cost_metrics.current_hourly_cost,
+                    "daily_projection": cost_metrics.projected_daily_cost,
+                    "cost_threshold": cost_optimizer.current_cost_threshold.value
+                },
+                "recommendations": recommendations,
+                "applied_optimizations": applied_optimizations,
+                "potential_savings": sum(r.get("potential_savings", 0) for r in recommendations),
+                "timestamp": datetime.utcnow().isoformat()
+            }
+    
+        except Exception as e:
+            logger.error(f"Failed to optimize costs: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
+    
+    
+    @app.post("/lambda/warm")
+>   async def warm_lambda_functions(functions: Optional[List[str]] = None):
+                                                        ^^^^
+E   NameError: name 'List' is not defined
+
+src/main.py:1275: NameError
+=================================== FAILURES ===================================
+_____________________ test_send_message_falls_back_to_sqs ______________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1098fc850>
+
+    @pytest.mark.asyncio
+    async def test_send_message_falls_back_to_sqs(monkeypatch):
+        factory = StubAWSFactory()
+>       bus = ResilientMessageBus(factory)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_message_bus_failover.py:72: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <src.services.message_bus.ResilientMessageBus object at 0x108e5a050>
+service_factory = <tests.unit.test_message_bus_failover.StubAWSFactory object at 0x1098ab450>
+
+    def __init__(self, service_factory: AWSServiceFactory):
+        """Initialize message bus."""
+        self._service_factory = service_factory
+        self._redis_client = None
+        self._sqs_client = None
+>       self._message_breaker = circuit_breaker_manager.get_circuit_breaker("message_bus")
+                                ^^^^^^^^^^^^^^^^^^^^^^^
+E       NameError: name 'circuit_breaker_manager' is not defined
+
+src/services/message_bus.py:105: NameError
+_____________________ test_failed_handler_schedules_retry ______________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10a0a6490>
+
+    @pytest.mark.asyncio
+    async def test_failed_handler_schedules_retry(monkeypatch):
+        factory = StubAWSFactory()
+>       bus = ResilientMessageBus(factory)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_message_bus_failover.py:105: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <src.services.message_bus.ResilientMessageBus object at 0x10a0a7950>
+service_factory = <tests.unit.test_message_bus_failover.StubAWSFactory object at 0x10a0a7550>
+
+    def __init__(self, service_factory: AWSServiceFactory):
+        """Initialize message bus."""
+        self._service_factory = service_factory
+        self._redis_client = None
+        self._sqs_client = None
+>       self._message_breaker = circuit_breaker_manager.get_circuit_breaker("message_bus")
+                                ^^^^^^^^^^^^^^^^^^^^^^^
+E       NameError: name 'circuit_breaker_manager' is not defined
+
+src/services/message_bus.py:105: NameError
+=============================== warnings summary ===============================
+src/models/agent.py:51
+  /Users/rish2jain/Documents/Incident Commander/src/models/agent.py:51: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class AgentMessage(BaseModel):
+
+src/models/agent.py:77
+  /Users/rish2jain/Documents/Incident Commander/src/models/agent.py:77: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class AgentRecommendation(BaseModel):
+
+src/models/agent.py:151
+  /Users/rish2jain/Documents/Incident Commander/src/models/agent.py:151: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class ConsensusDecision(BaseModel):
+
+tests/integration/test_api_health.py::test_health_endpoint_reports_runtime_status
+  /Users/rish2jain/Documents/Incident Commander/src/models/incident.py:102: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    @validator('description')
+
+tests/integration/test_api_health.py::test_health_endpoint_reports_runtime_status
+  /Users/rish2jain/Documents/Incident Commander/src/models/incident.py:77: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class Incident(BaseModel):
+
+tests/integration/test_api_health.py::test_health_endpoint_reports_runtime_status
+tests/integration/test_api_health.py::test_health_endpoint_reports_runtime_status
+tests/integration/test_api_health.py::test_health_endpoint_reports_runtime_status
+tests/integration/test_api_health.py::test_health_endpoint_reports_runtime_status
+  /Users/rish2jain/Documents/Incident Commander/.venv/lib/python3.11/site-packages/pydantic/_internal/_generate_schema.py:319: PydanticDeprecatedSince20: `json_encoders` is deprecated. See https://docs.pydantic.dev/2.12/concepts/serialization/#custom-serializers for alternatives. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/unit/test_message_bus_failover.py::test_send_message_falls_back_to_sqs
+FAILED tests/unit/test_message_bus_failover.py::test_failed_handler_schedules_retry
+ERROR tests/integration/test_api_health.py::test_health_endpoint_reports_runtime_status
+ERROR tests/integration/test_api_health.py::test_system_status_returns_metrics
+=================== 2 failed, 9 warnings, 2 errors in 0.65s ====================

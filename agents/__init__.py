@@ -1,0 +1,1 @@
+"""Individual agent implementations for the Incident Commander system."""

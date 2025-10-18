@@ -1,6 +1,6 @@
 # Incident Commander Development Makefile
 
-.PHONY: help install install-dev test test-unit test-integration lint format type-check security-check clean setup-dev run-local
+.PHONY: help install install-dev test test-unit test-integration test-manual lint format type-check security-check clean setup-dev run-local
 
 # Default target
 help:
@@ -11,6 +11,7 @@ help:
 	@echo "  test          - Run all tests"
 	@echo "  test-unit     - Run unit tests only"
 	@echo "  test-integration - Run integration tests only"
+	@echo "  test-manual   - Run manual/demo validation suite"
 	@echo "  lint          - Run linting (ruff)"
 	@echo "  format        - Format code (black + isort)"
 	@echo "  type-check    - Run type checking (mypy)"
@@ -39,6 +40,9 @@ test-unit:
 
 test-integration:
 	pytest -m integration --maxfail=1
+
+test-manual:
+	pytest -m manual --maxfail=1
 
 test-e2e:
 	pytest -m e2e --maxfail=1

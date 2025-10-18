@@ -50,11 +50,21 @@ async def main():
     print()
     
     # Test results summary
+    total = len(report.test_results)
+    passed = sum(1 for r in report.test_results if r.success)
+    failed = total - passed
+    
+    if total == 0:
+        success_rate_str = "N/A"
+    else:
+        success_rate = (passed / total) * 100
+        success_rate_str = f"{success_rate:.1f}%"
+    
     print("📈 Test Results Summary:")
-    print(f"  • Total Tests Executed: {len(report.test_results)}")
-    print(f"  • Tests Passed: {sum(1 for r in report.test_results if r.success)}")
-    print(f"  • Tests Failed: {sum(1 for r in report.test_results if not r.success)}")
-    print(f"  • Success Rate: {(sum(1 for r in report.test_results if r.success) / len(report.test_results) * 100):.1f}%")
+    print(f"  • Total Tests Executed: {total}")
+    print(f"  • Tests Passed: {passed}")
+    print(f"  • Tests Failed: {failed}")
+    print(f"  • Success Rate: {success_rate_str}")
     print()
     
     # Category breakdown

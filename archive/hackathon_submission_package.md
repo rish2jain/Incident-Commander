@@ -100,6 +100,7 @@ We built an **interactive value dashboard** that makes the business impact and t
 ### **7 Key Value Widgets**
 
 #### **1. 💰 Business Impact Meter (Top Left - Most Prominent)**
+
 - **Real-time cost avoidance counter**: Shows $103,360 saved per incident
 - **Animated counting** on page load for impact
 - **90.7% cost reduction visualization** with comparison bars
@@ -112,6 +113,7 @@ We built an **interactive value dashboard** that makes the business impact and t
 **Key Message**: "This single incident saved $103K - what takes 30 minutes manually, AI does in 2.8 minutes"
 
 #### **2. ⚡ MTTR Comparison Gauge (Top Center)**
+
 - **Side-by-side visual bars**: 30 min (manual) vs 2.8 min (AI)
 - **Golden "10.7x FASTER" badge** with glow animation
 - **Live incident timeline** showing each agent:
@@ -125,6 +127,7 @@ We built an **interactive value dashboard** that makes the business impact and t
 **Key Message**: "10x faster than industry standard with sub-second agent response times"
 
 #### **3. 🤖 Agent Swarm Visualizer (Center Large)**
+
 - **Network diagram** showing 5 agents coordinating
 - **Byzantine Consensus center**: "⚖️ 5/5 Agents Agree"
 - **Live reasoning feed** with real-time agent thoughts:
@@ -137,6 +140,7 @@ We built an **interactive value dashboard** that makes the business impact and t
 **Key Message**: "AI autonomy in action - watch 5 agents coordinate using Byzantine consensus"
 
 #### **4. 💚 System Health Dashboard (Top Right)**
+
 - **Agent health**: All 5 agents with response times (89ms - 203ms)
 - **Infrastructure status**: Bedrock API, Event Store, RAG Memory (100K indexed)
 - **Performance metrics**: 1,247 incidents today, 2.9 min avg MTTR, 99.8% success
@@ -145,6 +149,7 @@ We built an **interactive value dashboard** that makes the business impact and t
 **Key Message**: "Production-ready reliability with proven performance at scale"
 
 #### **5. 📈 Incident Timeline (Bottom Left)**
+
 - **Complete chronological progression** from 00:00.0 to 00:18.0
 - **Detailed events** at each timestamp with agent icons
 - **Confidence scores**: Detection 95%, RAG match 87%, Prediction 90%
@@ -154,6 +159,7 @@ We built an **interactive value dashboard** that makes the business impact and t
 **Key Message**: "Complete transparency into every decision and action"
 
 #### **6. 🛡️ Zero-Trust Security Panel (Bottom Center)**
+
 - **Security validation status**: 4 checks (Sandbox, IAM, Audit, Rollback)
 - **Current action details**: Sandbox test passed, production execution safe
 - **Compliance badges**: SOC2 Type II, HIPAA, PCI-DSS, GDPR
@@ -162,6 +168,7 @@ We built an **interactive value dashboard** that makes the business impact and t
 **Key Message**: "Enterprise-grade security with zero-trust architecture and compliance"
 
 #### **7. 🔮 Prediction Impact Meter (Bottom Right)**
+
 - **Risk forecast**: Memory leak detected, 24 min to failure, 87% confidence
 - **Preventive actions**: 3 specific recommendations
 - **Historical performance**:
@@ -190,6 +197,7 @@ We built an **interactive value dashboard** that makes the business impact and t
 ### **Demo Impact**
 
 The dashboard makes the value proposition **immediately clear**:
+
 - **3 seconds**: Viewers see $103K saved, 10.7x faster, 5 agents working
 - **30 seconds**: Complete understanding of how it works and why it's valuable
 - **3 minutes**: Full technical story with enterprise readiness proven
@@ -322,6 +330,7 @@ cd dashboard && python3 -m http.server 8080
 ```
 
 **What you'll see**:
+
 - **💰 $103,360 saved** in real-time counter
 - **⚡ 10.7x faster** than industry standard
 - **🤖 5 AI agents** coordinating with Byzantine consensus
@@ -398,6 +407,7 @@ open http://localhost:8000/dashboard
 ```
 
 **⚡ Fast Demo Path** (No Backend Required):
+
 ```bash
 # Just open the standalone dashboard - all values pre-populated
 open dashboard/value_dashboard.html
@@ -461,17 +471,17 @@ open dashboard/value_dashboard.html
 
 ### **Project Links**
 
-- **GitHub Repository:** [github.com/your-org/autonomous-incident-commander]
-- **Live Demo:** [demo.incident-commander.ai]
-- **Documentation:** [docs.incident-commander.ai]
-- **Architecture Diagrams:** [architecture.incident-commander.ai]
+- **GitHub Repository:** https://github.com/rish2jain/Incident-Commander
+- **Live Demo:** https://github.com/rish2jain/Incident-Commander#-quick-start
+- **Documentation:** https://github.com/rish2jain/Incident-Commander/tree/main/docs
+- **Architecture Diagrams:** https://github.com/rish2jain/Incident-Commander/blob/main/docs/architecture.md
 
 ### **Team Contact**
 
-- **Developer:** [Your Name]
-- **Email:** [your.email@domain.com]
-- **LinkedIn:** [linkedin.com/in/yourprofile]
-- **Twitter:** [@yourhandle]
+- **Developer:** Rishabh Jain
+- **Email:** mail@rishabhjain.co
+- **LinkedIn:** https://www.linkedin.com/in/rishj
+- **Twitter:** https://www.x.com/rish2jain
 
 ---
 
@@ -490,23 +500,27 @@ The **Autonomous Incident Commander** represents a **breakthrough in incident re
 ### **What Makes This Stand Out**
 
 **Business Impact**: Every single incident saves $103,360 (90.7% cost reduction)
+
 - Manual MTTR: 30 minutes = $114,000 cost
 - AI MTTR: 2.8 minutes = $10,640 cost
 - **Savings per incident: $103,360**
 
 **Technical Innovation**: Byzantine fault-tolerant multi-agent swarm
+
 - 5 AI agents coordinating autonomously
 - Sub-second agent response times
 - 99.92% uptime, 99.8% success rate
 - 2,292 lines of production code for agents
 
 **Proactive Prevention**: $1.8M saved in 7 days
+
 - 142 predictions made
 - 83% accuracy
 - 24 incidents prevented before they happened
 - 15-30 minute advance warnings
 
 **Enterprise Ready**: Production-grade security and compliance
+
 - Zero-trust architecture with sandbox validation
 - SOC2 Type II, HIPAA, PCI-DSS, GDPR compliant
 - Cryptographic audit trails
@@ -531,11 +545,13 @@ The **Autonomous Incident Commander** represents a **breakthrough in incident re
 ### **LIVE DEMO (Recommended - Shows Real Agent Workflows)**
 
 **Start the demo:**
+
 ```bash
 python start_live_demo.py
 ```
 
 **What you'll see:**
+
 - ✅ Backend server starts automatically
 - ✅ Dashboard opens in browser with live WebSocket connection
 - ✅ Green connection status shows real-time agent orchestration
@@ -543,12 +559,14 @@ python start_live_demo.py
 **Demo Script:**
 
 1. **Show Live System** (0:00-1:00)
+
    - Point to green WebSocket connection status
    - Say: _"This is live backend integration with real agent workflows executing"_
    - Click **"Database Cascade"** scenario button
    - **Key Message**: "Watch real agents coordinate, not a simulation"
 
 2. **Narrate Agent Activity** (1:00-2:00)
+
    - Point to live activity feed streaming agent logs:
      - 🔍 **Detection (0.8s)**: 94% confidence pattern match
      - 🔬 **Diagnosis (3.2s)**: Analyzes 15K logs, finds root cause
@@ -576,10 +594,12 @@ open dashboard/value_dashboard.html
 ```
 
 1. **Show Business Value** (0:00-1:00)
+
    - $103K savings, 10.7x faster, 5 agents coordinating
    - **Key Message**: "This is the business value, immediately visible"
 
 2. **Walk Through Agent Capabilities** (1:00-2:00)
+
    - Agent swarm visualization with Byzantine consensus
    - Incident timeline with sub-second responses
    - Live reasoning feed showing agent decision-making
@@ -592,5 +612,6 @@ open dashboard/value_dashboard.html
    - **Key Message**: "Production-ready with enterprise security"
 
 **For complete demo instructions, see:**
+
 - [INCIDENT_SIMULATION_GUIDE.md](INCIDENT_SIMULATION_GUIDE.md) - Full simulation guide with troubleshooting
 - [DEMO_QUICK_REFERENCE.md](DEMO_QUICK_REFERENCE.md) - Printable reference card for presentations

@@ -1,8 +1,8 @@
-# 🏗️ DEMO ARCHITECTURE & FLOW
+# 🏗️ Hackathon Architecture & Flow Reference
 
-## **How the Live Demo Works**
+# Purpose
 
-This document explains the technical architecture behind the incident simulation and live demo.
+Technical architecture snapshot for in-progress hackathon reviews.
 
 ---
 

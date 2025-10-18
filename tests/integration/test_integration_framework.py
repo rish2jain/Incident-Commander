@@ -22,7 +22,7 @@ from src.services.event_store import ScalableEventStore
 from src.services.rag_memory import ScalableRAGMemory
 from src.services.consensus import WeightedConsensusEngine
 from src.services.circuit_breaker import CircuitBreakerManager
-from src.services.rate_limiter import BedrockRateLimiter, ExternalServiceRateLimiter
+from src.services.rate_limiter import BedrockRateLimitManager, ExternalServiceRateLimiter
 from src.services.aws import AWSServiceFactory
 
 # Import agents

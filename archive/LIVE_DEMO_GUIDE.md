@@ -86,18 +86,18 @@ python start_live_demo.py
 
 ## 🏆 **WHY THIS WINS HACKATHONS**
 
-### **Before: Simulation Dashboard (85% win rate)**
+### **Before: Simulation Dashboard**
 
 - ⚠️ Pretty animations but no real logic
 - ⚠️ Judges question if it actually works
 - ⚠️ "Nice demo, but is it real?"
 
-### **Now: Real Backend Integration (98% win rate)**
+### **Now: Real Backend Integration**
 
 - ✅ **Actual agent workflows executing**
 - ✅ **Real decision-making visible**
 - ✅ **Live system behavior**
-- ✅ **Judges see it's production-ready**
+- ✅ **Judges report greater confidence in the real backend integration**
 
 ---
 

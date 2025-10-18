@@ -1,8 +1,10 @@
-# AWS Agent Hackathon Compliance Review
+# AWS Agent Hackathon Compliance Overview
 
-## Autonomous Incident Commander
+> Detailed evidence tables now live in `archive/hackathon_compliance_detailed.md`.
 
-### 🎯 **HACKATHON ALIGNMENT ANALYSIS**
+# Autonomous Incident Commander
+
+### 🎯 Alignment Snapshot
 
 Based on typical AWS Agent Hackathon criteria and the DevPost platform requirements, here's how the Autonomous Incident Commander aligns:
 

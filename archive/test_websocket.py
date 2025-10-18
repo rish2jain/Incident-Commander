@@ -8,7 +8,7 @@ Run this after starting the FastAPI server to test real-time updates.
 import asyncio
 import json
 import websockets
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 async def test_websocket_connection():
@@ -24,7 +24,7 @@ async def test_websocket_connection():
             # Send ping message
             ping_message = {
                 "type": "ping",
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
             await websocket.send(json.dumps(ping_message))
             print("📤 Sent ping message")

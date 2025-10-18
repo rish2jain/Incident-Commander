@@ -157,3 +157,12 @@ def mock_logger():
     logger.debug = MagicMock()
     
     return logger
+
+
+def pytest_configure(config):
+    """Register custom markers for strict marker enforcement."""
+
+    config.addinivalue_line(
+        "markers",
+        "manual: marks tests that exercise hackathon/demo flows",
+    )

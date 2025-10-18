@@ -1,6 +1,6 @@
-# Dashboard & Demo Value Proposition Enhancement Guide
+# Dashboard & Demo Value Pitch Guide
 
-**Purpose**: Make the business value and technical capabilities of Autonomous Incident Commander immediately visible and compelling
+**Purpose**: Equip presenters with fast talking points that sell value during hackathon judging.
 
 **Generated**: 2025-10-16
 

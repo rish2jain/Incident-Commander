@@ -174,14 +174,15 @@ class ComprehensiveTestRunner:
             "src/main.py",
             "src/services/websocket_manager.py",
             "src/services/realtime_integration.py",
-            "dashboard/enhanced_live_dashboard.html",
-            "dashboard/live_dashboard.html",
+            "docs/hackathon/demo_playbook.md",
+            "docs/hackathon/dashboard_setup.md",
+            "docs/hackathon/websocket_integration.md",
+            "docs/hackathon/architecture.md",
             "validate_websocket.py",
             "validate_demo_performance.py",
             "harden_security.py",
             "start_demo.py",
-            "WEBSOCKET_INTEGRATION.md",
-            "DEPLOYMENT_CHECKLIST.md"
+            "deployment_checklist.md"
         ]
         
         missing_files = []
@@ -249,15 +250,67 @@ class ComprehensiveTestRunner:
             print(f"❌ Configuration check error: {e}")
             return False
     
+    def run_manual_pytest(self) -> bool:
+        """Execute the manual pytest suite for demo validation."""
+        print("🧪 Running Manual Pytest Suite...")
+
+        try:
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "pytest",
+                    "-m",
+                    "manual",
+                    "--maxfail=1",
+                    "-q",
+                ],
+                capture_output=True,
+                text=True,
+                timeout=180,
+            )
+
+            success = result.returncode == 0
+            if success:
+                print("✅ Manual suite passed")
+            else:
+                print("❌ Manual suite failed")
+                print(result.stdout)
+                print(result.stderr)
+
+            self.test_results["manual_pytest"] = {
+                "success": success,
+                "output": result.stdout,
+                "error": result.stderr,
+            }
+
+            return success
+
+        except subprocess.TimeoutExpired:
+            print("❌ Manual suite timed out")
+            self.test_results["manual_pytest"] = {
+                "success": False,
+                "error": "Timeout",
+            }
+            return False
+        except Exception as e:
+            print(f"❌ Manual suite error: {e}")
+            self.test_results["manual_pytest"] = {
+                "success": False,
+                "error": str(e),
+            }
+            return False
+
     async def run_comprehensive_tests(self) -> Dict[str, Any]:
         """Run all comprehensive tests."""
         print("🚀 Starting Comprehensive Test Suite")
         print("=" * 60)
-        
+
         test_functions = [
             ("File Integrity", self.check_file_integrity),
             ("Configuration", self.validate_configuration),
             ("Foundation Tests", self.run_foundation_tests),
+            ("Manual Pytest", self.run_manual_pytest),
             ("Setup Verification", self.run_setup_verification),
             ("WebSocket Validation", self.run_websocket_validation),
             ("Performance Validation", self.run_performance_validation),

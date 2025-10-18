@@ -1,4 +1,4 @@
-# WebSocket Real-time Integration
+# WebSocket Real-time Integration (Hackathon Reference)
 
 ## Overview
 

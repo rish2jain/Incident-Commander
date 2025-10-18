@@ -1,8 +1,8 @@
-# 🎯 **DASHBOARD SETUP GUIDE**
+# 🎯 Hackathon Dashboard Setup Guide
 
 ## **Autonomous Incident Commander - Interactive Dashboard**
 
-### **🚀 QUICK START (30 seconds)**
+### 🚀 Quick Start (30 seconds)
 
 ```bash
 # Test dashboard components
@@ -16,7 +16,7 @@ python simple_dashboard.py
 
 ---
 
-## 🎮 **WHAT YOU GET**
+## 🎮 What You Get
 
 ### **Interactive Features**
 

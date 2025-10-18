@@ -1,0 +1,43 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  # - "first_rules.yml"
+  # - "second_rules.yml"
+
+scrape_configs:
+  # Prometheus itself
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  # Incident Commander API
+  - job_name: "incident-commander-api"
+    static_configs:
+      - targets: ["host.docker.internal:8000"]
+    metrics_path: "/metrics"
+    scrape_interval: 10s
+
+  # Redis metrics
+  - job_name: "redis"
+    static_configs:
+      - targets: ["redis:6379"]
+
+  # LocalStack metrics (if available)
+  - job_name: "localstack"
+    static_configs:
+      - targets: ["localstack:4566"]
+    metrics_path: "/health"
+    scrape_interval: 30s
+
+  # Node exporter (if running)
+  - job_name: "node"
+    static_configs:
+      - targets: ["host.docker.internal:9100"]
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          # - alertmanager:9093

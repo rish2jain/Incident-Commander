@@ -80,3 +80,62 @@ node_modules/
 # Temporary files
 *.tmp
 *.temp
+# 
+Hackathon Submission Documents
+# These files are for hackathon preparation and should not be in the main repository
+
+# Main hackathon documents
+HACKATHON_SUBMISSION_CHECKLIST.md
+WINNING_STRATEGY.md
+COMPREHENSIVE_INTEGRATION_GUIDE.md
+ULTIMATE_INTEGRATION_STATUS.md
+INTEGRATION_COMPLETE.md
+INFRASTRUCTURE_DEPLOYMENT_READY.md
+
+# Hackathon documentation folder
+docs/hackathon/
+docs/hackathon/project_story.md
+docs/hackathon/demo_video_script.md
+docs/hackathon/submission_package.md
+docs/hackathon/architecture_diagram.md
+docs/hackathon/future_enhancements.md
+
+# Deployment and validation scripts (hackathon-specific)
+deploy_ultimate_system.py
+validate_ultimate_integration.py
+validate_infrastructure.py
+make_executable.py
+
+# Hackathon reports and status files
+infrastructure_validation_report.md
+validation_report.json
+deployment_report.json
+DEPLOYMENT_GUIDE.md
+
+# Archive folder with hackathon materials
+archive/
+archive/hackathon_submission_package.md
+
+# Hackathon configuration files
+deployment_checklist.md
+docs/configuration.md
+
+# Hackathon startup scripts
+start_ultimate_system.sh
+*.sh
+
+# Hackathon-specific integrations (keep core system clean)
+src/enhanced_prediction_integration.py
+src/strands_sdk_integration.py
+src/nova_act_integration.py
+src/amazon_q_integration.py
+
+# Hackathon test files
+tests/test_predictive_prevention.py
+
+# Business case and demo materials (hackathon-specific)
+src/business_impact_calculator.py
+src/predictive_prevention.py
+src/enhanced_dashboard.py
+src/interactive_judge_demo.py
+src/ultimate_incident_commander.py

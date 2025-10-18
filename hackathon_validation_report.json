@@ -1,0 +1,168 @@
+{
+  "summary": {
+    "total_checks": 25,
+    "passed": 23,
+    "failed": 1,
+    "warnings": 1,
+    "success_rate": "92.0%"
+  },
+  "results": [
+    {
+      "requirement": "File: README.md",
+      "status": "PASS",
+      "message": "File exists",
+      "details": null
+    },
+    {
+      "requirement": "File: requirements.txt",
+      "status": "PASS",
+      "message": "File exists",
+      "details": null
+    },
+    {
+      "requirement": "File: src/main.py",
+      "status": "PASS",
+      "message": "File exists",
+      "details": null
+    },
+    {
+      "requirement": "File: agents/__init__.py",
+      "status": "PASS",
+      "message": "File exists",
+      "details": null
+    },
+    {
+      "requirement": "File: docs/hackathon/architecture_diagram.md",
+      "status": "PASS",
+      "message": "File exists",
+      "details": null
+    },
+    {
+      "requirement": "Directory: src",
+      "status": "PASS",
+      "message": "Directory exists",
+      "details": null
+    },
+    {
+      "requirement": "Directory: agents",
+      "status": "PASS",
+      "message": "Directory exists",
+      "details": null
+    },
+    {
+      "requirement": "Directory: tests",
+      "status": "PASS",
+      "message": "Directory exists",
+      "details": null
+    },
+    {
+      "requirement": "Directory: docs",
+      "status": "PASS",
+      "message": "Directory exists",
+      "details": null
+    },
+    {
+      "requirement": "Directory: infrastructure",
+      "status": "PASS",
+      "message": "Directory exists",
+      "details": null
+    },
+    {
+      "requirement": "AWS Credentials",
+      "status": "FAIL",
+      "message": "AWS credentials not configured: Unable to locate credentials",
+      "details": null
+    },
+    {
+      "requirement": "LLM Reasoning",
+      "status": "PASS",
+      "message": "LLM reasoning patterns found in 373 files",
+      "details": null
+    },
+    {
+      "requirement": "Autonomous Capabilities",
+      "status": "PASS",
+      "message": "Autonomous patterns found in 2443 files",
+      "details": null
+    },
+    {
+      "requirement": "API/Database Integration",
+      "status": "PASS",
+      "message": "Integration patterns found in 2299 files",
+      "details": null
+    },
+    {
+      "requirement": "README Content",
+      "status": "PASS",
+      "message": "README contains all required sections",
+      "details": null
+    },
+    {
+      "requirement": "Architecture Diagram",
+      "status": "PASS",
+      "message": "Architecture diagram exists",
+      "details": null
+    },
+    {
+      "requirement": "Demo Functionality",
+      "status": "PASS",
+      "message": "Demo scripts available",
+      "details": null
+    },
+    {
+      "requirement": "Code Volume",
+      "status": "PASS",
+      "message": "52512 lines of code across 153 Python files",
+      "details": null
+    },
+    {
+      "requirement": "Test Coverage",
+      "status": "PASS",
+      "message": "535 test files found",
+      "details": null
+    },
+    {
+      "requirement": "Code Structure",
+      "status": "PASS",
+      "message": "Main module imports successfully",
+      "details": null
+    },
+    {
+      "requirement": "Deployment Script",
+      "status": "PASS",
+      "message": "AWS deployment script exists",
+      "details": null
+    },
+    {
+      "requirement": "AWS Dependencies",
+      "status": "PASS",
+      "message": "All AWS dependencies present",
+      "details": null
+    },
+    {
+      "requirement": "Environment Config",
+      "status": "PASS",
+      "message": "Environment configuration template exists",
+      "details": null
+    },
+    {
+      "requirement": "Unit Tests",
+      "status": "WARNING",
+      "message": "Some tests failed: /Users/rish2jain/Documents/Incident Commander/.venv/lib/python3.11/site-packages/_pytest/unraisableexception.py:33: RuntimeWarning: coroutine 'TestDataConsistencyValidation.validation_framework' was n",
+      "details": null
+    },
+    {
+      "requirement": "Application Startup",
+      "status": "PASS",
+      "message": "Application can be imported",
+      "details": null
+    }
+  ],
+  "hackathon_ready": false,
+  "recommendations": [
+    "\u274c CRITICAL: Fix all failed requirements before submission",
+    "  - AWS Credentials: AWS credentials not configured: Unable to locate credentials",
+    "\u26a0\ufe0f  RECOMMENDED: Address warnings to improve submission quality",
+    "  - Unit Tests: Some tests failed: /Users/rish2jain/Documents/Incident Commander/.venv/lib/python3.11/site-packages/_pytest/unraisableexception.py:33: RuntimeWarning: coroutine 'TestDataConsistencyValidation.validation_framework' was n"
+  ]
+}

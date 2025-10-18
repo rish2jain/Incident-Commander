@@ -1,0 +1,4 @@
+Organization Type,Annual Incident Cost (Current),Average MTTR (Current),Downtime Cost per Hour,Critical Incidents per Year,Alert Volume per Month,Current Tool Cost,Potential Savings with AIOps (50% MTTR reduction),Potential Savings with Autonomous IC (91% MTTR reduction),Incident Prevention Value (68%),Total Annual Value
+Mid-sized Company (500 employees),"$1,000,000",6.2 hours,"$300,000",50,"10,000","$180,000","$500,000","$910,000","$680,000","$1,590,000"
+"Large Enterprise (5,000 employees)","$10,000,000",6.2 hours,"$1,000,000",500,"100,000","$1,800,000","$5,000,000","$9,100,000","$6,800,000","$15,900,000"
+Fortune 1000 Company,"$200,000,000",4-8 hours,"$5,000,000+","2,000+","1,000,000+","$5,000,000+","$100,000,000","$182,000,000","$136,000,000","$318,000,000"

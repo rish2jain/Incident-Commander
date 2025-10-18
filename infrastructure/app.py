@@ -140,6 +140,7 @@ def main():
         security_groups=security_stack.security_groups,
         task_role=security_stack.ecs_task_role,
         execution_role=security_stack.ecs_execution_role,
+        lambda_role=security_stack.lambda_execution_role,
         dynamodb_tables=storage_stack.dynamodb_tables,
         s3_buckets=storage_stack.s3_buckets
     )

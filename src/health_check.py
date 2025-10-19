@@ -4,7 +4,7 @@ Health Check Lambda Function for Incident Commander
 
 import json
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 def handler(event, context):
@@ -41,7 +41,7 @@ def health_check():
         },
         'body': json.dumps({
             'status': 'healthy',
-            'timestamp': datetime.utcnow().isoformat(),
+            'timestamp': datetime.now(timezone.utc).isoformat(),
             'environment': os.getenv('ENVIRONMENT', 'development'),
             'service': 'incident-commander',
             'version': '1.0.0'
@@ -67,7 +67,7 @@ def demo_status():
                 'resolution': 'active',
                 'communication': 'active'
             },
-            'timestamp': datetime.utcnow().isoformat()
+            'timestamp': datetime.now(timezone.utc).isoformat()
         })
     }
 
@@ -121,6 +121,6 @@ def demo_scenarios():
         'body': json.dumps({
             'scenarios': scenarios,
             'total_count': len(scenarios),
-            'timestamp': datetime.utcnow().isoformat()
+            'timestamp': datetime.now(timezone.utc).isoformat()
         })
     }

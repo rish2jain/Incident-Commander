@@ -16,6 +16,7 @@ from src.models.agent import AgentRecommendation, AgentType, AgentMessage, Actio
 from src.models.incident import Incident
 from src.services.aws import AWSServiceFactory
 from src.services.rag_memory import ScalableRAGMemory
+from src.services.preventive_action_engine import PreventiveActionEngine
 from src.utils.logging import get_logger
 from src.utils.exceptions import AgentError
 
@@ -47,6 +48,7 @@ class PredictionAgent(BaseAgent):
         self.rag_memory = rag_memory
         self.prediction_model = PredictionModel()
         self.feature_extractor = FeatureExtractor()
+        self.preventive_action_engine = PreventiveActionEngine(rag_memory)
         
         # Performance targets
         self.target_accuracy = 0.8  # 80% accuracy target
@@ -737,6 +739,54 @@ class PredictionAgent(BaseAgent):
         except Exception as e:
             logger.error(f"Error assessing risk: {e}")
             return 0.0
+    
+    async def generate_preventive_recommendations(
+        self,
+        predictions: List[PredictionResult]
+    ) -> List[Dict[str, Any]]:
+        """Generate preventive action recommendations for predictions"""
+        try:
+            recommendations = []
+            
+            for prediction in predictions:
+                if prediction.probability > 0.5:  # Only for high-probability predictions
+                    preventive_recommendation = await self.preventive_action_engine.generate_recommendations(
+                        incident_type=prediction.incident_type,
+                        predicted_probability=prediction.probability,
+                        time_to_incident=prediction.time_to_incident,
+                        service_context={"service_tier": "critical"}  # Could be dynamic
+                    )
+                    
+                    recommendations.append({
+                        "prediction": {
+                            "incident_type": prediction.incident_type,
+                            "probability": prediction.probability,
+                            "time_to_incident_minutes": prediction.time_to_incident.total_seconds() / 60
+                        },
+                        "preventive_actions": [
+                            {
+                                "action_id": action.action_id,
+                                "description": action.description,
+                                "estimated_cost": action.estimated_cost,
+                                "estimated_benefit": action.estimated_benefit,
+                                "success_probability": action.success_probability,
+                                "expected_value": action.expected_value,
+                                "execution_time_minutes": action.execution_time_minutes,
+                                "risk_level": action.risk_level,
+                                "automation_available": action.automation_available
+                            }
+                            for action in preventive_recommendation.recommended_actions
+                        ],
+                        "reasoning": preventive_recommendation.reasoning,
+                        "confidence": preventive_recommendation.confidence
+                    })
+            
+            logger.info(f"Generated {len(recommendations)} preventive action recommendations")
+            return recommendations
+            
+        except Exception as e:
+            logger.error(f"Error generating preventive recommendations: {e}")
+            return []
     
     async def get_health_status(self) -> Dict[str, Any]:
         """Get detailed health status of the prediction agent"""

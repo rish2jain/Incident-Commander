@@ -174,14 +174,33 @@ class ScalableRAGMemory:
         try:
             bedrock_client = await self._get_bedrock_client()
             
-            # Use Titan embedding model
+            # Use real Titan embedding model
             embedding_request = {
-                "inputText": text[:8000]  # Limit input size
+                "inputText": text[:8000]  # Limit input size for Titan
             }
             
-            # This would call Bedrock Titan embedding model
-            # For now, simulate with a simple hash-based embedding
-            embedding = self._generate_simulated_embedding(text)
+            try:
+                # Call Amazon Titan Embeddings model
+                response = await bedrock_client.invoke_model_async(
+                    modelId="amazon.titan-embed-text-v1",
+                    body=json.dumps(embedding_request),
+                    contentType="application/json"
+                )
+                
+                # Parse Titan response
+                response_body = json.loads(response['body'].read())
+                embedding = response_body.get('embedding', [])
+                
+                if not embedding or len(embedding) != self._embedding_dimension:
+                    logger.warning(f"Invalid Titan embedding response, falling back to simulated")
+                    embedding = self._generate_simulated_embedding(text)
+                
+                logger.debug(f"Generated Titan embedding for text: {text[:50]}...")
+                
+            except Exception as titan_error:
+                logger.warning(f"Titan embedding failed, using simulated: {titan_error}")
+                # Fallback to simulated embedding for development
+                embedding = self._generate_simulated_embedding(text)
             
             # Cache the embedding
             self._embedding_cache[text_hash] = embedding

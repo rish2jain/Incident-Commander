@@ -7,12 +7,16 @@ Creates sample incidents and API calls to populate dashboard widgets
 import requests
 import time
 import json
+import os
 import random
 from datetime import datetime
 
 
-# API Gateway endpoint
-API_BASE_URL = "https://ucgmznm1m7.execute-api.us-east-1.amazonaws.com/prod"
+# API Gateway endpoint - must be set via environment variable
+# Do not use production endpoints in CI/tests
+API_BASE_URL = os.environ.get("API_BASE_URL")
+if not API_BASE_URL:
+    raise ValueError("API_BASE_URL environment variable must be set. Do not use production URLs in tests.")
 
 # Sample incident scenarios
 INCIDENT_SCENARIOS = [

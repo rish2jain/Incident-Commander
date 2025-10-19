@@ -6,6 +6,7 @@ Creates comprehensive monitoring dashboards with widgets
 
 import boto3
 import json
+import os
 import sys
 
 
@@ -13,6 +14,9 @@ def create_incident_commander_dashboard():
     """Create a comprehensive CloudWatch dashboard for Incident Commander."""
     
     cloudwatch = boto3.client('cloudwatch', region_name='us-east-1')
+    
+    # Get model ID from environment or use default
+    MODEL_ID = os.getenv("BEDROCK_MODEL_ID", "anthropic.claude-3-5-sonnet-20241022-v2:0")
     
     # Dashboard configuration
     dashboard_body = {
@@ -157,7 +161,7 @@ def create_incident_commander_dashboard():
                 "height": 6,
                 "properties": {
                     "metrics": [
-                        ["AWS/Bedrock", "Invocations", "ModelId", "anthropic.claude-3-sonnet-20240229-v1:0"],
+                        ["AWS/Bedrock", "Invocations", "ModelId", MODEL_ID],
                         [".", "InputTokens", ".", "."],
                         [".", "OutputTokens", ".", "."]
                     ],

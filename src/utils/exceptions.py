@@ -151,3 +151,8 @@ class PerformanceOptimizationError(IncidentCommanderError):
 class CostOptimizationError(IncidentCommanderError):
     """Raised when cost optimization operations fail."""
     pass
+
+
+class ModelRoutingError(IncidentCommanderError):
+    """Raised when model routing operations fail."""
+    pass

@@ -24,12 +24,12 @@ scrape_configs:
     static_configs:
       - targets: ["redis:6379"]
 
-  # LocalStack metrics (if available)
-  - job_name: "localstack"
-    static_configs:
-      - targets: ["localstack:4566"]
-    metrics_path: "/health"
-    scrape_interval: 30s
+  # LocalStack metrics (disabled - no metrics endpoint available)
+  # - job_name: "localstack"
+  #   static_configs:
+  #     - targets: ["localstack:4566"]
+  #   metrics_path: "/metrics"
+  #   scrape_interval: 30s
 
   # Node exporter (if running)
   - job_name: "node"

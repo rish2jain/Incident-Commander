@@ -25,6 +25,7 @@ from src.services.byzantine_consensus import ByzantineFaultTolerantConsensus
 from src.services.event_store import ScalableEventStore
 from src.services.performance_optimizer import PerformanceOptimizer
 from src.services.scaling_manager import ScalingManager
+from src.services.aws import AWSServiceFactory
 
 # Import models and exceptions
 from src.models.incident import Incident, IncidentSeverity, ServiceTier, BusinessImpact
@@ -43,12 +44,13 @@ class ProductionValidationFramework:
     async def setup_validation_environment(self):
         """Set up production validation environment."""
         # Initialize services for validation
-        self.rag_memory = ScalableRAGMemory()
-        self.cost_optimizer = CostOptimizer()
+        mock_service_factory = Mock(spec=AWSServiceFactory)
+        self.rag_memory = ScalableRAGMemory(service_factory=mock_service_factory)
+        self.cost_optimizer = CostOptimizer(service_factory=mock_service_factory)
         self.byzantine_consensus = ByzantineFaultTolerantConsensus()
-        self.event_store = ScalableEventStore()
-        self.performance_optimizer = PerformanceOptimizer()
-        self.scaling_manager = ScalingManager()
+        self.event_store = ScalableEventStore(service_factory=mock_service_factory)
+        self.performance_optimizer = PerformanceOptimizer(service_factory=mock_service_factory)
+        self.scaling_manager = ScalingManager(service_factory=mock_service_factory)
         
         # Mock external dependencies for validation
         await self._setup_validation_mocks()

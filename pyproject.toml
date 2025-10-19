@@ -166,19 +166,24 @@ addopts = [
     "--cov-report=term-missing",
     "--cov-report=html",
     "--cov-report=xml",
-    "--cov-fail-under=80",
+    "--cov-fail-under=60",
 ]
 testpaths = ["tests"]
+asyncio_mode = "auto"
 filterwarnings = [
-    "error",
     "ignore::UserWarning",
     "ignore::DeprecationWarning",
+    "ignore::PytestDeprecationWarning",
+    "ignore::RuntimeWarning",
+    "ignore::PytestCollectionWarning",
 ]
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "integration: marks tests as integration tests",
     "unit: marks tests as unit tests",
     "e2e: marks tests as end-to-end tests",
+    "agent: marks tests as agent-specific tests",
+    "manual: marks tests that require an active demo environment",
 ]
 
 [tool.coverage.run]

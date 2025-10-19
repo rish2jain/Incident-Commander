@@ -1,4 +1,5 @@
 # File Review Recommendations - Hackathon Documentation
+
 **Date**: October 18, 2025
 **Reviewer**: Claude (Serena-enabled)
 **Scope**: All files linked in docs/hackathon/README.md
@@ -8,6 +9,7 @@
 ## 📋 Executive Summary
 
 Reviewed **36 files** linked in the hackathon README. Found:
+
 - ✅ **22 files** are current and should remain
 - ⚠️ **4 files** should be archived (planning/strategy documents)
 - 🔄 **1 file** should be consolidated then archived
@@ -32,6 +34,7 @@ git mv COMPREHENSIVE_INTEGRATION_GUIDE.md docs/hackathon/archive/integration/
 ```
 
 **Rationale:**
+
 - **WINNING_STRATEGY.md**: References non-existent `winning_enhancements/` directory, conceptual only
 - **PRIZE_CATEGORY_STRATEGY.md**: Contains unimplemented Amazon Q/Nova Act/Strands code snippets
 - **COMPREHENSIVE_INTEGRATION_GUIDE.md**: Timeline-specific roadmap (Oct 18-24), implementation tracking
@@ -39,11 +42,14 @@ git mv COMPREHENSIVE_INTEGRATION_GUIDE.md docs/hackathon/archive/integration/
 ### 2. **CONSOLIDATE Deployment Guide** (Review → Merge → Archive)
 
 **[AWS_HACKATHON_DEPLOYMENT_GUIDE.md](../AWS_HACKATHON_DEPLOYMENT_GUIDE.md)** contains useful content but overlaps with:
+
 - DEPLOYMENT_CHECKLIST_AND_ROLLBACK_PLAN.md (current operational guide)
 - INFRASTRUCTURE_DEPLOYMENT_READY.md (validation status)
 
 **Action Plan:**
+
 1. Extract unique value from AWS_HACKATHON_DEPLOYMENT_GUIDE.md:
+
    - Bedrock agent creation scripts (lines 260-300)
    - Knowledge base setup (lines 303-331)
    - Cost optimization section (lines 743-772)
@@ -88,10 +94,12 @@ Current [docs/hackathon/README.md](README.md) lists demo scripts with incorrect 
 **No changes needed for:**
 
 **Submission Essentials:**
+
 - HACKATHON_SUBMISSION_CHECKLIST.md ✅
 - ULTIMATE_INTEGRATION_STATUS.md ✅
 
 **Deployment & Infrastructure:**
+
 - DEPLOYMENT_CHECKLIST_AND_ROLLBACK_PLAN.md ✅
 - INFRASTRUCTURE_DEPLOYMENT_READY.md ✅
 - infrastructure_validation_results.json ✅
@@ -99,6 +107,7 @@ Current [docs/hackathon/README.md](README.md) lists demo scripts with incorrect 
 - infrastructure_compliance_summary.md ✅
 
 **Operational Enhancements:**
+
 - REAL_WORLD_DATA_UPDATES.md ✅
 - docs/hackathon/future_enhancements.md ✅
 
@@ -112,34 +121,35 @@ Current [docs/hackathon/README.md](README.md) lists demo scripts with incorrect 
 
 #### ✅ **CURRENT - Submission Essentials**
 
-| File | Status | Notes |
-|------|--------|-------|
-| WINNING_STRATEGY.md | ⚠️ ARCHIVE | Planning doc, references non-existent code |
-| PRIZE_CATEGORY_STRATEGY.md | ⚠️ ARCHIVE | Contains unimplemented integration code |
-| HACKATHON_SUBMISSION_CHECKLIST.md | ✅ KEEP | Current checklist, Oct 18, 2025 |
-| ULTIMATE_INTEGRATION_STATUS.md | ✅ KEEP | Comprehensive status doc |
+| File                              | Status     | Notes                                      |
+| --------------------------------- | ---------- | ------------------------------------------ |
+| WINNING_STRATEGY.md               | ⚠️ ARCHIVE | Planning doc, references non-existent code |
+| PRIZE_CATEGORY_STRATEGY.md        | ⚠️ ARCHIVE | Contains unimplemented integration code    |
+| HACKATHON_SUBMISSION_CHECKLIST.md | ✅ KEEP    | Current checklist, Oct 18, 2025            |
+| ULTIMATE_INTEGRATION_STATUS.md    | ✅ KEEP    | Comprehensive status doc                   |
 
 #### ✅ **CURRENT - Deployment & Infrastructure**
 
-| File | Status | Notes |
-|------|--------|-------|
-| AWS_HACKATHON_DEPLOYMENT_GUIDE.md | 🔄 CONSOLIDATE | Detailed but overlaps with checklist |
-| COMPREHENSIVE_INTEGRATION_GUIDE.md | ⚠️ ARCHIVE | Timeline-specific roadmap (Oct 18-24) |
-| DEPLOYMENT_CHECKLIST_AND_ROLLBACK_PLAN.md | ✅ KEEP | Operational deployment guide |
-| INFRASTRUCTURE_DEPLOYMENT_READY.md | ✅ KEEP | Validation status, Oct 18, 2025 |
-| infrastructure_validation_report.md | ✅ KEEP | Technical validation results |
-| infrastructure_compliance_summary.md | ✅ KEEP | Security compliance status |
+| File                                      | Status         | Notes                                 |
+| ----------------------------------------- | -------------- | ------------------------------------- |
+| AWS_HACKATHON_DEPLOYMENT_GUIDE.md         | 🔄 CONSOLIDATE | Detailed but overlaps with checklist  |
+| COMPREHENSIVE_INTEGRATION_GUIDE.md        | ⚠️ ARCHIVE     | Timeline-specific roadmap (Oct 18-24) |
+| DEPLOYMENT_CHECKLIST_AND_ROLLBACK_PLAN.md | ✅ KEEP        | Operational deployment guide          |
+| INFRASTRUCTURE_DEPLOYMENT_READY.md        | ✅ KEEP        | Validation status, Oct 18, 2025       |
+| infrastructure_validation_report.md       | ✅ KEEP        | Technical validation results          |
+| infrastructure_compliance_summary.md      | ✅ KEEP        | Security compliance status            |
 
 #### ✅ **CURRENT - Validation Files**
 
-| File | Type | Status | Last Updated |
-|------|------|--------|--------------|
-| infrastructure_validation_results.json | JSON | ✅ KEEP | Oct 18, 19:10 |
-| hackathon_validation_report.json | JSON | ✅ KEEP | (Exists in root) |
+| File                                   | Type | Status  | Last Updated     |
+| -------------------------------------- | ---- | ------- | ---------------- |
+| infrastructure_validation_results.json | JSON | ✅ KEEP | Oct 18, 19:10    |
+| hackathon_validation_report.json       | JSON | ✅ KEEP | (Exists in root) |
 
 #### ✅ **CURRENT - Demo Scripts**
 
 All demo scripts exist in **root directory** (not docs/):
+
 - master_demo_controller.py ✅
 - start_demo.py ✅
 - start_live_demo.py ✅
@@ -153,10 +163,10 @@ All demo scripts exist in **root directory** (not docs/):
 
 #### ✅ **CURRENT - Operational Enhancements**
 
-| File | Status | Notes |
-|------|--------|-------|
+| File                                  | Status  | Notes                               |
+| ------------------------------------- | ------- | ----------------------------------- |
 | docs/hackathon/future_enhancements.md | ✅ KEEP | Roadmap for post-hackathon features |
-| REAL_WORLD_DATA_UPDATES.md | ✅ KEEP | Data enhancement documentation |
+| REAL_WORLD_DATA_UPDATES.md            | ✅ KEEP | Data enhancement documentation      |
 
 ---
 
@@ -191,12 +201,15 @@ docs/hackathon/
 ## 🎯 Implementation Commands
 
 ### Step 1: Create Archive Directories
+
 ```bash
-cd /Users/rish2jain/Documents/Incident\ Commander
+# Navigate to project root (adjust path as needed for your setup)
+cd Incident_Commander
 mkdir -p docs/hackathon/archive/{planning,integration,deployment}
 ```
 
 ### Step 2: Archive Strategy Documents
+
 ```bash
 git mv WINNING_STRATEGY.md docs/hackathon/archive/planning/
 git mv PRIZE_CATEGORY_STRATEGY.md docs/hackathon/archive/planning/
@@ -204,6 +217,7 @@ git mv COMPREHENSIVE_INTEGRATION_GUIDE.md docs/hackathon/archive/integration/
 ```
 
 ### Step 3: Update README.md Paths
+
 ```bash
 # Edit docs/hackathon/README.md
 # Change all `../` references to `../../` for root files
@@ -212,6 +226,7 @@ git mv COMPREHENSIVE_INTEGRATION_GUIDE.md docs/hackathon/archive/integration/
 ```
 
 ### Step 4: (Optional) Consolidate Deployment Guide
+
 ```bash
 # 1. Review AWS_HACKATHON_DEPLOYMENT_GUIDE.md sections
 # 2. Extract unique content not in DEPLOYMENT_CHECKLIST
@@ -221,6 +236,7 @@ git mv AWS_HACKATHON_DEPLOYMENT_GUIDE.md docs/hackathon/archive/deployment/
 ```
 
 ### Step 5: Commit Changes
+
 ```bash
 git add .
 git commit -m "docs: Archive outdated planning documents and fix README paths
@@ -268,6 +284,7 @@ Kept all current operational documentation and validation results."
 ## ✅ Success Criteria
 
 After implementation:
+
 - ✅ All strategy/planning documents archived with clear categorization
 - ✅ All README file links work correctly
 - ✅ Git history preserved for archived files

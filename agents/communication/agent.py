@@ -13,6 +13,7 @@ from src.interfaces.agent import BaseAgent
 from src.models.agent import AgentType
 from src.models.agent import AgentRecommendation, AgentStatus, ActionType, RiskLevel, ActionType as AgentActionType, RiskLevel, AgentMessage
 from src.models.incident import Incident
+from src.services.timezone_manager import TimezoneManager
 from src.utils.logging import get_logger
 from src.utils.exceptions import CommunicationError
 
@@ -162,6 +163,7 @@ class ResilientCommunicationAgent(BaseAgent):
         self.template_manager = MessageTemplateManager()
         self.channel_manager = NotificationChannelManager()
         self.stakeholder_manager = StakeholderManager()
+        self.timezone_manager = TimezoneManager()
         
         # Performance targets
         self.target_delivery_time = timedelta(seconds=10)  # 10s target, 30s max
@@ -283,6 +285,115 @@ class ResilientCommunicationAgent(BaseAgent):
             
         except Exception as e:
             logger.error(f"Error sending resolution complete: {e}")
+            return []
+    
+    async def send_timezone_aware_notifications(
+        self,
+        incident: Incident,
+        message_type: MessageType,
+        context: Dict[str, Any]
+    ) -> List[DeliveryResult]:
+        """Send notifications with timezone-aware routing"""
+        try:
+            logger.info(f"Sending timezone-aware notifications for incident {incident.id}")
+            
+            # Create escalation plan
+            escalation_plan = self.timezone_manager.create_escalation_plan(
+                incident_severity=incident.severity,
+                business_impact=str(incident.business_impact.service_tier.value) if incident.business_impact else None,
+                affected_services=[incident.metadata.tags.get("service", "unknown")]
+            )
+            
+            delivery_results = []
+            
+            # Send notifications to each stakeholder based on their timezone and preferences
+            for stakeholder_id, routing_info in escalation_plan["stakeholder_routing"].items():
+                try:
+                    # Check if stakeholder should receive notification now
+                    if routing_info["dnd_active"] and incident.severity not in ["critical", "emergency"]:
+                        logger.info(f"Skipping {stakeholder_id} due to DND policy")
+                        continue
+                    
+                    # Get appropriate channels for this stakeholder
+                    channels = routing_info["channels"]
+                    
+                    # Render message for this stakeholder
+                    rendered_message = await self.template_manager.render_message(
+                        message_type=message_type,
+                        context={
+                            **context,
+                            "stakeholder_name": routing_info["name"],
+                            "local_time": routing_info["local_time"],
+                            "escalation_level": routing_info["escalation_level"]
+                        }
+                    )
+                    
+                    # Send via appropriate channels
+                    for channel_type, addresses in channels.items():
+                        for address in addresses:
+                            try:
+                                result = await self.channel_manager.send_notification(
+                                    channel=NotificationChannel(channel_type.upper()),
+                                    address=address,
+                                    message=rendered_message
+                                )
+                                delivery_results.append(result)
+                                
+                            except Exception as e:
+                                logger.error(f"Error sending to {channel_type}:{address}: {e}")
+                
+                except Exception as e:
+                    logger.error(f"Error processing stakeholder {stakeholder_id}: {e}")
+            
+            logger.info(f"Sent {len(delivery_results)} timezone-aware notifications")
+            return delivery_results
+            
+        except Exception as e:
+            logger.error(f"Error sending timezone-aware notifications: {e}")
+            return []
+    
+    async def handle_escalation(
+        self,
+        incident: Incident,
+        incident_age_minutes: int,
+        acknowledgment_received: bool = False
+    ) -> List[DeliveryResult]:
+        """Handle incident escalation based on time and acknowledgment"""
+        try:
+            logger.info(f"Handling escalation for incident {incident.id} (age: {incident_age_minutes}min)")
+            
+            # Check if escalation is needed
+            should_escalate = self.timezone_manager.should_escalate(
+                incident_severity=incident.severity,
+                incident_age_minutes=incident_age_minutes,
+                acknowledgment_received=acknowledgment_received
+            )
+            
+            if not should_escalate:
+                logger.info(f"No escalation needed for incident {incident.id}")
+                return []
+            
+            # Get escalated stakeholders
+            escalated_stakeholders = self.timezone_manager.get_relevant_stakeholders(
+                incident_severity=incident.severity,
+                business_impact=str(incident.business_impact.service_tier.value) if incident.business_impact else None
+            )
+            
+            # Send escalated notifications
+            context = {
+                "escalation_reason": "No acknowledgment received" if not acknowledgment_received else "Time-based escalation",
+                "incident_age_minutes": incident_age_minutes,
+                "escalation_level": "URGENT"
+            }
+            
+            return await self.send_timezone_aware_notifications(
+                incident=incident,
+                message_type=MessageType.ESCALATION,
+                context=context
+            )
+            
+        except Exception as e:
+            logger.error(f"Error handling escalation for incident {incident.id}: {e}")
             return []
     
     async def request_human_approval(

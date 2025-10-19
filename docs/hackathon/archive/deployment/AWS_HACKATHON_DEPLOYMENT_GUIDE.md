@@ -90,7 +90,7 @@ DEBUG=false
 
 # Bedrock Configuration
 BEDROCK_REGION=us-east-1
-BEDROCK_MODEL_ID=anthropic.claude-3-sonnet-20240229-v1:0
+BEDROCK_MODEL_ID=global.anthropic.claude-sonnet-4-5-20250929-v1:0
 
 # Demo Configuration
 DEMO_MODE=true
@@ -98,8 +98,15 @@ ENABLE_INTERACTIVE_DEMO=true
 HACKATHON_FEATURES=true
 EOF
 
-# Load environment variables
-export $(cat .env.hackathon | xargs)
+# Load environment variables safely
+set -a  # Enable automatic export
+while IFS= read -r line || [[ -n "$line" ]]; do
+    # Skip empty lines and comments
+    [[ -z "$line" || "$line" =~ ^[[:space:]]*# ]] && continue
+    # Export the variable
+    export "$line"
+done < .env.hackathon
+set +a  # Disable automatic export
 ```
 
 ---
@@ -262,7 +269,7 @@ echo "ECS Cluster: $ECS_CLUSTER"
 DETECTION_AGENT_ID=$(aws bedrock-agent create-agent \
   --agent-name "incident-detection-agent" \
   --description "Detects infrastructure incidents using monitoring data" \
-  --foundation-model "anthropic.claude-3-sonnet-20240229-v1:0" \
+  --foundation-model "global.anthropic.claude-sonnet-4-5-20250929-v1:0" \
   --instruction "You are an expert incident detection agent. Analyze monitoring data to identify potential infrastructure issues." \
   --query 'agent.agentId' --output text)
 
@@ -272,7 +279,7 @@ echo "Detection Agent ID: $DETECTION_AGENT_ID"
 DIAGNOSIS_AGENT_ID=$(aws bedrock-agent create-agent \
   --agent-name "incident-diagnosis-agent" \
   --description "Performs root cause analysis for detected incidents" \
-  --foundation-model "anthropic.claude-3-sonnet-20240229-v1:0" \
+  --foundation-model "global.anthropic.claude-haiku-4-5-20250929-v1:0" \
   --instruction "You are an expert incident diagnosis agent. Perform thorough root cause analysis using logs, metrics, and traces." \
   --query 'agent.agentId' --output text)
 
@@ -282,7 +289,7 @@ echo "Diagnosis Agent ID: $DIAGNOSIS_AGENT_ID"
 RESOLUTION_AGENT_ID=$(aws bedrock-agent create-agent \
   --agent-name "incident-resolution-agent" \
   --description "Executes automated remediation actions for incidents" \
-  --foundation-model "anthropic.claude-3-sonnet-20240229-v1:0" \
+  --foundation-model "global.anthropic.claude-opus-4-1-20250929-v1:0" \
   --instruction "You are an expert incident resolution agent. Execute safe, automated remediation actions based on diagnosis results." \
   --query 'agent.agentId' --output text)
 

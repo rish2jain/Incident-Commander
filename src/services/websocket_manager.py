@@ -1,259 +1,404 @@
 """
-WebSocket connection manager for real-time dashboard updates.
+WebSocket Manager for Real-time Dashboard Updates
 
-Provides real-time streaming of incident processing, agent actions, and system metrics
-to connected dashboard clients for enhanced demo experience.
+Handles WebSocket connections, agent state broadcasting, and incident flow visualization.
+Supports batching and backpressure for 1,000+ concurrent viewers.
 """
 
 import asyncio
 import json
-import logging
-from typing import Dict, List, Set, Any, Optional
+import time
 from datetime import datetime
-from fastapi import WebSocket, WebSocketDisconnect
+from typing import Dict, List, Set, Any, Optional
 from dataclasses import dataclass, asdict
+from collections import defaultdict, deque
+import weakref
 
+from fastapi import WebSocket, WebSocketDisconnect
 from src.utils.logging import get_logger
+from src.models.incident import Incident
+from src.models.agent import AgentMessage, AgentType
+
 
 logger = get_logger("websocket_manager")
 
 
 @dataclass
 class WebSocketMessage:
-    """Structured WebSocket message for dashboard communication."""
+    """Structured WebSocket message."""
     type: str
+    timestamp: datetime
     data: Dict[str, Any]
-    timestamp: str = None
-    
-    def __post_init__(self):
-        if self.timestamp is None:
-            self.timestamp = datetime.utcnow().isoformat()
-    
-    def to_json(self) -> str:
-        """Convert message to JSON string."""
-        return json.dumps(asdict(self))
+    priority: int = 1  # 1=low, 2=medium, 3=high
 
 
-class WebSocketConnectionManager:
+@dataclass
+class ConnectionMetrics:
+    """Connection performance metrics."""
+    connected_at: datetime
+    messages_sent: int = 0
+    messages_received: int = 0
+    last_ping: Optional[datetime] = None
+    latency_ms: Optional[float] = None
+
+
+class WebSocketManager:
     """
-    Manages WebSocket connections for real-time dashboard updates.
+    Production-ready WebSocket manager with batching and backpressure.
     
-    Handles multiple client connections, message broadcasting, and connection lifecycle.
+    Features:
+    - Connection pooling and management
+    - Message batching for performance
+    - Backpressure handling for slow clients
+    - Agent state broadcasting
+    - Incident flow visualization
+    - Performance monitoring
     """
     
-    def __init__(self):
-        self.active_connections: Set[WebSocket] = set()
-        self.connection_metadata: Dict[WebSocket, Dict[str, Any]] = {}
-        self._lock = asyncio.Lock()
+    def __init__(self, max_connections: int = 1000, batch_size: int = 10, batch_interval: float = 0.1):
+        self.max_connections = max_connections
+        self.batch_size = batch_size
+        self.batch_interval = batch_interval
         
-    async def connect(self, websocket: WebSocket, client_info: Dict[str, Any] = None) -> None:
-        """Accept and register a new WebSocket connection."""
-        await websocket.accept()
+        # Connection management
+        self.active_connections: Dict[str, WebSocket] = {}
+        self.connection_metrics: Dict[str, ConnectionMetrics] = {}
+        self.connection_queues: Dict[str, deque] = defaultdict(lambda: deque(maxlen=100))
         
-        async with self._lock:
-            self.active_connections.add(websocket)
-            self.connection_metadata[websocket] = {
-                "connected_at": datetime.utcnow(),
-                "client_info": client_info or {},
-                "messages_sent": 0
-            }
+        # Message batching
+        self.pending_messages: Dict[str, List[WebSocketMessage]] = defaultdict(list)
+        self.batch_task: Optional[asyncio.Task] = None
         
-        logger.info(f"WebSocket client connected. Total connections: {len(self.active_connections)}")
+        # Agent state tracking
+        self.agent_states: Dict[str, str] = {}
+        self.incident_flows: Dict[str, Dict[str, Any]] = {}
         
-        # Send welcome message
-        await self.send_to_connection(websocket, WebSocketMessage(
-            type="connection_established",
-            data={
-                "message": "Connected to Incident Commander real-time feed",
-                "server_time": datetime.utcnow().isoformat(),
-                "features": [
-                    "Real-time incident processing",
-                    "Agent action streaming", 
-                    "Performance metrics updates",
-                    "System health monitoring"
-                ]
-            }
-        ))
-    
-    async def disconnect(self, websocket: WebSocket) -> None:
-        """Remove a WebSocket connection."""
-        async with self._lock:
-            self.active_connections.discard(websocket)
-            metadata = self.connection_metadata.pop(websocket, {})
+        # Performance monitoring
+        self.total_messages_sent = 0
+        self.total_connections = 0
+        self.start_time = datetime.utcnow()
         
-        connected_duration = None
-        if metadata.get("connected_at"):
-            connected_duration = (datetime.utcnow() - metadata["connected_at"]).total_seconds()
+    async def start(self):
+        """Start the WebSocket manager and background tasks."""
+        logger.info("Starting WebSocket manager")
+        self.batch_task = asyncio.create_task(self._batch_processor())
         
-        logger.info(
-            f"WebSocket client disconnected. "
-            f"Duration: {connected_duration:.1f}s, "
-            f"Messages sent: {metadata.get('messages_sent', 0)}, "
-            f"Remaining connections: {len(self.active_connections)}"
-        )
-    
-    async def send_to_connection(self, websocket: WebSocket, message: WebSocketMessage) -> bool:
-        """Send message to a specific WebSocket connection."""
-        try:
-            await websocket.send_text(message.to_json())
+    async def stop(self):
+        """Stop the WebSocket manager and cleanup."""
+        logger.info("Stopping WebSocket manager")
+        if self.batch_task:
+            self.batch_task.cancel()
+            try:
+                await self.batch_task
+            except asyncio.CancelledError:
+                pass
+                
+        # Close all connections
+        for connection_id in list(self.active_connections.keys()):
+            await self.disconnect(connection_id)
             
-            # Update metadata
-            if websocket in self.connection_metadata:
-                self.connection_metadata[websocket]["messages_sent"] += 1
+    async def connect(self, websocket: WebSocket, connection_id: str) -> bool:
+        """
+        Accept a new WebSocket connection.
+        
+        Args:
+            websocket: FastAPI WebSocket instance
+            connection_id: Unique connection identifier
+            
+        Returns:
+            True if connection accepted, False if rejected
+        """
+        if len(self.active_connections) >= self.max_connections:
+            logger.warning(f"Connection limit reached, rejecting {connection_id}")
+            await websocket.close(code=1013, reason="Server overloaded")
+            return False
+            
+        try:
+            await websocket.accept()
+            self.active_connections[connection_id] = websocket
+            self.connection_metrics[connection_id] = ConnectionMetrics(
+                connected_at=datetime.utcnow()
+            )
+            self.total_connections += 1
+            
+            logger.info(f"WebSocket connected: {connection_id} ({len(self.active_connections)} total)")
+            
+            # Send initial state
+            await self._send_initial_state(connection_id)
             
             return True
             
-        except WebSocketDisconnect:
-            await self.disconnect(websocket)
-            return False
         except Exception as e:
-            logger.error(f"Error sending WebSocket message: {e}")
-            await self.disconnect(websocket)
+            logger.error(f"Failed to accept connection {connection_id}: {e}")
             return False
-    
-    async def broadcast(self, message: WebSocketMessage) -> int:
-        """Broadcast message to all connected clients."""
-        if not self.active_connections:
-            return 0
+            
+    async def disconnect(self, connection_id: str):
+        """Disconnect a WebSocket connection."""
+        if connection_id in self.active_connections:
+            try:
+                websocket = self.active_connections[connection_id]
+                await websocket.close()
+            except Exception as e:
+                logger.warning(f"Error closing connection {connection_id}: {e}")
+            finally:
+                del self.active_connections[connection_id]
+                del self.connection_metrics[connection_id]
+                if connection_id in self.connection_queues:
+                    del self.connection_queues[connection_id]
+                if connection_id in self.pending_messages:
+                    del self.pending_messages[connection_id]
+                    
+                logger.info(f"WebSocket disconnected: {connection_id} ({len(self.active_connections)} remaining)")
+                
+    async def broadcast_agent_state(self, agent_name: str, state: str, metadata: Optional[Dict[str, Any]] = None):
+        """
+        Broadcast agent state change to all connected clients.
         
-        successful_sends = 0
-        failed_connections = []
+        Args:
+            agent_name: Name of the agent
+            state: New agent state
+            metadata: Additional state metadata
+        """
+        self.agent_states[agent_name] = state
         
-        # Send to all connections
-        for websocket in list(self.active_connections):
-            success = await self.send_to_connection(websocket, message)
-            if success:
-                successful_sends += 1
+        message = WebSocketMessage(
+            type="agent_state_update",
+            timestamp=datetime.utcnow(),
+            data={
+                "agent_name": agent_name,
+                "state": state,
+                "metadata": metadata or {},
+                "all_states": self.agent_states.copy()
+            },
+            priority=2
+        )
+        
+        await self._queue_broadcast(message)
+        
+    async def broadcast_incident_update(self, incident: Incident, phase: str):
+        """
+        Broadcast incident update to all connected clients.
+        
+        Args:
+            incident: Incident object
+            phase: Current processing phase
+        """
+        self.incident_flows[incident.id] = {
+            "id": incident.id,
+            "title": incident.title,
+            "severity": incident.severity.value if hasattr(incident.severity, 'value') else str(incident.severity),
+            "phase": phase,
+            "timestamp": datetime.utcnow().isoformat(),
+            "affected_services": getattr(incident, 'affected_services', []),
+            "estimated_impact": getattr(incident, 'estimated_impact', {})
+        }
+        
+        message = WebSocketMessage(
+            type="incident_update",
+            timestamp=datetime.utcnow(),
+            data={
+                "incident": self.incident_flows[incident.id],
+                "active_incidents": list(self.incident_flows.values())
+            },
+            priority=3
+        )
+        
+        await self._queue_broadcast(message)
+        
+    async def broadcast_consensus_update(self, consensus_data: Dict[str, Any]):
+        """
+        Broadcast consensus decision to all connected clients.
+        
+        Args:
+            consensus_data: Consensus decision data
+        """
+        message = WebSocketMessage(
+            type="consensus_update",
+            timestamp=datetime.utcnow(),
+            data=consensus_data,
+            priority=3
+        )
+        
+        await self._queue_broadcast(message)
+        
+    async def handle_client_message(self, connection_id: str, message_data: Dict[str, Any]):
+        """
+        Handle incoming message from client.
+        
+        Args:
+            connection_id: Client connection ID
+            message_data: Message data from client
+        """
+        try:
+            action = message_data.get("action")
+            
+            if action == "ping":
+                await self._handle_ping(connection_id, message_data)
+            elif action == "trigger_demo_incident":
+                await self._handle_demo_trigger(connection_id)
+            elif action == "reset_agents":
+                await self._handle_agent_reset(connection_id)
             else:
-                failed_connections.append(websocket)
-        
-        # Clean up failed connections
-        for websocket in failed_connections:
-            await self.disconnect(websocket)
-        
-        if successful_sends > 0:
-            logger.debug(f"Broadcasted message to {successful_sends} clients: {message.type}")
-        
-        return successful_sends
-    
-    async def broadcast_incident_started(self, incident: Any) -> int:
-        """Broadcast incident started event."""
-        message = WebSocketMessage(
-            type="incident_started",
+                logger.warning(f"Unknown action from {connection_id}: {action}")
+                
+        except Exception as e:
+            logger.error(f"Error handling message from {connection_id}: {e}")
+            
+    async def _send_initial_state(self, connection_id: str):
+        """Send initial state to newly connected client."""
+        initial_message = WebSocketMessage(
+            type="initial_state",
+            timestamp=datetime.utcnow(),
             data={
-                "incident": {
-                    "id": incident.id,
-                    "title": incident.title,
-                    "description": incident.description,
-                    "severity": incident.severity,
-                    "created_at": incident.detected_at.isoformat(),
-                    "affected_services": getattr(incident, 'affected_services', [
-                        "payment-service", "user-service", "notification-service"
-                    ]),
-                    "metrics": {
-                        "affected_users": incident.business_impact.affected_users,
-                        "cost_per_minute": incident.business_impact.calculate_cost_per_minute(),
-                        "service_tier": incident.business_impact.service_tier
+                "agent_states": self.agent_states.copy(),
+                "active_incidents": list(self.incident_flows.values()),
+                "system_status": "operational"
+            },
+            priority=3
+        )
+        
+        await self._queue_message(connection_id, initial_message)
+        
+    async def _queue_broadcast(self, message: WebSocketMessage):
+        """Queue message for broadcast to all connections."""
+        for connection_id in self.active_connections.keys():
+            await self._queue_message(connection_id, message)
+            
+    async def _queue_message(self, connection_id: str, message: WebSocketMessage):
+        """Queue message for specific connection with backpressure handling."""
+        if connection_id not in self.active_connections:
+            return
+            
+        queue = self.connection_queues[connection_id]
+        
+        # Backpressure: drop low priority messages if queue is full
+        if len(queue) >= queue.maxlen and message.priority < 3:
+            logger.debug(f"Dropping low priority message for {connection_id} (queue full)")
+            return
+            
+        queue.append(message)
+        self.pending_messages[connection_id].append(message)
+        
+    async def _batch_processor(self):
+        """Background task to process message batches."""
+        while True:
+            try:
+                await asyncio.sleep(self.batch_interval)
+                
+                # Process batches for each connection
+                for connection_id in list(self.pending_messages.keys()):
+                    if connection_id not in self.active_connections:
+                        continue
+                        
+                    messages = self.pending_messages[connection_id][:self.batch_size]
+                    if not messages:
+                        continue
+                        
+                    # Remove processed messages
+                    self.pending_messages[connection_id] = self.pending_messages[connection_id][self.batch_size:]
+                    
+                    # Send batch
+                    await self._send_message_batch(connection_id, messages)
+                    
+            except asyncio.CancelledError:
+                break
+            except Exception as e:
+                logger.error(f"Error in batch processor: {e}")
+                
+    async def _send_message_batch(self, connection_id: str, messages: List[WebSocketMessage]):
+        """Send a batch of messages to a specific connection."""
+        if connection_id not in self.active_connections:
+            return
+            
+        websocket = self.active_connections[connection_id]
+        
+        try:
+            # Create batch message
+            batch_data = {
+                "type": "message_batch",
+                "timestamp": datetime.utcnow().isoformat(),
+                "messages": [
+                    {
+                        "type": msg.type,
+                        "timestamp": msg.timestamp.isoformat(),
+                        "data": msg.data
                     }
-                }
+                    for msg in messages
+                ]
             }
-        )
-        return await self.broadcast(message)
-    
-    async def broadcast_agent_action(self, agent_type: str, action_description: str, 
-                                   details: Dict[str, Any] = None, confidence: float = None,
-                                   status: str = "in_progress") -> int:
-        """Broadcast agent action event."""
-        message = WebSocketMessage(
-            type="agent_action",
-            data={
-                "action": {
-                    "agent_type": agent_type,
-                    "description": action_description,
-                    "details": details or {},
-                    "confidence": confidence,
-                    "status": status,
-                    "timestamp": datetime.utcnow().isoformat()
-                }
-            }
-        )
-        return await self.broadcast(message)
-    
-    async def broadcast_incident_resolved(self, incident: Any, resolution_time_seconds: int,
-                                        actions_executed: List[str] = None) -> int:
-        """Broadcast incident resolved event."""
-        message = WebSocketMessage(
-            type="incident_resolved",
-            data={
-                "incident": {
-                    "id": incident.id,
-                    "title": incident.title,
-                    "resolution_time": resolution_time_seconds,
-                    "actions": actions_executed or [],
-                    "success": True
-                },
-                "metrics": {
-                    "incidents_resolved": 2848,  # Will be replaced with real metrics
-                    "total_cost_savings": 1241000,
-                    "avg_mttr": min(167, resolution_time_seconds),  # Update running average
-                    "success_rate": 0.926
-                }
-            }
-        )
-        return await self.broadcast(message)
-    
-    async def broadcast_system_metrics(self, metrics: Dict[str, Any]) -> int:
-        """Broadcast system performance metrics."""
-        message = WebSocketMessage(
-            type="system_metrics",
-            data={
-                "metrics": metrics,
-                "system_health": "operational",
-                "active_incidents": metrics.get("active_incidents", 0),
-                "agent_status": metrics.get("agent_status", {})
-            }
-        )
-        return await self.broadcast(message)
-    
-    def get_connection_stats(self) -> Dict[str, Any]:
-        """Get statistics about WebSocket connections."""
-        total_messages = sum(
-            metadata.get("messages_sent", 0) 
-            for metadata in self.connection_metadata.values()
-        )
+            
+            await websocket.send_text(json.dumps(batch_data))
+            
+            # Update metrics
+            metrics = self.connection_metrics[connection_id]
+            metrics.messages_sent += len(messages)
+            self.total_messages_sent += len(messages)
+            
+        except WebSocketDisconnect:
+            await self.disconnect(connection_id)
+        except Exception as e:
+            logger.error(f"Error sending batch to {connection_id}: {e}")
+            await self.disconnect(connection_id)
+            
+    async def _handle_ping(self, connection_id: str, message_data: Dict[str, Any]):
+        """Handle ping message for latency measurement."""
+        client_timestamp = message_data.get("timestamp")
+        if client_timestamp:
+            try:
+                client_time = datetime.fromisoformat(client_timestamp)
+                latency = (datetime.utcnow() - client_time).total_seconds() * 1000
+                
+                metrics = self.connection_metrics[connection_id]
+                metrics.last_ping = datetime.utcnow()
+                metrics.latency_ms = latency
+                
+                # Send pong response
+                pong_message = WebSocketMessage(
+                    type="pong",
+                    timestamp=datetime.utcnow(),
+                    data={"latency_ms": latency},
+                    priority=1
+                )
+                await self._queue_message(connection_id, pong_message)
+                
+            except Exception as e:
+                logger.error(f"Error handling ping from {connection_id}: {e}")
+                
+    async def _handle_demo_trigger(self, connection_id: str):
+        """Handle demo incident trigger request."""
+        # TODO: Integrate with incident simulation system
+        logger.info(f"Demo incident triggered by {connection_id}")
+        
+    async def _handle_agent_reset(self, connection_id: str):
+        """Handle agent reset request."""
+        # TODO: Integrate with agent coordinator
+        logger.info(f"Agent reset requested by {connection_id}")
+        
+    def get_metrics(self) -> Dict[str, Any]:
+        """Get WebSocket manager performance metrics."""
+        uptime = (datetime.utcnow() - self.start_time).total_seconds()
         
         return {
             "active_connections": len(self.active_connections),
-            "total_messages_sent": total_messages,
-            "average_messages_per_connection": (
-                total_messages / len(self.active_connections) 
-                if self.active_connections else 0
-            ),
-            "connection_details": [
-                {
-                    "connected_at": metadata["connected_at"].isoformat(),
-                    "messages_sent": metadata["messages_sent"],
-                    "client_info": metadata.get("client_info", {})
+            "total_connections": self.total_connections,
+            "total_messages_sent": self.total_messages_sent,
+            "uptime_seconds": uptime,
+            "messages_per_second": self.total_messages_sent / max(uptime, 1),
+            "connection_metrics": {
+                conn_id: {
+                    "connected_at": metrics.connected_at.isoformat(),
+                    "messages_sent": metrics.messages_sent,
+                    "latency_ms": metrics.latency_ms
                 }
-                for metadata in self.connection_metadata.values()
-            ]
+                for conn_id, metrics in self.connection_metrics.items()
+            }
         }
 
 
 # Global WebSocket manager instance
-_websocket_manager: Optional[WebSocketConnectionManager] = None
+websocket_manager = WebSocketManager()
 
 
-def get_websocket_manager() -> WebSocketConnectionManager:
-    """Get the global WebSocket connection manager."""
-    global _websocket_manager
-    if _websocket_manager is None:
-        _websocket_manager = WebSocketConnectionManager()
-    return _websocket_manager
-
-
-async def broadcast_to_dashboard(message_type: str, data: Dict[str, Any]) -> int:
-    """Convenience function to broadcast messages to dashboard clients."""
-    manager = get_websocket_manager()
-    message = WebSocketMessage(type=message_type, data=data)
-    return await manager.broadcast(message)
+def get_websocket_manager() -> WebSocketManager:
+    """Get the global WebSocket manager instance."""
+    return websocket_manager

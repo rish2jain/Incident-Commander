@@ -3,6 +3,7 @@ DynamoDB Helper Functions
 Utilities for handling DynamoDB data type conversions
 """
 
+import math
 from decimal import Decimal
 from typing import Any, Dict, List, Union
 
@@ -16,8 +17,13 @@ def convert_floats_to_decimal(obj: Any) -> Any:
         
     Returns:
         The object with all floats converted to Decimal
+        
+    Raises:
+        ValueError: If float is NaN or Infinity (not supported by DynamoDB)
     """
     if isinstance(obj, float):
+        if not math.isfinite(obj):
+            raise ValueError(f"Unsupported float value: {obj}")
         return Decimal(str(obj))
     elif isinstance(obj, dict):
         return {key: convert_floats_to_decimal(value) for key, value in obj.items()}

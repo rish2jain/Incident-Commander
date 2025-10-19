@@ -40,10 +40,27 @@ class IncidentCommanderStorageStack(Stack):
         # Create S3 buckets
         self.s3_buckets = {}
         
+        # Create access logs bucket first
+        access_logs_bucket = s3.Bucket(
+            self, "IncidentAccessLogs",
+            bucket_name=f"incident-commander-access-logs-{environment_name}",
+            encryption=s3.BucketEncryption.KMS,
+            encryption_key=kms_key,
+            block_public_access=s3.BlockPublicAccess.BLOCK_ALL,
+            versioned=True,
+            removal_policy=RemovalPolicy.RETAIN if environment_name == "production" else RemovalPolicy.DESTROY,
+            auto_delete_objects=True if environment_name != "production" else False
+        )
+
         self.s3_buckets['artifacts'] = s3.Bucket(
             self, "IncidentArtifacts",
             bucket_name=f"incident-commander-artifacts-{environment_name}",
             encryption=s3.BucketEncryption.KMS,
             encryption_key=kms_key,
-            removal_policy=RemovalPolicy.RETAIN if environment_name == "production" else RemovalPolicy.DESTROY
+            block_public_access=s3.BlockPublicAccess.BLOCK_ALL,
+            versioned=True,
+            server_access_logs_bucket=access_logs_bucket,
+            server_access_logs_prefix="artifacts-access-logs/",
+            removal_policy=RemovalPolicy.RETAIN if environment_name == "production" else RemovalPolicy.DESTROY,
+            auto_delete_objects=True if environment_name != "production" else False
         )

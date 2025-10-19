@@ -4,6 +4,7 @@ AWS Credentials Setup Helper for Incident Commander Hackathon
 """
 
 import os
+import platform
 import subprocess
 import sys
 
@@ -98,7 +99,21 @@ def main():
     # Check AWS CLI
     if not check_aws_cli():
         print("\nPlease install AWS CLI first:")
-        print("brew install awscli")
+        system = platform.system().lower()
+        if system == "darwin":
+            print("brew install awscli")
+        elif system == "linux":
+            print("# For Ubuntu/Debian:")
+            print("sudo apt-get update && sudo apt-get install awscli")
+            print("# For RHEL/CentOS/Fedora:")
+            print("sudo yum install awscli  # or sudo dnf install awscli")
+        elif system == "windows":
+            print("# Using Chocolatey:")
+            print("choco install awscli")
+            print("# Using winget:")
+            print("winget install Amazon.AWSCLI")
+        else:
+            print("Visit: https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html")
         sys.exit(1)
     
     # Check credentials

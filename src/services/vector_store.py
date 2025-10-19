@@ -163,14 +163,43 @@ class VectorStoreService:
             return self.embeddings_cache[str(cache_key)]
         
         try:
-            # In production, this would call Bedrock Titan Embeddings
-            # For now, simulate with random vector (normalized)
-            embedding = np.random.normal(0, 1, self.embedding_dimension).tolist()
+            # Use real Bedrock Titan Embeddings
+            bedrock_client = self.aws_factory.get_bedrock_client()
             
-            # Normalize vector
-            norm = np.linalg.norm(embedding)
-            if norm > 0:
-                embedding = (np.array(embedding) / norm).tolist()
+            embedding_request = {
+                "inputText": text[:8000]  # Limit input size for Titan
+            }
+            
+            try:
+                # Call Amazon Titan Embeddings model
+                response = await bedrock_client.invoke_model(
+                    modelId="amazon.titan-embed-text-v2:0",
+                    body=json.dumps(embedding_request),
+                    contentType="application/json"
+                )
+                
+                # Parse Titan response
+                response_body_bytes = await response['body'].read()
+                response_body = json.loads(response_body_bytes.decode())
+                embedding = response_body.get('embedding', [])
+                
+                if not embedding or len(embedding) != self.embedding_dimension:
+                    logger.warning(f"Invalid Titan embedding response, falling back to simulated")
+                    # Fallback to simulated embedding
+                    embedding = np.random.normal(0, 1, self.embedding_dimension).tolist()
+                    norm = np.linalg.norm(embedding)
+                    if norm > 0:
+                        embedding = (np.array(embedding) / norm).tolist()
+                
+                logger.debug(f"Generated Titan embedding for text: {text[:50]}...")
+                
+            except Exception as titan_error:
+                logger.warning(f"Titan embedding failed, using simulated: {titan_error}")
+                # Fallback to simulated embedding for development
+                embedding = np.random.normal(0, 1, self.embedding_dimension).tolist()
+                norm = np.linalg.norm(embedding)
+                if norm > 0:
+                    embedding = (np.array(embedding) / norm).tolist()
             
             # Cache result
             self.embeddings_cache[str(cache_key)] = embedding

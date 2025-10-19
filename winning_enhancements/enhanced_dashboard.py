@@ -400,7 +400,8 @@ def create_enhanced_dashboard_html() -> str:
 
     <script>
         // WebSocket connection for real-time updates
-        const ws = new WebSocket(`ws://${window.location.host}/ws/dashboard`);
+        const wsScheme = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const ws = new WebSocket(`${wsScheme}//${window.location.host}/ws/dashboard`);
         
         // Three.js 3D visualization
         let scene, camera, renderer, agents = {};

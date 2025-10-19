@@ -13,6 +13,8 @@ from src.interfaces.agent import BaseAgent
 from src.models.agent import AgentRecommendation, AgentStatus, AgentType, ActionType, RiskLevel, ActionType as AgentActionType, RiskLevel, AgentMessage
 from src.models.incident import Incident
 from src.services.aws import AWSServiceFactory
+from src.services.security_validation_service import SecurityValidationService
+from src.services.resolution_success_validator import ResolutionSuccessValidator
 from src.utils.logging import get_logger
 from src.utils.exceptions import SecurityError, ValidationError
 from src.utils.constants import AGENT_CONFIG
@@ -46,6 +48,8 @@ class SecureResolutionAgent(BaseAgent):
         self.aws_factory = aws_factory
         self.action_executor = ActionExecutor(aws_factory, sandbox_account_id)
         self.rollback_manager = RollbackManager(aws_factory)
+        self.security_validator = SecurityValidationService()
+        self.success_validator = ResolutionSuccessValidator(aws_factory)
         
         # Performance targets from config
         config = AGENT_CONFIG["resolution"]
@@ -198,6 +202,46 @@ class SecureResolutionAgent(BaseAgent):
         except Exception as e:
             logger.error(f"Error classifying incident type: {e}")
             return "generic"
+    
+    async def _validate_action_security(
+        self,
+        action: ResolutionAction
+    ) -> bool:
+        """Validate action security before execution"""
+        try:
+            logger.info(f"Validating security for action {action.action_id}")
+            
+            # Convert action to security validation format
+            action_parameters = {
+                "target_service": action.target_service,
+                "parameters": action.parameters,
+                "risk_level": action.risk_level.value if hasattr(action.risk_level, 'value') else str(action.risk_level)
+            }
+            
+            # Perform security validation
+            validation_result = await self.security_validator.validate_action(
+                action_id=action.action_type.value if hasattr(action.action_type, 'value') else str(action.action_type),
+                action_parameters=action_parameters
+            )
+            
+            if not validation_result.is_valid:
+                logger.warning(f"Action {action.action_id} failed security validation: {validation_result.validation_errors}")
+                return False
+            
+            if validation_result.approval_required:
+                logger.info(f"Action {action.action_id} requires human approval (risk score: {validation_result.estimated_risk_score:.2f})")
+                # In a real implementation, this would trigger approval workflow
+                # For now, we'll allow medium-risk actions but block high-risk ones
+                if validation_result.estimated_risk_score > 0.8:
+                    logger.warning(f"Action {action.action_id} blocked due to high risk score")
+                    return False
+            
+            logger.info(f"Action {action.action_id} passed security validation")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error validating action security: {e}")
+            return False
     
     async def _create_cpu_exhaustion_actions(self, incident: Incident) -> List[ResolutionAction]:
         """Create actions for CPU exhaustion incidents"""
@@ -526,6 +570,22 @@ class SecureResolutionAgent(BaseAgent):
             
             for action in actions:
                 try:
+                    # Validate action security before execution
+                    if not await self._validate_action_security(action):
+                        logger.warning(f"Action {action.action_id} failed security validation, skipping")
+                        
+                        # Create security failure result
+                        security_result = ActionResult(
+                            action_id=action.action_id,
+                            success=False,
+                            execution_time=timedelta(seconds=1),
+                            output="",
+                            error_message="Action failed security validation",
+                            rollback_required=False
+                        )
+                        results.append(security_result)
+                        continue
+                    
                     # Track active action
                     self.active_actions[action.action_id] = {
                         "action": action,
@@ -536,6 +596,18 @@ class SecureResolutionAgent(BaseAgent):
                     # Execute action
                     result = await self.action_executor.execute_action(action)
                     results.append(result)
+                    
+                    # Start success validation monitoring if action succeeded
+                    if result.success:
+                        try:
+                            validation_id = await self.success_validator.start_validation(
+                                action_id=action.action_id,
+                                action_type=action.action_type.value if hasattr(action.action_type, 'value') else str(action.action_type),
+                                target_service=action.target_service
+                            )
+                            logger.info(f"Started success validation for action {action.action_id}: {validation_id}")
+                        except Exception as e:
+                            logger.error(f"Failed to start success validation for action {action.action_id}: {e}")
                     
                     # Handle rollback if action failed
                     if not result.success and result.rollback_required:

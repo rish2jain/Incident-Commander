@@ -189,3 +189,9 @@ winning_enhancements/
 *.hackathon
 *.demo
 *.submission
+# Next.js build artifacts
+dashboard/.next/
+.next/
+
+# Deployment packages (too large for GitHub)
+deployment_package/

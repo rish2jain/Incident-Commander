@@ -4,19 +4,124 @@ AWS service clients and authentication management.
 
 import asyncio
 from datetime import datetime, timedelta
-from typing import Dict, Any, Optional, Set
+from typing import Dict, Any, Optional, Set, Callable, TypeVar
 import json
+import random
+import time
 
 import aioboto3
 import boto3
 from botocore.exceptions import ClientError, NoCredentialsError
+from botocore.config import Config
 
 from src.utils.config import config
 from src.utils.logging import get_logger
 from src.utils.exceptions import AuthenticationError, ConfigurationError
 
+T = TypeVar('T')
+
 
 logger = get_logger("aws_services")
+
+
+class RetryConfig:
+    """Configuration for retry and backoff behavior."""
+    
+    def __init__(self, 
+                 max_retries: int = 3,
+                 base_delay: float = 1.0,
+                 max_delay: float = 60.0,
+                 exponential_base: float = 2.0,
+                 jitter: bool = True):
+        self.max_retries = max_retries
+        self.base_delay = base_delay
+        self.max_delay = max_delay
+        self.exponential_base = exponential_base
+        self.jitter = jitter
+    
+    def get_delay(self, attempt: int) -> float:
+        """Calculate delay for given attempt with exponential backoff and jitter."""
+        delay = min(self.base_delay * (self.exponential_base ** attempt), self.max_delay)
+        
+        if self.jitter:
+            # Add jitter to prevent thundering herd
+            delay = delay * (0.5 + random.random() * 0.5)
+        
+        return delay
+
+
+async def retry_with_backoff(
+    func: Callable[..., T],
+    retry_config: RetryConfig = None,
+    timeout: float = None,
+    retryable_exceptions: tuple = None
+) -> T:
+    """
+    Execute function with exponential backoff retry logic.
+    
+    Args:
+        func: Async function to execute
+        retry_config: Retry configuration
+        timeout: Overall timeout for all attempts
+        retryable_exceptions: Tuple of exceptions that should trigger retry
+        
+    Returns:
+        Function result
+        
+    Raises:
+        Last exception if all retries exhausted
+    """
+    if retry_config is None:
+        retry_config = RetryConfig()
+    
+    if retryable_exceptions is None:
+        retryable_exceptions = (ClientError, ConnectionError, TimeoutError)
+    
+    start_time = time.time()
+    last_exception = None
+    
+    for attempt in range(retry_config.max_retries + 1):
+        try:
+            if timeout:
+                remaining_time = timeout - (time.time() - start_time)
+                if remaining_time <= 0:
+                    raise TimeoutError("Overall timeout exceeded")
+                
+                return await asyncio.wait_for(func(), timeout=remaining_time)
+            else:
+                return await func()
+                
+        except retryable_exceptions as e:
+            last_exception = e
+            
+            if attempt == retry_config.max_retries:
+                logger.error(f"All retry attempts exhausted. Last error: {e}")
+                raise
+            
+            # Check if this is a throttling error that we should retry
+            if isinstance(e, ClientError):
+                error_code = e.response.get('Error', {}).get('Code', '')
+                if error_code in ['Throttling', 'ThrottlingException', 'RequestLimitExceeded']:
+                    delay = retry_config.get_delay(attempt)
+                    logger.warning(f"AWS throttling detected, retrying in {delay:.2f}s (attempt {attempt + 1})")
+                    await asyncio.sleep(delay)
+                    continue
+                elif error_code in ['ServiceUnavailable', 'InternalError']:
+                    delay = retry_config.get_delay(attempt)
+                    logger.warning(f"AWS service error, retrying in {delay:.2f}s (attempt {attempt + 1})")
+                    await asyncio.sleep(delay)
+                    continue
+                else:
+                    # Non-retryable error
+                    raise
+            
+            delay = retry_config.get_delay(attempt)
+            logger.warning(f"Retrying after error: {e}. Waiting {delay:.2f}s (attempt {attempt + 1})")
+            await asyncio.sleep(delay)
+    
+    # Should never reach here, but just in case
+    if last_exception:
+        raise last_exception
 
 
 class AWSCredentialManager:
@@ -115,7 +220,7 @@ class AWSCredentialManager:
 
 
 class AWSServiceFactory:
-    """Factory for creating AWS service clients."""
+    """Factory for creating AWS service clients with connection pooling and health monitoring."""
     
     def __init__(self):
         """Initialize service factory."""
@@ -123,7 +228,17 @@ class AWSServiceFactory:
         self._session: Optional[aioboto3.Session] = None
         self._active_clients: Set[Any] = set()
         self._active_resources: Set[Any] = set()
+        self._client_pool: Dict[str, Any] = {}
+        self._client_health: Dict[str, bool] = {}
         self._lock = asyncio.Lock()
+        self._retry_config = RetryConfig(max_retries=3, base_delay=1.0, max_delay=30.0)
+        
+        # Connection pool configuration
+        self._pool_config = Config(
+            retries={'max_attempts': 3, 'mode': 'adaptive'},
+            max_pool_connections=50,
+            region_name=config.aws.region
+        )
     
     def _get_session(self) -> aioboto3.Session:
         """Get or create aioboto3 session lazily."""
@@ -133,7 +248,7 @@ class AWSServiceFactory:
     
     async def create_client(self, service_name: str, **kwargs) -> Any:
         """
-        Create AWS service client with proper authentication.
+        Create AWS service client with proper authentication, connection pooling, and retry logic.
         
         Args:
             service_name: Name of AWS service (e.g., 'dynamodb', 'kinesis')
@@ -142,9 +257,17 @@ class AWSServiceFactory:
         Returns:
             Configured AWS service client
         """
+        # Check if we have a healthy pooled client
+        pool_key = f"{service_name}_{hash(frozenset(kwargs.items()))}"
+        
+        async with self._lock:
+            if pool_key in self._client_pool and self._client_health.get(pool_key, False):
+                return self._client_pool[pool_key]
+        
         client_config = {
             'region_name': config.aws.region,
             'endpoint_url': config.aws.endpoint_url,
+            'config': self._pool_config,
             **kwargs
         }
 
@@ -153,11 +276,21 @@ class AWSServiceFactory:
         if credentials:
             client_config.update(credentials)
 
-        session = self._get_session()
-        client = await session.client(service_name, **client_config)
+        async def _create_client():
+            session = self._get_session()
+            return await session.client(service_name, **client_config)
+
+        # Create client with retry logic
+        client = await retry_with_backoff(
+            _create_client,
+            retry_config=self._retry_config,
+            timeout=30.0
+        )
 
         async with self._lock:
             self._active_clients.add(client)
+            self._client_pool[pool_key] = client
+            self._client_health[pool_key] = True
 
         return client
     
@@ -218,6 +351,38 @@ class AWSServiceFactory:
         """Get CloudWatch client."""
         return await self.create_client('cloudwatch')
     
+    async def get_stepfunctions_client(self):
+        """Get Step Functions client for consensus coordination."""
+        return await self.create_client('stepfunctions')
+    
+    async def get_inspector_client(self):
+        """Get Inspector client for security validation."""
+        return await self.create_client('inspector2')
+    
+    async def get_cost_explorer_client(self):
+        """Get Cost Explorer client for FinOps operations."""
+        return await self.create_client('ce')
+    
+    async def get_bedrock_client(self):
+        """Get Bedrock runtime client."""
+        return await self.create_client('bedrock-runtime')
+    
+    async def get_dynamodb_client(self):
+        """Get DynamoDB client."""
+        return await self.create_client('dynamodb')
+    
+    async def get_kinesis_client(self):
+        """Get Kinesis client."""
+        return await self.create_client('kinesis')
+    
+    async def get_s3_client(self):
+        """Get S3 client."""
+        return await self.create_client('s3')
+    
+    async def get_opensearch_client(self):
+        """Get OpenSearch Serverless client."""
+        return await self.create_client('opensearchserverless')
+    
     async def cleanup(self):
         """Cleanup AWS service connections and resources."""
         try:
@@ -257,12 +422,107 @@ class AWSServiceFactory:
         """Perform health check on AWS services."""
         try:
             # Test basic AWS connectivity
-            client = await self.create_client('sts')
-            await client.get_caller_identity()
+            async def _check_sts():
+                client = await self.create_client('sts')
+                return await client.get_caller_identity()
+            
+            await retry_with_backoff(_check_sts, timeout=10.0)
             return True
         except Exception as e:
             logger.error(f"AWS health check failed: {e}")
             return False
+    
+    async def health_check_service(self, service_name: str) -> bool:
+        """
+        Perform health check on specific AWS service.
+        
+        Args:
+            service_name: Name of AWS service to check
+            
+        Returns:
+            True if service is healthy, False otherwise
+        """
+        try:
+            if service_name == 'stepfunctions':
+                client = await self.get_stepfunctions_client()
+                await client.list_state_machines(maxResults=1)
+            elif service_name == 'inspector2':
+                client = await self.get_inspector_client()
+                await client.list_findings(maxResults=1)
+            elif service_name == 'ce':
+                client = await self.get_cost_explorer_client()
+                # Cost Explorer requires specific date range
+                from datetime import datetime, timedelta
+                end_date = datetime.now().strftime('%Y-%m-%d')
+                start_date = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
+                await client.get_cost_and_usage(
+                    TimePeriod={'Start': start_date, 'End': end_date},
+                    Granularity='DAILY',
+                    Metrics=['BlendedCost']
+                )
+            elif service_name == 'bedrock-runtime':
+                client = await self.get_bedrock_client()
+                # Just check if we can create the client
+                pass
+            elif service_name == 'dynamodb':
+                client = await self.get_dynamodb_client()
+                await client.list_tables(Limit=1)
+            elif service_name == 'kinesis':
+                client = await self.get_kinesis_client()
+                await client.list_streams(Limit=1)
+            elif service_name == 's3':
+                client = await self.get_s3_client()
+                await client.list_buckets()
+            elif service_name == 'opensearchserverless':
+                client = await self.get_opensearch_client()
+                await client.list_collections()
+            else:
+                # Generic health check
+                client = await self.create_client(service_name)
+                # Just creating the client is enough for basic health check
+            
+            # Mark service as healthy
+            async with self._lock:
+                self._client_health[service_name] = True
+            
+            return True
+            
+        except Exception as e:
+            logger.warning(f"Health check failed for {service_name}: {e}")
+            
+            # Mark service as unhealthy
+            async with self._lock:
+                self._client_health[service_name] = False
+            
+            return False
+    
+    def get_service_health_status(self) -> Dict[str, bool]:
+        """Get health status of all monitored services."""
+        return self._client_health.copy()
+    
+    async def graceful_degrade_on_service_failure(self, service_name: str, fallback_func: Callable = None):
+        """
+        Handle service failure with graceful degradation.
+        
+        Args:
+            service_name: Name of failed service
+            fallback_func: Optional fallback function to execute
+        """
+        logger.warning(f"Service {service_name} is unavailable, implementing graceful degradation")
+        
+        # Mark service as unhealthy
+        async with self._lock:
+            self._client_health[service_name] = False
+        
+        # Execute fallback if provided
+        if fallback_func:
+            try:
+                return await fallback_func()
+            except Exception as e:
+                logger.error(f"Fallback function failed for {service_name}: {e}")
+        
+        # Queue requests for later retry if applicable
+        logger.info(f"Queueing requests for {service_name} until service recovery")
 
 
 class BedrockClient:

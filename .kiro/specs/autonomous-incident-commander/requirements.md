@@ -4,7 +4,7 @@
 
 The Autonomous Incident Commander is an AI-powered multi-agent system that provides zero-touch incident resolution for cloud infrastructure. The system uses coordinated agent swarms to detect, diagnose, predict, and resolve incidents autonomously, reducing mean time to resolution (MTTR) from 30+ minutes to under 3 minutes. The system targets enterprise DevOps and SRE teams struggling with alert fatigue, increasing incident complexity, skill gaps, and high incident costs.
 
-> Operational thresholds (consensus weights, circuit breaker policy, notification rate limits, and agent SLAs) are defined centrally in *Steering → Architecture → Shared Operational Constants* and should be referenced instead of redefining values in individual requirements.
+> Operational thresholds (consensus weights, circuit breaker policy, notification rate limits, and agent SLAs) are defined centrally in _Steering → Architecture → Shared Operational Constants_ and should be referenced instead of redefining values in individual requirements.
 
 ## Glossary
 
@@ -232,8 +232,8 @@ The Autonomous Incident Commander is an AI-powered multi-agent system that provi
 
 #### Acceptance Criteria
 
-1. WHEN integrating with Datadog API, THE Incident_Commander_System SHALL respect the Datadog rate limits documented in *Steering → Architecture → Shared Operational Constants*.
-2. WHEN using PagerDuty API, THE Communication_Agent SHALL honor the PagerDuty limits defined in *Steering → Architecture → Shared Operational Constants* with intelligent request batching.
+1. WHEN integrating with Datadog API, THE Incident_Commander_System SHALL respect the Datadog rate limits documented in _Steering → Architecture → Shared Operational Constants_.
+2. WHEN using PagerDuty API, THE Communication_Agent SHALL honor the PagerDuty limits defined in _Steering → Architecture → Shared Operational Constants_ with intelligent request batching.
 3. WHILE sending Slack notifications, THE Communication_Agent SHALL respect the Slack per-channel throttling defined in the shared constants.
 4. WHERE external APIs return rate limit errors, THE Incident_Commander_System SHALL implement exponential backoff with maximum 5-minute delay
 5. THE Incident_Commander_System SHALL maintain request queues for each external service with priority-based processing
@@ -258,9 +258,9 @@ The Autonomous Incident Commander is an AI-powered multi-agent system that provi
 
 #### Acceptance Criteria
 
-1. WHEN agents provide conflicting recommendations, THE Consensus_Engine SHALL use the standardized agent weighting defined in *Steering → Architecture → Shared Operational Constants*.
+1. WHEN agents provide conflicting recommendations, THE Consensus_Engine SHALL use the standardized agent weighting defined in _Steering → Architecture → Shared Operational Constants_.
 2. WHEN aggregated confidence is below 70%, THE Consensus_Engine SHALL escalate to human operators with complete agent recommendations and reasoning
-3. WHILE all agent confidence scores are below 60% and incident severity is critical, THE Consensus_Engine SHALL execute safest available action with immediate human notification, using the shared confidence thresholds documented in *Steering → Architecture → Shared Operational Constants*.
+3. WHILE all agent confidence scores are below 60% and incident severity is critical, THE Consensus_Engine SHALL execute safest available action with immediate human notification, using the shared confidence thresholds documented in _Steering → Architecture → Shared Operational Constants_.
 4. WHERE agent compromise is detected through behavioral analysis, THE Byzantine_Fault_Detector SHALL isolate the compromised agent and continue with remaining agents at reduced confidence
 5. THE Consensus_Engine SHALL implement decision timeout of 2 minutes with automatic escalation if consensus cannot be reached
 
@@ -311,3 +311,63 @@ The Autonomous Incident Commander is an AI-powered multi-agent system that provi
 3. WHILE operating in fallback mode, THE Agent_Swarm SHALL escalate to human operators for validation of high-risk actions
 4. WHERE Consensus_Engine recovery occurs, THE Agent_Swarm SHALL resume normal consensus-based operation with state synchronization
 5. THE Agent_Swarm SHALL log all fallback operations for post-incident analysis and system improvement
+
+### Requirement 24
+
+**User Story:** As a platform engineer, I want comprehensive AWS service client infrastructure, so that all AWS integrations work reliably with proper error handling.
+
+#### Acceptance Criteria
+
+1. WHEN agents need AWS services, THE AWSServiceFactory SHALL provide properly configured clients for Step Functions, Inspector, and Cost Explorer
+2. WHEN AWS API calls fail, THE Incident_Commander_System SHALL implement retry with exponential backoff and timeout guards
+3. WHILE running locally, THE Incident_Commander_System SHALL use LocalStack fixtures for all AWS-dependent services
+4. WHERE AWS service limits are reached, THE Incident_Commander_System SHALL gracefully degrade and queue requests
+5. THE AWSServiceFactory SHALL provide connection pooling and health monitoring for all AWS clients
+
+### Requirement 25
+
+**User Story:** As a security engineer, I want comprehensive authentication and authorization middleware, so that all API access is properly secured and audited.
+
+#### Acceptance Criteria
+
+1. WHEN API requests are made, THE Incident_Commander_System SHALL validate JWT tokens or API keys for all endpoints
+2. WHEN authentication fails, THE Incident_Commander_System SHALL log security events and return appropriate error responses
+3. WHILE processing requests, THE Incident_Commander_System SHALL enforce RBAC scopes and per-route guards
+4. WHERE rate limits are exceeded, THE Incident_Commander_System SHALL enforce SecurityConfig.api_rate_limit with proper throttling
+5. THE Incident_Commander_System SHALL implement CORS policies and audit logging for all sensitive routes
+
+### Requirement 26
+
+**User Story:** As a system operator, I want comprehensive observability and FinOps integration, so that I can monitor system performance and control costs effectively.
+
+#### Acceptance Criteria
+
+1. WHEN system operations occur, THE Incident_Commander_System SHALL export OpenTelemetry spans for all orchestrator phases
+2. WHEN costs exceed thresholds, THE FinOps_Controller SHALL make decisions about agent orchestration and model selection
+3. WHILE monitoring system health, THE Incident_Commander_System SHALL expose /metrics endpoint with Prometheus-compatible metrics
+4. WHERE budget limits are approached, THE FinOps_Controller SHALL emit alerts and adjust resource allocation
+5. THE Incident_Commander_System SHALL track MTTR, spend caps, and guardrail status in real-time dashboards
+
+### Requirement 27
+
+**User Story:** As a demo presenter, I want enhanced dashboard connectivity and documentation, so that demonstrations are compelling and well-documented.
+
+#### Acceptance Criteria
+
+1. WHEN incidents occur, THE Dashboard SHALL receive real-time WebSocket feeds from the incident lifecycle data
+2. WHEN backend services are offline, THE Dashboard SHALL provide fallback displays and graceful degradation
+3. WHILE demonstrations are running, THE Incident_Commander_System SHALL provide updated screenshots and video content
+4. WHERE judges interact with the system, THE Dashboard SHALL offer judge-friendly configuration presets
+5. THE Incident_Commander_System SHALL provide automated demo startup and teardown with Make targets
+
+### Requirement 28
+
+**User Story:** As a quality assurance engineer, I want comprehensive validation and testing infrastructure, so that system reliability and compliance can be verified.
+
+#### Acceptance Criteria
+
+1. WHEN running tests, THE Incident_Commander_System SHALL execute full pytest suite with AWS, FinOps, and guardrail coverage
+2. WHEN validating contracts, THE Incident_Commander_System SHALL provide contract tests for auth and observability layers
+3. WHILE testing AWS services, THE Incident_Commander_System SHALL use LocalStack harnesses to avoid live service dependencies
+4. WHERE validation artifacts are needed, THE Incident_Commander_System SHALL capture coverage reports, LocalStack logs, and performance benchmarks
+5. THE Incident_Commander_System SHALL provide documented rollback plans and DevPost-ready submission assets

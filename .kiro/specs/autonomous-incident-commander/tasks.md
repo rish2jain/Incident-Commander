@@ -692,6 +692,138 @@ All Milestone 2 components have been successfully implemented and tested:
   - Implement incident response procedures for the incident response system
   - _Requirements: 22.1, 22.2, 22.3_
 
+## Phase-Based Implementation (Missing Features Integration)
+
+### Phase 1 – Platform Stabilization
+
+- [ ] 19.1 Implement missing AWS client helpers with aioboto3
+
+  - Create AWSServiceFactory.get_stepfunctions_client() for consensus coordination
+  - Add Inspector and Cost Explorer client implementations with proper configuration
+  - Implement connection pooling and health monitoring for all AWS clients
+  - Add retry/backoff and timeout guards on all AWS service calls
+  - _Requirements: 24.1, 24.2, 24.4, 24.5_
+
+- [ ] 19.2 Create LocalStack fixtures and offline testing infrastructure
+
+  - Implement LocalStack harnesses for all AWS-dependent services (Bedrock, DynamoDB, Step Functions)
+  - Create test fixtures that work offline without live AWS credentials
+  - Add LocalStack initialization scripts for development environment setup
+  - Update existing tests to use LocalStack fixtures instead of live services
+  - _Requirements: 24.3, 28.3_
+
+- [ ] 19.3 Add comprehensive retry and timeout infrastructure
+
+  - Implement exponential backoff with jitter for all external service calls
+  - Add timeout guards on FinOps, security, and consensus workflows
+  - Create circuit breaker integration for AWS service failures
+  - Implement graceful degradation when AWS services are unavailable
+  - _Requirements: 24.2, 24.4_
+
+### Phase 2 – Security Hardening
+
+- [ ] 20.1 Implement authentication middleware and API security
+
+  - Create JWT/OIDC authentication middleware for all API endpoints
+  - Add API key validation system for demo and production access
+  - Implement RBAC scopes and per-route security guards
+  - Create user session management and token refresh mechanisms
+  - _Requirements: 25.1, 25.2, 25.3_
+
+- [ ] 20.2 Enforce CORS and security configuration
+
+  - Implement SecurityConfig enforcement in production mode
+  - Add rate limiting tied to SecurityConfig.api_rate_limit
+  - Create CORS policy enforcement with environment-specific origins
+  - Implement request validation and sanitization middleware
+  - _Requirements: 25.4, 25.5_
+
+- [ ] 20.3 Expand security audit and tamper-proof logging
+
+  - Implement tamper-proof hash logging into DynamoDB/OpenSearch
+  - Create comprehensive security event correlation and analysis
+  - Add cryptographic integrity verification for all audit logs
+  - Implement automated security incident detection and response
+  - _Requirements: 25.5, 7.5_
+
+### Phase 3 – Observability & FinOps
+
+- [ ] 21.1 Adopt OpenTelemetry SDK for comprehensive tracing
+
+  - Implement OpenTelemetry instrumentation for all orchestrator phases
+  - Define spans for agent coordination, consensus, and resolution workflows
+  - Add distributed tracing across multi-agent interactions
+  - Create trace correlation with business impact and cost metrics
+  - _Requirements: 26.1_
+
+- [ ] 21.2 Wire FinOps controller into agent orchestration
+
+  - Implement FinOpsController with budget-aware decision making
+  - Create cost-based model selection and resource allocation
+  - Add spend cap enforcement with automatic scaling adjustments
+  - Implement cost prediction and budget alert systems
+  - _Requirements: 26.2, 26.4_
+
+- [ ] 21.3 Expose metrics endpoint and create monitoring dashboards
+
+  - Implement /metrics endpoint with Prometheus-compatible format
+  - Export CloudWatch metrics for MTTR, spend caps, and guardrail status
+  - Create Grafana dashboard panels for real-time system monitoring
+  - Add performance regression detection and automated alerting
+  - _Requirements: 26.3, 26.5_
+
+### Phase 4 – Demo & Experience Polish
+
+- [ ] 22.1 Connect dashboard WebSocket feeds to real incident data
+
+  - Implement real-time WebSocket streaming from incident lifecycle manager
+  - Create fallback mechanisms when backend services are offline
+  - Add interactive demo controls with judge-friendly interfaces
+  - Implement demo scenario replay and analysis capabilities
+  - _Requirements: 27.1, 27.2, 27.4_
+
+- [ ] 22.2 Produce updated documentation and media assets
+
+  - Create updated screenshots and video demonstrations
+  - Refresh hackathon documentation and submission packages
+  - Update architecture diagrams to match implemented features
+  - Create judge-friendly configuration presets and quick-start guides
+  - _Requirements: 27.3, 27.4_
+
+- [ ] 22.3 Automate demo startup and teardown procedures
+
+  - Create Make targets for automated demo environment setup
+  - Implement one-click demo initialization and cleanup
+  - Add demo health checks and validation procedures
+  - Create demo performance monitoring and optimization
+  - _Requirements: 27.5_
+
+### Phase 5 – Validation & Packaging
+
+- [ ] 23.1 Run comprehensive test suite with full coverage
+
+  - Execute full pytest suite with AWS, FinOps, and guardrail coverage
+  - Add contract tests for authentication and observability layers
+  - Implement end-to-end validation with LocalStack integration
+  - Create automated test reporting and coverage analysis
+  - _Requirements: 28.1, 28.2, 28.3_
+
+- [ ] 23.2 Capture validation artifacts for submission
+
+  - Generate comprehensive coverage reports and performance benchmarks
+  - Capture LocalStack logs and integration test results
+  - Create validation certificates and compliance documentation
+  - Implement automated artifact collection and packaging
+  - _Requirements: 28.4, 28.5_
+
+- [ ] 23.3 Finalize DevPost and judge submission assets
+
+  - Create final architecture diagrams and system overview
+  - Generate metric snapshots and performance demonstrations
+  - Update demo recordings with latest features and capabilities
+  - Document rollback plans and operational procedures
+  - _Requirements: 28.5_
+
 ## Optional Enhancements Backlog
 
 - ✅ **4.3**: Deep detection accuracy benchmarking and regression harness.

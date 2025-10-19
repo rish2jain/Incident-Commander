@@ -80,12 +80,12 @@ node_modules/
 # Temporary files
 *.tmp
 *.temp
-# 
-Hackathon Submission Documents
+
+# Hackathon Submission Documents
 # These files are for hackathon preparation and should not be in the main repository
 
-# Main hackathon documents
-HACKATHON_SUBMISSION_CHECKLIST.md
+# Main hackathon documents (now in hackathon/ folder)
+# HACKATHON_SUBMISSION_CHECKLIST.md
 WINNING_STRATEGY.md
 COMPREHENSIVE_INTEGRATION_GUIDE.md
 ULTIMATE_INTEGRATION_STATUS.md
@@ -114,7 +114,7 @@ DEPLOYMENT_GUIDE.md
 
 # Archive folder with hackathon materials
 archive/
-archive/hackathon_submission_package.md
+# archive/hackathon_submission_package.md
 
 # Hackathon configuration files
 deployment_checklist.md
@@ -139,3 +139,53 @@ src/predictive_prevention.py
 src/enhanced_dashboard.py
 src/interactive_judge_demo.py
 src/ultimate_incident_commander.py
+
+# Additional hackathon files and patterns (now organized in hackathon/ folder)
+# *_hackathon_*
+# *hackathon*
+# HACKATHON_*
+# *_HACKATHON_*
+# hackathon_*
+*_validation_report*
+*_compliance_*
+*_COMPLETE.md
+*_READY.md
+*_STATUS.md
+FINAL_*
+ULTIMATE_*
+WINNING_*
+REAL_WORLD_*
+
+# Demo and presentation files
+demo_*
+record_demo_*
+master_demo_*
+start_demo*
+start_live_demo*
+simple_dashboard.py
+dashboard_backend.py
+test_dashboard_*
+validate_demo_*
+
+# Hackathon validation and testing (now in hackathon/ folder)
+# final_hackathon_*
+# hackathon_submission_*
+# hackathon_validation_*
+run_comprehensive_tests.py
+build_and_test.py
+
+# Infrastructure deployment (hackathon-specific)
+deploy_to_aws.py
+setup_aws_*
+setup_cloudwatch_*
+harden_security.py
+validate_api.py
+validate_websocket.py
+
+# Winning enhancements folder
+winning_enhancements/
+
+# Temporary hackathon artifacts
+*.hackathon
+*.demo
+*.submission

@@ -1,0 +1,98 @@
+{
+  "validation_time": "2025-10-19T16:06:47.780355",
+  "all_endpoints_passed": true,
+  "total_endpoints": 4,
+  "successful_endpoints": 4,
+  "average_response_time_ms": 186.77,
+  "base_url": "https://h8xlzr74h8.execute-api.us-east-1.amazonaws.com",
+  "results": [
+    {
+      "endpoint": "main",
+      "url": "https://h8xlzr74h8.execute-api.us-east-1.amazonaws.com",
+      "status_code": 200,
+      "response_time_ms": 459.19,
+      "success": true,
+      "content_type": "application/json",
+      "response_size": 553,
+      "json_response": {
+        "service": "Autonomous Incident Commander",
+        "description": "AI-powered multi-agent system for zero-touch incident resolution",
+        "features": [
+          "5 specialized AI agents powered by Claude 3.5 Sonnet",
+          "Zero-touch autonomous incident resolution",
+          "Byzantine consensus for fault-tolerant decisions",
+          "95% MTTR reduction (30+ minutes \u2192 3 minutes)",
+          "Predictive incident prevention",
+          "Real-time multi-agent coordination"
+        ],
+        "endpoints": [
+          "/health - Service health check",
+          "/demo/incident - Demo incident resolution",
+          "/demo/stats - Performance statistics"
+        ]
+      },
+      "json_valid": true,
+      "content_valid": true
+    },
+    {
+      "endpoint": "health",
+      "url": "https://h8xlzr74h8.execute-api.us-east-1.amazonaws.com/health",
+      "status_code": 200,
+      "response_time_ms": 84.97,
+      "success": true,
+      "content_type": "application/json",
+      "response_size": 122,
+      "json_response": {
+        "status": "healthy",
+        "service": "Incident Commander Demo",
+        "timestamp": "2025-10-19T16:06:47.588240",
+        "version": "1.0.0"
+      },
+      "json_valid": true,
+      "content_valid": true
+    },
+    {
+      "endpoint": "demo_incident",
+      "url": "https://h8xlzr74h8.execute-api.us-east-1.amazonaws.com/demo/incident",
+      "status_code": 200,
+      "response_time_ms": 111.73,
+      "success": true,
+      "content_type": "application/json",
+      "response_size": 248,
+      "json_response": {
+        "incident_id": "demo-cascade-001",
+        "status": "resolved",
+        "resolution_time": "2:47",
+        "agents_involved": [
+          "detection",
+          "diagnosis",
+          "resolution"
+        ],
+        "cost_saved": "$163,000",
+        "message": "Database cascade failure resolved autonomously in 2:47 minutes"
+      },
+      "json_valid": true,
+      "content_valid": true
+    },
+    {
+      "endpoint": "demo_stats",
+      "url": "https://h8xlzr74h8.execute-api.us-east-1.amazonaws.com/demo/stats",
+      "status_code": 200,
+      "response_time_ms": 91.19,
+      "success": true,
+      "content_type": "application/json",
+      "response_size": 177,
+      "json_response": {
+        "mttr_improvement": "95.2%",
+        "incidents_prevented": "85%",
+        "annual_savings": "$2,847,500",
+        "roi": "458%",
+        "payback_period": "6.2 months",
+        "aws_services": 8,
+        "agents_active": 5
+      },
+      "json_valid": true,
+      "content_valid": true
+    }
+  ]
+}

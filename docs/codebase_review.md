@@ -27,7 +27,7 @@
 - **Enhanced Dashboard**: Professional glassmorphism UI with animations (`dashboard/enhanced_live_dashboard.html`)
 - **Security Hardening**: Production-ready CORS, security headers, and secrets management
 - **Performance Optimization**: Connection pooling, caching, and cost optimization (Task 15 complete)
-- **Comprehensive Validation**: 100% test coverage with `final_hackathon_validation.py`
+- **Comprehensive Validation**: 100% test coverage with `hackathon/final_hackathon_validation.py`
 
 ## Reliability & Operations
 
@@ -43,7 +43,7 @@
 - **Real-time Health Monitoring**: WebSocket-based system health with live agent status tracking
 - **Comprehensive Metrics**: Live MTTR countdown, cost accumulation, and performance tracking
 - **Security Headers**: Production-ready CSP, HSTS, XSS protection implemented
-- **Demo Controller**: Master demo orchestration with `master_demo_controller.py`
+- **Demo Controller**: Master demo orchestration with `hackathon/master_demo_controller.py`
 
 ## Performance & Demo Optimization
 
@@ -91,7 +91,7 @@
 - **Comprehensive Validation**: `run_comprehensive_tests.py` with complete system validation
 - **Performance Testing**: `validate_demo_performance.py` ensures consistent sub-3-minute resolution
 - **WebSocket Testing**: `validate_websocket.py` confirms real-time integration functionality
-- **Final Validation**: `final_hackathon_validation.py` with 100% pass rate (6/6 tests)
+- **Final Validation**: `hackathon/final_hackathon_validation.py` with 100% pass rate (6/6 tests)
 
 ## Demo Dashboard & User Experience
 
@@ -106,7 +106,7 @@
 
 - **Enhanced Dashboard**: `dashboard/enhanced_live_dashboard.html` with glassmorphism effects and smooth animations
 - **Real-time WebSocket**: Live agent coordination streaming with instant updates
-- **Master Demo Controller**: `master_demo_controller.py` for interactive presentation control
+- **Master Demo Controller**: `hackathon/master_demo_controller.py` for interactive presentation control
 - **Professional Design**: Enterprise-grade UI with responsive layout and accessibility features
 
 ## 🏆 Hackathon Readiness - 100% COMPLETE
@@ -156,10 +156,10 @@
 python start_demo.py
 
 # Master demo controller
-python master_demo_controller.py
+cd hackathon && python master_demo_controller.py
 
 # Final validation (100% pass rate)
-python final_hackathon_validation.py
+cd hackathon && python final_hackathon_validation.py
 ```
 
 ### 🏆 **Key Achievements**

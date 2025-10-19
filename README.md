@@ -383,12 +383,14 @@ python start_demo.py
 ### **🎯 Master Demo Controller**
 
 ```bash
+cd hackathon
 python master_demo_controller.py
 ```
 
 ### **✅ Final Validation**
 
 ```bash
+cd hackathon
 python final_hackathon_validation.py
 ```
 

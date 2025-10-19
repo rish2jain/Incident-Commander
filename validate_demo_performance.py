@@ -7,11 +7,12 @@ and provides consistent experience for hackathon presentation.
 """
 
 import asyncio
-import time
 import json
+import os
 import statistics
-from typing import List, Dict, Any
+import time
 from datetime import datetime, timedelta
+from typing import Any, Dict, List
 
 try:
     import aiohttp
@@ -26,8 +27,12 @@ class DemoPerformanceValidator:
     """Validates demo performance and consistency."""
     
     def __init__(self):
-        self.api_base = "http://localhost:8000"
-        self.ws_url = "ws://localhost:8000/ws"
+        self.api_base = os.environ.get("HACKATHON_API_URL", "http://localhost:8000").rstrip("/")
+        self.ws_url = os.environ.get(
+            "HACKATHON_WEBSOCKET_URL",
+            self.api_base.replace("http", "ws") + "/dashboard/ws"
+        )
+        self.dashboard_metrics_endpoint = f"{self.api_base}/dashboard/demo-metrics"
         self.performance_targets = {
             "incident_resolution_seconds": 180,  # 3 minutes max
             "api_response_ms": 500,  # 500ms max
@@ -41,9 +46,9 @@ class DemoPerformanceValidator:
         
         endpoints = [
             "/health",
-            "/status", 
-            "/demo/scenarios",
-            "/agents/status"
+            "/system-status",
+            "/dashboard/metrics",
+            "/dashboard/demo-metrics"
         ]
         
         results = {}
@@ -134,10 +139,14 @@ class DemoPerformanceValidator:
         """Test demo scenario trigger performance."""
         print("🎯 Testing scenario trigger performance...")
         
-        scenarios = ["database_cascade", "ddos_attack", "memory_leak"]
         results = {}
         
         async with aiohttp.ClientSession() as session:
+            scenarios = await self._load_available_scenarios(session)
+            if not scenarios:
+                print("⚠️  No scenarios available from demo metrics")
+                return {"error": "No scenarios available", "meets_target": False}
+
             for scenario in scenarios:
                 trigger_times = []
                 
@@ -145,7 +154,10 @@ class DemoPerformanceValidator:
                     start_time = time.time()
                     
                     try:
-                        async with session.post(f"{self.api_base}/demo/scenarios/{scenario}") as response:
+                        async with session.post(
+                            f"{self.api_base}/dashboard/trigger-demo",
+                            json={"scenario_type": scenario}
+                        ) as response:
                             await response.text()
                             trigger_time_ms = (time.time() - start_time) * 1000
                             trigger_times.append(trigger_time_ms)
@@ -162,18 +174,32 @@ class DemoPerformanceValidator:
                 
                 if trigger_times:
                     avg_trigger_time = statistics.mean(trigger_times)
+                    max_trigger_time = max(trigger_times)
                     meets_target = avg_trigger_time <= self.performance_targets["scenario_trigger_ms"]
-                    
+
                     results[scenario] = {
                         "avg_ms": avg_trigger_time,
+                        "max_ms": max_trigger_time,
                         "meets_target": meets_target
                     }
-                    
+
                     status = "✅" if meets_target else "❌"
-                    print(f"  {status} {scenario}: {avg_trigger_time:.1f}ms trigger time")
-        
+                    print(f"  {status} {scenario}: {avg_trigger_time:.1f}ms avg, {max_trigger_time:.1f}ms max")
+
         return results
-    
+
+    async def _load_available_scenarios(self, session: aiohttp.ClientSession) -> List[str]:
+        try:
+            async with session.get(self.dashboard_metrics_endpoint) as response:
+                if response.status != 200:
+                    return []
+                payload = await response.json()
+                scenarios = payload.get("available_scenarios", [])
+                # Limit to a few scenarios for quicker validation cycles
+                return scenarios[:3]
+        except Exception:
+            return []
+
     async def test_end_to_end_incident_flow(self) -> Dict[str, Any]:
         """Test complete incident processing flow timing."""
         print("🔄 Testing end-to-end incident flow...")
@@ -200,11 +226,13 @@ class DemoPerformanceValidator:
                                 data = json.loads(message)
                                 messages_received.append(data)
                                 
-                                if data['type'] == 'incident_started':
-                                    start_time = time.time()
-                                elif data['type'] == 'incident_resolved':
-                                    resolution_time = time.time()
-                                    break
+                                if data['type'] == 'incident_update':
+                                    phase = data.get('data', {}).get('incident', {}).get('phase')
+                                    if phase in {"scenario_started", "detecting"} and start_time is None:
+                                        start_time = time.time()
+                                    if phase == 'resolved':
+                                        resolution_time = time.time()
+                                        break
                                     
                             except websockets.exceptions.ConnectionClosed:
                                 break
@@ -214,7 +242,10 @@ class DemoPerformanceValidator:
                     
                     # Trigger incident
                     async with aiohttp.ClientSession() as session:
-                        async with session.post(f"{self.api_base}/demo/scenarios/memory_leak") as response:
+                        async with session.post(
+                            f"{self.api_base}/dashboard/trigger-demo",
+                            json={"scenario_type": "memory_leak"}
+                        ) as response:
                             if response.status != 200:
                                 print(f"❌ Failed to trigger incident: {response.status}")
                                 continue
@@ -315,7 +346,10 @@ class DemoPerformanceValidator:
         
         # Scenario Triggers Summary
         scenario_results = results['scenario_triggers']
-        scenario_passed = all(scenario['meets_target'] for scenario in scenario_results.values())
+        if isinstance(scenario_results, dict) and scenario_results and 'error' not in scenario_results:
+            scenario_passed = all(scenario['meets_target'] for scenario in scenario_results.values())
+        else:
+            scenario_passed = False
         print(f"Scenario Triggers: {'✅ PASS' if scenario_passed else '❌ FAIL'}")
         if not scenario_passed:
             all_targets_met = False

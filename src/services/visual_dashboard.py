@@ -145,6 +145,7 @@ class VisualDashboard:
         # Broadcast scene initialization to connected clients
         await self.websocket_manager.broadcast(WebSocketMessage(
             type="3d_scene_initialized",
+            timestamp=datetime.utcnow(),
             data=scene_data
         ))
         
@@ -179,6 +180,7 @@ class VisualDashboard:
         # Broadcast agent addition
         await self.websocket_manager.broadcast(WebSocketMessage(
             type="3d_agent_added",
+            timestamp=datetime.utcnow(),
             data={
                 "agent": asdict(agent_position),
                 "scene_stats": {
@@ -206,6 +208,7 @@ class VisualDashboard:
         # Broadcast agent state update
         await self.websocket_manager.broadcast(WebSocketMessage(
             type="3d_agent_state_updated",
+            timestamp=datetime.utcnow(),
             data={
                 "agent_id": agent_id,
                 "state": state.value,
@@ -231,6 +234,7 @@ class VisualDashboard:
         # Broadcast animation start
         await self.websocket_manager.broadcast(WebSocketMessage(
             type="3d_agent_animation",
+            timestamp=datetime.utcnow(),
             data={
                 "agent_id": agent_id,
                 "animation_type": "move",
@@ -270,6 +274,7 @@ class VisualDashboard:
         # Broadcast connection creation
         await self.websocket_manager.broadcast(WebSocketMessage(
             type="3d_agent_connection",
+            timestamp=datetime.utcnow(),
             data={
                 "connection": asdict(connection),
                 "from_position": {
@@ -321,6 +326,7 @@ class VisualDashboard:
         # Broadcast incident visualization
         await self.websocket_manager.broadcast(WebSocketMessage(
             type="3d_incident_added",
+            timestamp=datetime.utcnow(),
             data={
                 "incident": asdict(incident_viz),
                 "affected_agent_positions": [
@@ -350,6 +356,7 @@ class VisualDashboard:
         # Broadcast incident status update
         await self.websocket_manager.broadcast(WebSocketMessage(
             type="3d_incident_updated",
+            timestamp=datetime.utcnow(),
             data={
                 "incident_id": incident_id,
                 "status": status,
@@ -397,6 +404,7 @@ class VisualDashboard:
         # Broadcast configuration update
         await self.websocket_manager.broadcast(WebSocketMessage(
             type="3d_scene_config_updated",
+            timestamp=datetime.utcnow(),
             data={
                 "config": asdict(self.scene_config),
                 "timestamp": datetime.utcnow().isoformat()
@@ -414,6 +422,7 @@ class VisualDashboard:
         # Broadcast scene clear
         await self.websocket_manager.broadcast(WebSocketMessage(
             type="3d_scene_cleared",
+            timestamp=datetime.utcnow(),
             data={"timestamp": datetime.utcnow().isoformat()}
         ))
         
@@ -433,6 +442,7 @@ class VisualDashboard:
             # Broadcast connection removal
             await self.websocket_manager.broadcast(WebSocketMessage(
                 type="3d_connection_removed",
+                timestamp=datetime.utcnow(),
                 data={
                     "from_agent": connection.from_agent,
                     "to_agent": connection.to_agent,
@@ -450,6 +460,7 @@ class VisualDashboard:
             # Broadcast incident removal
             await self.websocket_manager.broadcast(WebSocketMessage(
                 type="3d_incident_removed",
+                timestamp=datetime.utcnow(),
                 data={"incident_id": incident_id}
             ))
 

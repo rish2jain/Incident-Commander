@@ -175,6 +175,7 @@ class Interactive3DDemoController:
         # Broadcast demo interface initialization
         await self.websocket_manager.broadcast(WebSocketMessage(
             type="3d_demo_interface_initialized",
+            timestamp=datetime.utcnow(),
             data={
                 "scene_state": scene_state,
                 "camera_presets": {name: asdict(pos) for name, pos in self.camera_presets.items()},
@@ -222,6 +223,7 @@ class Interactive3DDemoController:
         # Broadcast scenario start
         await self.websocket_manager.broadcast(WebSocketMessage(
             type="3d_demo_scenario_started",
+            timestamp=datetime.utcnow(),
             data={
                 "scenario": asdict(scenario),
                 "controls_enabled": True,
@@ -284,6 +286,7 @@ class Interactive3DDemoController:
         # Broadcast camera change
         await self.websocket_manager.broadcast(WebSocketMessage(
             type="3d_camera_change",
+            timestamp=datetime.utcnow(),
             data={
                 "camera_position": asdict(camera_pos),
                 "animate": animate,
@@ -325,6 +328,7 @@ class Interactive3DDemoController:
         # Broadcast performance overlay update
         await self.websocket_manager.broadcast(WebSocketMessage(
             type="3d_performance_overlay",
+            timestamp=datetime.utcnow(),
             data={
                 "current_metrics": asdict(metrics),
                 "trends": {
@@ -350,6 +354,7 @@ class Interactive3DDemoController:
         # Broadcast camera path animation
         await self.websocket_manager.broadcast(WebSocketMessage(
             type="3d_camera_path",
+            timestamp=datetime.utcnow(),
             data={
                 "waypoints": waypoints,
                 "duration_seconds": duration_seconds,
@@ -383,6 +388,7 @@ class Interactive3DDemoController:
         
         await self.websocket_manager.broadcast(WebSocketMessage(
             type="3d_demo_paused",
+            timestamp=datetime.utcnow(),
             data={"timestamp": datetime.utcnow().isoformat()}
         ))
         
@@ -395,6 +401,7 @@ class Interactive3DDemoController:
         
         await self.websocket_manager.broadcast(WebSocketMessage(
             type="3d_demo_resumed",
+            timestamp=datetime.utcnow(),
             data={"timestamp": datetime.utcnow().isoformat()}
         ))
         
@@ -407,6 +414,7 @@ class Interactive3DDemoController:
         
         await self.websocket_manager.broadcast(WebSocketMessage(
             type="3d_demo_speed_changed",
+            timestamp=datetime.utcnow(),
             data={
                 "speed": self.demo_speed,
                 "timestamp": datetime.utcnow().isoformat()
@@ -422,6 +430,7 @@ class Interactive3DDemoController:
         
         await self.websocket_manager.broadcast(WebSocketMessage(
             type="3d_metrics_overlay_toggled",
+            timestamp=datetime.utcnow(),
             data={
                 "enabled": self.metrics_overlay_enabled,
                 "timestamp": datetime.utcnow().isoformat()
@@ -438,6 +447,7 @@ class Interactive3DDemoController:
         
         await self.websocket_manager.broadcast(WebSocketMessage(
             type="3d_agent_highlight",
+            timestamp=datetime.utcnow(),
             data={
                 "agent_id": agent_id,
                 "highlight_duration_ms": 3000,
@@ -456,6 +466,7 @@ class Interactive3DDemoController:
         
         await self.websocket_manager.broadcast(WebSocketMessage(
             type="3d_zoom_to_incident",
+            timestamp=datetime.utcnow(),
             data={
                 "incident_id": incident_id,
                 "zoom_duration_ms": 2000,
@@ -478,6 +489,7 @@ class Interactive3DDemoController:
         
         await self.websocket_manager.broadcast(WebSocketMessage(
             type="3d_scene_reset",
+            timestamp=datetime.utcnow(),
             data={"timestamp": datetime.utcnow().isoformat()}
         ))
         

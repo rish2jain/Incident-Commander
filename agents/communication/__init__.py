@@ -5,7 +5,11 @@ Provides resilient communication capabilities with deduplication and stakeholder
 """
 
 from .templates import MessageTemplateManager
-# from .agent import ResilientCommunicationAgent  # TODO: Implement communication agent
-# from .channels import NotificationChannelManager  # TODO: Implement channel manager
+from .agent import ResilientCommunicationAgent
+from .channels import NotificationChannelManager
 
-__all__ = ["MessageTemplateManager"]
+__all__ = [
+    "MessageTemplateManager",
+    "ResilientCommunicationAgent", 
+    "NotificationChannelManager"
+]

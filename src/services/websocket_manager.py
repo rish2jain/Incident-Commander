@@ -221,6 +221,19 @@ class WebSocketManager:
         
         await self._queue_broadcast(message)
         
+    async def broadcast(self, message: WebSocketMessage):
+        """
+        Generic broadcast method for WebSocket messages.
+        
+        Args:
+            message: WebSocket message to broadcast
+        """
+        # Ensure timestamp is set
+        if not hasattr(message, 'timestamp') or message.timestamp is None:
+            message.timestamp = datetime.utcnow()
+            
+        await self._queue_broadcast(message)
+        
     async def handle_client_message(self, connection_id: str, message_data: Dict[str, Any]):
         """
         Handle incoming message from client.
@@ -366,13 +379,192 @@ class WebSocketManager:
                 
     async def _handle_demo_trigger(self, connection_id: str):
         """Handle demo incident trigger request."""
-        # TODO: Integrate with incident simulation system
         logger.info(f"Demo incident triggered by {connection_id}")
+        
+        try:
+            # Import demo controller
+            from src.services.demo_controller import get_demo_controller, DemoScenarioType
+            from src.models.incident import Incident, IncidentSeverity, ServiceTier, BusinessImpact
+            
+            # Get demo controller instance
+            demo_controller = get_demo_controller()
+            
+            # Select a random demo scenario for variety
+            import random
+            scenarios = list(DemoScenarioType)
+            scenario_type = random.choice(scenarios)
+            
+            logger.info(f"Starting demo scenario: {scenario_type.value}")
+            
+            # Start the demo scenario (async operation)
+            # This will create an incident and execute the full workflow
+            asyncio.create_task(self._execute_demo_scenario(demo_controller, scenario_type, connection_id))
+            
+            # Immediately broadcast demo trigger acknowledgment
+            await self.broadcast(
+                message_type='demo_triggered',
+                data={
+                    'status': 'started',
+                    'scenario': scenario_type.value,
+                    'timestamp': datetime.utcnow().isoformat(),
+                    'triggered_by': connection_id
+                },
+                priority=3  # High priority for demo events
+            )
+            
+            logger.info(f"Demo scenario {scenario_type.value} initiated successfully")
+            
+        except Exception as e:
+            logger.error(f"Error triggering demo incident: {e}")
+            # Broadcast error to clients
+            await self.broadcast(
+                message_type='demo_error',
+                data={
+                    'status': 'error',
+                    'error': str(e),
+                    'timestamp': datetime.utcnow().isoformat()
+                },
+                priority=2
+            )
+    
+    async def _execute_demo_scenario(self, demo_controller, scenario_type, connection_id: str):
+        """Execute demo scenario and broadcast progress updates."""
+        try:
+            # Start the demo scenario
+            session = await demo_controller.start_demo_scenario(scenario_type)
+            
+            # Broadcast scenario start
+            await self.broadcast(
+                message_type='demo_scenario_started',
+                data={
+                    'session_id': session.session_id,
+                    'scenario': scenario_type.value,
+                    'incident_id': session.incident_id,
+                    'timestamp': datetime.utcnow().isoformat()
+                },
+                priority=3
+            )
+            
+            # Monitor and broadcast demo progress
+            # In production, this would stream real-time updates
+            logger.info(f"Demo scenario {scenario_type.value} executing with session {session.session_id}")
+            
+        except Exception as e:
+            logger.error(f"Error executing demo scenario: {e}")
+            await self.broadcast(
+                message_type='demo_scenario_error',
+                data={'error': str(e)},
+                priority=2
+            )
         
     async def _handle_agent_reset(self, connection_id: str):
         """Handle agent reset request."""
-        # TODO: Integrate with agent coordinator
         logger.info(f"Agent reset requested by {connection_id}")
+        
+        try:
+            # Import agent coordinators
+            from src.services.agent_swarm_coordinator import AgentSwarmCoordinator
+            from src.services.enhanced_consensus_coordinator import get_enhanced_coordinator
+            
+            # Get coordinator instances
+            try:
+                enhanced_coordinator = await get_enhanced_coordinator()
+                coordinator = enhanced_coordinator
+            except Exception:
+                # Fallback to base coordinator if enhanced not available
+                coordinator = AgentSwarmCoordinator()
+            
+            logger.info("Resetting agent states and metrics")
+            
+            # Reset agent states
+            reset_results = {
+                'agents_reset': [],
+                'state_cleared': False,
+                'metrics_reset': False,
+                'timestamp': datetime.utcnow().isoformat()
+            }
+            
+            # Clear agent states if coordinator has agent tracking
+            if hasattr(coordinator, 'agent_states'):
+                for agent_name in coordinator.agent_states.keys():
+                    # Reset each agent's state
+                    coordinator.agent_states[agent_name] = 'idle'
+                    reset_results['agents_reset'].append(agent_name)
+                reset_results['state_cleared'] = True
+            
+            # Reset workflow tracking
+            if hasattr(coordinator, 'active_workflows'):
+                coordinator.active_workflows.clear()
+            
+            # Reset consensus metrics if using enhanced coordinator
+            if hasattr(coordinator, 'enhanced_metrics'):
+                coordinator.enhanced_metrics.total_consensus_rounds = 0
+                coordinator.enhanced_metrics.byzantine_faults_detected = 0
+                coordinator.enhanced_metrics.consensus_success_rate = 0.0
+                coordinator.enhanced_metrics.average_consensus_time_ms = 0.0
+                coordinator.enhanced_metrics.isolated_agents.clear()
+                reset_results['metrics_reset'] = True
+            
+            # Reset PBFT state if available
+            if hasattr(coordinator, 'pbft_engine'):
+                coordinator.pbft_engine.active_rounds.clear()
+                coordinator.pbft_engine.completed_rounds.clear()
+                coordinator.pbft_engine.message_log.clear()
+                coordinator.pbft_engine.isolated_nodes.clear()
+                coordinator.pbft_engine.view_changes = 0
+                coordinator.pbft_engine.byzantine_detections = 0
+                reset_results['pbft_reset'] = True
+            
+            # Clear agent behavior history if it exists
+            if hasattr(coordinator, 'agent_behavior_history'):
+                coordinator.agent_behavior_history.clear()
+                reset_results['history_cleared'] = True
+            
+            logger.info(f"Agent reset completed: {reset_results}")
+            
+            # Broadcast reset confirmation to all clients
+            await self.broadcast(
+                message_type='agent_reset_complete',
+                data={
+                    'status': 'success',
+                    'reset_results': reset_results,
+                    'requested_by': connection_id,
+                    'timestamp': datetime.utcnow().isoformat()
+                },
+                priority=3  # High priority for system events
+            )
+            
+            # Also broadcast updated agent states
+            agent_states = {}
+            if hasattr(coordinator, 'agent_states'):
+                agent_states = {
+                    agent: state for agent, state in coordinator.agent_states.items()
+                }
+            
+            await self.broadcast(
+                message_type='agent_states_update',
+                data={
+                    'agent_states': agent_states,
+                    'timestamp': datetime.utcnow().isoformat()
+                },
+                priority=2
+            )
+            
+            logger.info(f"Agent reset broadcast completed for request from {connection_id}")
+            
+        except Exception as e:
+            logger.error(f"Error resetting agents: {e}")
+            # Broadcast error to clients
+            await self.broadcast(
+                message_type='agent_reset_error',
+                data={
+                    'status': 'error',
+                    'error': str(e),
+                    'requested_by': connection_id,
+                    'timestamp': datetime.utcnow().isoformat()
+                },
+                priority=2
+            )
         
     def get_metrics(self) -> Dict[str, Any]:
         """Get WebSocket manager performance metrics."""

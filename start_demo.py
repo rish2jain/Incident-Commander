@@ -5,12 +5,28 @@ Demo startup script for Incident Commander WebSocket integration.
 Starts the FastAPI server and opens the live dashboard for testing.
 """
 
-import asyncio
+import os
 import subprocess
 import sys
 import time
 import webbrowser
 from pathlib import Path
+
+
+API_BASE = os.environ.get("HACKATHON_API_URL", "http://localhost:8000")
+DASHBOARD_PORT = int(os.environ.get("HACKATHON_DASHBOARD_PORT", "3000"))
+DASHBOARD_BASE = os.environ.get(
+    "HACKATHON_DASHBOARD_BASE",
+    f"http://localhost:{DASHBOARD_PORT}"
+)
+DASHBOARD_PAGE = os.environ.get(
+    "HACKATHON_DASHBOARD_URL",
+    f"{DASHBOARD_BASE}/comprehensive_demo_dashboard.html"
+)
+WEBSOCKET_URL = os.environ.get(
+    "HACKATHON_WEBSOCKET_URL",
+    API_BASE.replace("http", "ws") + "/dashboard/ws"
+)
 
 
 def start_fastapi_server():
@@ -37,7 +53,7 @@ def start_dashboard_server():
     
     # Start simple HTTP server for dashboard
     process = subprocess.Popen([
-        sys.executable, "-m", "http.server", "3000"
+        sys.executable, "-m", "http.server", str(DASHBOARD_PORT)
     ], cwd=dashboard_dir)
     
     return process
@@ -74,28 +90,27 @@ def main():
         # Wait for servers to start
         print("⏳ Waiting for servers to start...")
         
-        if wait_for_server("http://localhost:8000/health"):
-            print("✅ FastAPI server ready at http://localhost:8000")
+        if wait_for_server(f"{API_BASE.rstrip('/')}/health"):
+            print(f"✅ FastAPI server ready at {API_BASE}")
         else:
             print("❌ FastAPI server failed to start")
             return
         
-        if wait_for_server("http://localhost:3000"):
-            print("✅ Dashboard server ready at http://localhost:3000")
+        if wait_for_server(DASHBOARD_BASE):
+            print(f"✅ Dashboard server ready at {DASHBOARD_BASE}")
         else:
             print("❌ Dashboard server failed to start")
             return
         
         # Open dashboard in browser
-        dashboard_url = "http://localhost:3000/live_dashboard.html"
-        print(f"🌐 Opening dashboard: {dashboard_url}")
-        webbrowser.open(dashboard_url)
+        print(f"🌐 Opening dashboard: {DASHBOARD_PAGE}")
+        webbrowser.open(DASHBOARD_PAGE)
         
         print("\n" + "=" * 50)
         print("🎉 Demo environment ready!")
-        print("📊 Dashboard: http://localhost:3000/live_dashboard.html")
-        print("🔌 API: http://localhost:8000")
-        print("📡 WebSocket: ws://localhost:8000/ws")
+        print(f"📊 Dashboard: {DASHBOARD_PAGE}")
+        print(f"🔌 API: {API_BASE}")
+        print(f"📡 WebSocket: {WEBSOCKET_URL}")
         print("\n💡 Try triggering a demo scenario from the dashboard!")
         print("Press Ctrl+C to stop...")
         

@@ -5,18 +5,23 @@ Hackathon Deployment Validation Script
 Validates that all systems are ready for hackathon submission and demo.
 """
 
-import requests
 import json
+import os
 import time
-from typing import Dict, Any, List
 from datetime import datetime
+from typing import Any, Dict, List
+
+import requests
 
 
 class HackathonValidator:
     """Validates hackathon deployment readiness."""
     
     def __init__(self):
-        self.base_url = "https://h8xlzr74h8.execute-api.us-east-1.amazonaws.com"
+        self.base_url = os.environ.get(
+            "HACKATHON_API_URL",
+            "https://h8xlzr74h8.execute-api.us-east-1.amazonaws.com"
+        ).rstrip("/")
         self.endpoints = {
             'main': '',
             'health': '/health',

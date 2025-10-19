@@ -129,6 +129,7 @@ class RealtimeVisualizationIntegrator:
         # Broadcast agent action visualization
         await self.websocket_manager.broadcast(WebSocketMessage(
             type="agent_visualization_update",
+            timestamp=datetime.utcnow(),
             data={
                 "agent_id": agent_id,
                 "agent_type": update.agent_type,
@@ -196,6 +197,7 @@ class RealtimeVisualizationIntegrator:
         # Broadcast communication visualization
         await self.websocket_manager.broadcast(WebSocketMessage(
             type="agent_communication_visual",
+            timestamp=datetime.utcnow(),
             data={
                 "communication": interaction,
                 "visualization": {
@@ -237,6 +239,7 @@ class RealtimeVisualizationIntegrator:
         # Broadcast consensus visualization
         await self.websocket_manager.broadcast(WebSocketMessage(
             type="consensus_visualization",
+            timestamp=datetime.utcnow(),
             data={
                 "participating_agents": agents,
                 "consensus_data": consensus_data,
@@ -287,6 +290,7 @@ class RealtimeVisualizationIntegrator:
         # Broadcast incident visualization
         await self.websocket_manager.broadcast(WebSocketMessage(
             type="incident_visualization",
+            timestamp=datetime.utcnow(),
             data={
                 "incident_id": incident_id,
                 "incident_data": incident_data,
@@ -333,6 +337,7 @@ class RealtimeVisualizationIntegrator:
         # Broadcast resolution visualization
         await self.websocket_manager.broadcast(WebSocketMessage(
             type="incident_resolution_visual",
+            timestamp=datetime.utcnow(),
             data={
                 "incident_id": incident_id,
                 "resolution_data": resolution_data,
@@ -378,6 +383,7 @@ class RealtimeVisualizationIntegrator:
         # Broadcast visualization toggle
         await self.websocket_manager.broadcast(WebSocketMessage(
             type="visualization_toggled",
+            timestamp=datetime.utcnow(),
             data={
                 "enabled": enabled,
                 "timestamp": datetime.utcnow().isoformat()

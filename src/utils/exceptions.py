@@ -98,6 +98,11 @@ class ComplianceError(SecurityError):
     pass
 
 
+class ComplianceViolationError(ComplianceError):
+    """Raised when specific compliance violations are detected."""
+    pass
+
+
 class RateLimitError(IncidentCommanderError):
     """Raised when rate limit is exceeded."""
     pass
@@ -155,4 +160,46 @@ class CostOptimizationError(IncidentCommanderError):
 
 class ModelRoutingError(IncidentCommanderError):
     """Raised when model routing operations fail."""
+    pass
+
+
+# Byzantine Consensus specific exceptions
+class ByzantineConsensusError(ConsensusError):
+    """Raised when Byzantine consensus operations fail."""
+    pass
+
+
+class MaliciousAgentDetected(ByzantineFaultError):
+    """Raised when a malicious agent is detected."""
+    pass
+
+
+# Security specific exceptions
+class SecurityViolationError(SecurityError):
+    """Raised when security violations are detected."""
+    pass
+
+
+class GuardrailViolationError(SecurityError):
+    """Raised when guardrail violations are detected."""
+    pass
+
+
+class SecurityAuditError(SecurityError):
+    """Raised when automated security audit checks fail."""
+    pass
+
+
+class ChaosExperimentError(IncidentCommanderError):
+    """Raised when chaos experiments encounter errors."""
+    pass
+
+
+class SystemRecoveryError(IncidentCommanderError):
+    """Raised when automated system recovery actions fail."""
+    pass
+
+
+class BudgetExceededError(CostOptimizationError):
+    """Raised when operations exceed configured budgets."""
     pass

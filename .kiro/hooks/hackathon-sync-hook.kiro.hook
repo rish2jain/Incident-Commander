@@ -1,0 +1,25 @@
+{
+  "enabled": true,
+  "name": "Hackathon Demo Sync",
+  "description": "Monitors changes to core system files and automatically updates hackathon demo files, documentation, and validation scripts to ensure they reflect the latest features and capabilities",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "src/main.py",
+      "src/services/*.py",
+      "agents/*/agent.py",
+      "dashboard/*.html",
+      "dashboard/src/**/*.tsx",
+      "hackathon/*.py",
+      "hackathon/*.md",
+      "winning_enhancements/*.py",
+      "README.md",
+      "DEMO_*.md"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Core system files have been updated. Please review the changes and update the hackathon demo files to ensure they showcase the latest features. Specifically:\n\n1. Update hackathon/README.md with any new capabilities or features\n2. Refresh demo scripts in hackathon/ to include new functionality\n3. Update DEMO_*.md files to reflect current system state\n4. Ensure validation scripts test new features\n5. Update dashboard demos to show latest UI improvements\n6. Sync winning_enhancements/ with any new AWS AI service integrations\n7. Verify all demo documentation is current and accurate\n\nFocus on maintaining consistency between the core system and demo materials so judges see the most up-to-date capabilities."
+  }
+}

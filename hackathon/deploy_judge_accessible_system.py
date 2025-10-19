@@ -6,13 +6,15 @@ Creates a complete system that judges can access without any setup.
 Uses a simpler approach that works with AWS account restrictions.
 """
 
-import boto3
 import json
+import os
 import subprocess
 import sys
 import time
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any, Dict
+
+import boto3
 
 
 class JudgeAccessibleDeployer:
@@ -24,7 +26,11 @@ class JudgeAccessibleDeployer:
         self.lambda_client = self.session.client('lambda')
         self.apigateway = self.session.client('apigatewayv2')
         self.s3 = self.session.client('s3')
-        
+        self.api_base_url = os.environ.get(
+            "HACKATHON_API_URL",
+            "https://h8xlzr74h8.execute-api.us-east-1.amazonaws.com"
+        ).rstrip("/")
+
         # Use existing API function
         self.api_function_name = "incident-commander-demo"
         self.dashboard_function_name = "incident-commander-dashboard"
@@ -77,7 +83,7 @@ class JudgeAccessibleDeployer:
                     MemorySize=256,
                     Environment={
                         'Variables': {
-                            'API_BASE_URL': 'https://h8xlzr74h8.execute-api.us-east-1.amazonaws.com'
+                            'API_BASE_URL': self.api_base_url
                         }
                     }
                 )
@@ -623,7 +629,7 @@ All endpoints are live and responding - this is a real working system, not a moc
             dashboard_url = self.create_dashboard_api_gateway(dashboard_function_arn)
             
             # Step 3: Get existing API URL
-            api_url = "https://h8xlzr74h8.execute-api.us-east-1.amazonaws.com"
+            api_url = self.api_base_url
             
             print("\n" + "=" * 60)
             print("🎉 JUDGE-ACCESSIBLE SYSTEM DEPLOYED!")

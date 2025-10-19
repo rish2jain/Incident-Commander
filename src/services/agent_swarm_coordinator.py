@@ -482,9 +482,406 @@ class AgentSwarmCoordinator:
         workflow_state["human_escalation"] = escalation_context
         workflow_state["requires_human_intervention"] = True
         
-        # TODO: Integrate with actual escalation system (PagerDuty, Slack, etc.)
-        # For now, log the escalation
+        # Integrate with escalation systems
+        await self._send_escalation_notifications(escalation_context, incident)
+        
+        # Log the escalation
         logger.info(f"Escalation context preserved: {json.dumps(escalation_context, indent=2)}")
+    
+    async def _send_escalation_notifications(
+        self, 
+        escalation_context: Dict[str, Any], 
+        incident: Incident
+    ):
+        """Send escalation notifications through multiple channels."""
+        notification_tasks = []
+        
+        # PagerDuty Integration
+        try:
+            task = asyncio.create_task(
+                self._send_pagerduty_alert(escalation_context, incident)
+            )
+            notification_tasks.append(("pagerduty", task))
+        except Exception as e:
+            logger.error(f"Failed to create PagerDuty notification task: {e}")
+        
+        # Slack Integration
+        try:
+            task = asyncio.create_task(
+                self._send_slack_alert(escalation_context, incident)
+            )
+            notification_tasks.append(("slack", task))
+        except Exception as e:
+            logger.error(f"Failed to create Slack notification task: {e}")
+        
+        # Email Integration
+        try:
+            task = asyncio.create_task(
+                self._send_email_alert(escalation_context, incident)
+            )
+            notification_tasks.append(("email", task))
+        except Exception as e:
+            logger.error(f"Failed to create email notification task: {e}")
+        
+        # SMS Integration (for critical incidents)
+        if incident.severity.value in ["critical", "high"]:
+            try:
+                task = asyncio.create_task(
+                    self._send_sms_alert(escalation_context, incident)
+                )
+                notification_tasks.append(("sms", task))
+            except Exception as e:
+                logger.error(f"Failed to create SMS notification task: {e}")
+        
+        # Wait for all notifications to complete
+        results = {}
+        for channel, task in notification_tasks:
+            try:
+                result = await asyncio.wait_for(task, timeout=10.0)
+                results[channel] = {"success": True, "result": result}
+                logger.info(f"Escalation notification sent via {channel}")
+            except asyncio.TimeoutError:
+                results[channel] = {"success": False, "error": "timeout"}
+                logger.error(f"Escalation notification via {channel} timed out")
+            except Exception as e:
+                results[channel] = {"success": False, "error": str(e)}
+                logger.error(f"Escalation notification via {channel} failed: {e}")
+        
+        return results
+    
+    async def _send_pagerduty_alert(
+        self, 
+        escalation_context: Dict[str, Any], 
+        incident: Incident
+    ) -> Dict[str, Any]:
+        """Send PagerDuty alert for human escalation."""
+        import os
+        import aiohttp
+        
+        pagerduty_key = os.getenv("PAGERDUTY_INTEGRATION_KEY")
+        if not pagerduty_key:
+            logger.warning("PAGERDUTY_INTEGRATION_KEY not configured, skipping PagerDuty alert")
+            return {"skipped": True, "reason": "no_api_key"}
+        
+        payload = {
+            "routing_key": pagerduty_key,
+            "event_action": "trigger",
+            "dedup_key": f"incident_{incident.id}_{escalation_context['workflow_id']}",
+            "payload": {
+                "summary": f"Agent Escalation: {incident.title}",
+                "severity": self._map_severity_to_pagerduty(incident.severity.value),
+                "source": "incident_commander_agent_swarm",
+                "component": escalation_context["failed_agent"],
+                "group": "agent_coordination",
+                "class": "agent_failure",
+                "custom_details": {
+                    "incident_id": incident.id,
+                    "workflow_id": escalation_context["workflow_id"],
+                    "failed_agent": escalation_context["failed_agent"],
+                    "error": escalation_context["error"],
+                    "affected_users": incident.business_impact.affected_users,
+                    "revenue_impact_per_minute": incident.business_impact.revenue_impact_per_minute,
+                    "dashboard_link": f"https://incident-commander.example.com/incidents/{incident.id}"
+                }
+            },
+            "links": [{
+                "href": f"https://incident-commander.example.com/incidents/{incident.id}",
+                "text": "View Incident Dashboard"
+            }]
+        }
+        
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.post(
+                    "https://events.pagerduty.com/v2/enqueue",
+                    json=payload,
+                    timeout=aiohttp.ClientTimeout(total=5)
+                ) as response:
+                    response_data = await response.json()
+                    return {
+                        "status": response.status,
+                        "dedup_key": response_data.get("dedup_key"),
+                        "message": response_data.get("message")
+                    }
+        except Exception as e:
+            logger.error(f"PagerDuty alert failed: {e}")
+            raise
+    
+    async def _send_slack_alert(
+        self, 
+        escalation_context: Dict[str, Any], 
+        incident: Incident
+    ) -> Dict[str, Any]:
+        """Send Slack alert for human escalation."""
+        import os
+        import aiohttp
+        
+        slack_webhook_url = os.getenv("SLACK_WEBHOOK_URL")
+        if not slack_webhook_url:
+            logger.warning("SLACK_WEBHOOK_URL not configured, skipping Slack alert")
+            return {"skipped": True, "reason": "no_webhook_url"}
+        
+        severity_emoji = {
+            "critical": "🔴",
+            "high": "🟠",
+            "medium": "🟡",
+            "low": "🟢",
+            "info": "🔵"
+        }
+        
+        emoji = severity_emoji.get(incident.severity.value, "⚪")
+        
+        payload = {
+            "text": f"{emoji} *AGENT ESCALATION REQUIRED*",
+            "blocks": [
+                {
+                    "type": "header",
+                    "text": {
+                        "type": "plain_text",
+                        "text": f"{emoji} Agent Escalation Required"
+                    }
+                },
+                {
+                    "type": "section",
+                    "fields": [
+                        {
+                            "type": "mrkdwn",
+                            "text": f"*Incident:*\n{incident.title}"
+                        },
+                        {
+                            "type": "mrkdwn",
+                            "text": f"*Severity:*\n{incident.severity.value.upper()}"
+                        },
+                        {
+                            "type": "mrkdwn",
+                            "text": f"*Failed Agent:*\n{escalation_context['failed_agent']}"
+                        },
+                        {
+                            "type": "mrkdwn",
+                            "text": f"*Error:*\n{escalation_context['error'][:100]}..."
+                        }
+                    ]
+                },
+                {
+                    "type": "section",
+                    "fields": [
+                        {
+                            "type": "mrkdwn",
+                            "text": f"*Affected Users:*\n{incident.business_impact.affected_users:,}"
+                        },
+                        {
+                            "type": "mrkdwn",
+                            "text": f"*Revenue Impact:*\n${incident.business_impact.revenue_impact_per_minute:,.2f}/min"
+                        }
+                    ]
+                },
+                {
+                    "type": "actions",
+                    "elements": [
+                        {
+                            "type": "button",
+                            "text": {
+                                "type": "plain_text",
+                                "text": "View Dashboard"
+                            },
+                            "url": f"https://incident-commander.example.com/incidents/{incident.id}",
+                            "style": "primary"
+                        },
+                        {
+                            "type": "button",
+                            "text": {
+                                "type": "plain_text",
+                                "text": "Acknowledge"
+                            },
+                            "value": f"ack_{escalation_context['workflow_id']}",
+                            "style": "danger"
+                        }
+                    ]
+                }
+            ]
+        }
+        
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.post(
+                    slack_webhook_url,
+                    json=payload,
+                    timeout=aiohttp.ClientTimeout(total=5)
+                ) as response:
+                    return {
+                        "status": response.status,
+                        "ok": response.status == 200
+                    }
+        except Exception as e:
+            logger.error(f"Slack alert failed: {e}")
+            raise
+    
+    async def _send_email_alert(
+        self, 
+        escalation_context: Dict[str, Any], 
+        incident: Incident
+    ) -> Dict[str, Any]:
+        """Send email alert for human escalation."""
+        import os
+        import aiohttp
+        
+        sendgrid_api_key = os.getenv("SENDGRID_API_KEY")
+        escalation_email = os.getenv("ESCALATION_EMAIL_RECIPIENTS", "oncall@example.com")
+        
+        if not sendgrid_api_key:
+            logger.warning("SENDGRID_API_KEY not configured, skipping email alert")
+            return {"skipped": True, "reason": "no_api_key"}
+        
+        email_html = f"""
+        <html>
+        <body style="font-family: Arial, sans-serif;">
+            <h2 style="color: #d32f2f;">⚠️ Agent Escalation Required</h2>
+            <div style="background: #f5f5f5; padding: 20px; border-radius: 5px;">
+                <h3>{incident.title}</h3>
+                <p><strong>Severity:</strong> <span style="color: #d32f2f;">{incident.severity.value.upper()}</span></p>
+                <p><strong>Failed Agent:</strong> {escalation_context['failed_agent']}</p>
+                <p><strong>Error:</strong> {escalation_context['error']}</p>
+                <hr>
+                <p><strong>Business Impact:</strong></p>
+                <ul>
+                    <li>Affected Users: {incident.business_impact.affected_users:,}</li>
+                    <li>Revenue Impact: ${incident.business_impact.revenue_impact_per_minute:,.2f}/minute</li>
+                    <li>Service Tier: {incident.business_impact.service_tier.value}</li>
+                </ul>
+                <hr>
+                <p><strong>Workflow ID:</strong> {escalation_context['workflow_id']}</p>
+                <p><strong>Incident ID:</strong> {incident.id}</p>
+                <p><a href="https://incident-commander.example.com/incidents/{incident.id}" 
+                   style="background: #1976d2; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
+                   View Dashboard
+                </a></p>
+            </div>
+        </body>
+        </html>
+        """
+        
+        payload = {
+            "personalizations": [
+                {
+                    "to": [{"email": email} for email in escalation_email.split(",")],
+                    "subject": f"🚨 Agent Escalation: {incident.title}"
+                }
+            ],
+            "from": {
+                "email": "noreply@incident-commander.example.com",
+                "name": "Incident Commander"
+            },
+            "content": [
+                {
+                    "type": "text/html",
+                    "value": email_html
+                }
+            ]
+        }
+        
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.post(
+                    "https://api.sendgrid.com/v3/mail/send",
+                    json=payload,
+                    headers={
+                        "Authorization": f"Bearer {sendgrid_api_key}",
+                        "Content-Type": "application/json"
+                    },
+                    timeout=aiohttp.ClientTimeout(total=5)
+                ) as response:
+                    return {
+                        "status": response.status,
+                        "ok": response.status == 202
+                    }
+        except Exception as e:
+            logger.error(f"Email alert failed: {e}")
+            raise
+    
+    async def _send_sms_alert(
+        self, 
+        escalation_context: Dict[str, Any], 
+        incident: Incident
+    ) -> Dict[str, Any]:
+        """Send SMS alert for critical incidents via Twilio."""
+        import os
+        import aiohttp
+        from base64 import b64encode
+        
+        twilio_account_sid = os.getenv("TWILIO_ACCOUNT_SID")
+        twilio_auth_token = os.getenv("TWILIO_AUTH_TOKEN")
+        twilio_from_number = os.getenv("TWILIO_FROM_NUMBER")
+        oncall_phone_numbers = os.getenv("ONCALL_PHONE_NUMBERS", "").split(",")
+        
+        if not all([twilio_account_sid, twilio_auth_token, twilio_from_number]):
+            logger.warning("Twilio credentials not configured, skipping SMS alert")
+            return {"skipped": True, "reason": "no_twilio_credentials"}
+        
+        if not oncall_phone_numbers or not oncall_phone_numbers[0]:
+            logger.warning("ONCALL_PHONE_NUMBERS not configured, skipping SMS alert")
+            return {"skipped": True, "reason": "no_phone_numbers"}
+        
+        message_body = (
+            f"🚨 INCIDENT ESCALATION\n"
+            f"Severity: {incident.severity.value.upper()}\n"
+            f"Agent: {escalation_context['failed_agent']} FAILED\n"
+            f"Users affected: {incident.business_impact.affected_users:,}\n"
+            f"Revenue: ${incident.business_impact.revenue_impact_per_minute:,.0f}/min\n"
+            f"View: https://incident-commander.example.com/incidents/{incident.id}"
+        )
+        
+        # Twilio Basic Auth
+        auth_string = f"{twilio_account_sid}:{twilio_auth_token}"
+        auth_header = b64encode(auth_string.encode()).decode()
+        
+        sms_results = []
+        for phone_number in oncall_phone_numbers:
+            phone_number = phone_number.strip()
+            if not phone_number:
+                continue
+                
+            try:
+                async with aiohttp.ClientSession() as session:
+                    async with session.post(
+                        f"https://api.twilio.com/2010-04-01/Accounts/{twilio_account_sid}/Messages.json",
+                        data={
+                            "From": twilio_from_number,
+                            "To": phone_number,
+                            "Body": message_body
+                        },
+                        headers={
+                            "Authorization": f"Basic {auth_header}"
+                        },
+                        timeout=aiohttp.ClientTimeout(total=5)
+                    ) as response:
+                        sms_results.append({
+                            "phone": phone_number,
+                            "status": response.status,
+                            "ok": response.status == 201
+                        })
+            except Exception as e:
+                logger.error(f"SMS alert to {phone_number} failed: {e}")
+                sms_results.append({
+                    "phone": phone_number,
+                    "status": "error",
+                    "error": str(e)
+                })
+        
+        return {
+            "sms_sent": len([r for r in sms_results if r.get("ok")]),
+            "results": sms_results
+        }
+    
+    def _map_severity_to_pagerduty(self, severity: str) -> str:
+        """Map incident severity to PagerDuty severity levels."""
+        severity_map = {
+            "critical": "critical",
+            "high": "error",
+            "medium": "warning",
+            "low": "info",
+            "info": "info"
+        }
+        return severity_map.get(severity, "warning")
     
     async def _create_workflow_checkpoint(self, workflow_id: str):
         """Create workflow checkpoint for recovery."""

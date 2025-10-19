@@ -16,6 +16,7 @@ import asyncio
 import hashlib
 import json
 import time
+import uuid
 from datetime import datetime, timedelta
 from typing import Dict, List, Set, Optional, Any, Tuple
 from dataclasses import dataclass, field
@@ -123,18 +124,22 @@ class ByzantineFaultTolerantConsensus:
     Supports up to f = (n-1)/3 Byzantine (malicious) agents.
     """
     
-    def __init__(self, node_id: str, total_nodes: int):
+    def __init__(self, node_id: str, total_nodes: int, websocket_manager: Optional[Any] = None):
         """
         Initialize PBFT consensus engine.
         
         Args:
             node_id: Unique identifier for this node
             total_nodes: Total number of nodes in the system
+            websocket_manager: Optional WebSocket manager for network broadcasting
         """
         self.node_id = node_id
         self.total_nodes = total_nodes
         self.fault_tolerance = (total_nodes - 1) // 3  # Maximum Byzantine nodes
         self.quorum_size = 2 * self.fault_tolerance + 1  # Minimum for safety
+        
+        # Network communication
+        self.websocket_manager = websocket_manager
         
         # PBFT state
         self.current_view = 0
@@ -399,9 +404,83 @@ class ByzantineFaultTolerantConsensus:
     
     async def _handle_view_change(self, message: PBFTMessage):
         """Handle view change message."""
-        # TODO: Implement view change protocol for primary failures
         logger.info(f"View change requested by {message.node_id}")
         self.view_changes += 1
+        
+        # Validate view change request
+        if message.view <= self.current_view:
+            logger.debug(f"Ignoring old view change for view {message.view}")
+            return
+        
+        # Record the view change message
+        view_change_key = f"view_{message.view}"
+        if view_change_key not in self.suspicious_patterns:
+            self.suspicious_patterns[view_change_key] = []
+        
+        # Store view change messages by view number
+        if not hasattr(self, 'view_change_messages'):
+            self.view_change_messages: Dict[int, Dict[str, PBFTMessage]] = {}
+        
+        if message.view not in self.view_change_messages:
+            self.view_change_messages[message.view] = {}
+        
+        self.view_change_messages[message.view][message.node_id] = message
+        
+        # Check if we have enough view change messages (2f+1)
+        view_change_count = len(self.view_change_messages[message.view])
+        
+        if view_change_count >= self.quorum_size:
+            # We have quorum for view change
+            logger.info(f"View change quorum reached for view {message.view} ({view_change_count} messages)")
+            
+            # Calculate new primary for this view
+            new_primary = self._calculate_primary(message.view)
+            
+            # If this node is the new primary, broadcast NEW-VIEW
+            if new_primary == self.node_id:
+                await self._broadcast_new_view(message.view)
+            
+            # Update to new view
+            self.current_view = message.view
+            self.primary_node = new_primary
+            
+            # Clear old active rounds that haven't completed
+            for seq in list(self.active_rounds.keys()):
+                round_info = self.active_rounds[seq]
+                if not round_info.decided:
+                    logger.info(f"Clearing incomplete round {seq} due to view change")
+                    del self.active_rounds[seq]
+            
+            logger.info(f"View changed to {self.current_view}, new primary: {self.primary_node}")
+    
+    async def _broadcast_new_view(self, view: int):
+        """Broadcast NEW-VIEW message as the new primary."""
+        # Collect checkpoint proofs from view change messages
+        checkpoint_proofs = []
+        if view in self.view_change_messages:
+            for node_id, msg in self.view_change_messages[view].items():
+                if 'checkpoint' in msg.payload:
+                    checkpoint_proofs.append({
+                        'node_id': node_id,
+                        'checkpoint': msg.payload['checkpoint']
+                    })
+        
+        new_view_msg = PBFTMessage(
+            message_type=MessageType.NEW_VIEW,
+            view=view,
+            sequence=self.sequence_number,
+            digest="",  # Not used for NEW-VIEW
+            node_id=self.node_id,
+            timestamp=datetime.utcnow(),
+            payload={
+                'checkpoint_proofs': checkpoint_proofs,
+                'view_change_messages': len(self.view_change_messages.get(view, {}))
+            }
+        )
+        
+        new_view_msg.signature = self._sign_message(new_view_msg)
+        await self._broadcast_message(new_view_msg)
+        logger.info(f"Broadcast NEW-VIEW for view {view}")
     
     def _calculate_primary(self, view: int) -> str:
         """Calculate primary node for given view."""
@@ -512,16 +591,128 @@ class ByzantineFaultTolerantConsensus:
     
     def _reconstruct_recommendation(self, payload: Dict[str, Any]) -> AgentRecommendation:
         """Reconstruct agent recommendation from message payload."""
-        # TODO: Implement proper reconstruction based on your AgentRecommendation model
-        # This is a placeholder implementation
-        return payload.get("recommendation", {})
+        # Extract recommendation data from payload
+        recommendation_data = payload.get("recommendation", {})
+        
+        # Handle both dict and string representations
+        if isinstance(recommendation_data, str):
+            try:
+                recommendation_data = json.loads(recommendation_data)
+            except json.JSONDecodeError:
+                logger.error(f"Failed to parse recommendation string: {recommendation_data}")
+                # Return minimal recommendation as fallback
+                return AgentRecommendation(
+                    agent_name=AgentType.COORDINATOR,
+                    incident_id=payload.get("incident_id", "unknown"),
+                    action_type="investigate",
+                    action_id="fallback",
+                    confidence=0.5,
+                    risk_level="medium",
+                    estimated_impact="Unknown impact due to parsing error",
+                    reasoning="Failed to reconstruct full recommendation from payload"
+                )
+        
+        # Reconstruct full AgentRecommendation object
+        try:
+            # Handle enum fields
+            agent_name = recommendation_data.get("agent_name")
+            if isinstance(agent_name, str):
+                agent_name = AgentType(agent_name)
+            
+            # Reconstruct evidence list if present
+            evidence = []
+            if "evidence" in recommendation_data and isinstance(recommendation_data["evidence"], list):
+                # Evidence reconstruction would require Evidence model import
+                # For now, keep as raw data
+                evidence = recommendation_data["evidence"]
+            
+            # Parse datetime fields
+            created_at = recommendation_data.get("created_at")
+            if isinstance(created_at, str):
+                created_at = datetime.fromisoformat(created_at)
+            else:
+                created_at = datetime.utcnow()
+            
+            expires_at = recommendation_data.get("expires_at")
+            if isinstance(expires_at, str):
+                expires_at = datetime.fromisoformat(expires_at)
+            elif expires_at:
+                expires_at = None
+            
+            # Create AgentRecommendation with all fields
+            return AgentRecommendation(
+                id=recommendation_data.get("id", str(uuid.uuid4())),
+                agent_name=agent_name or AgentType.COORDINATOR,
+                incident_id=recommendation_data.get("incident_id", payload.get("incident_id", "unknown")),
+                action_type=recommendation_data.get("action_type", "investigate"),
+                action_id=recommendation_data.get("action_id", "reconstructed"),
+                confidence=float(recommendation_data.get("confidence", 0.7)),
+                risk_level=recommendation_data.get("risk_level", "medium"),
+                estimated_impact=recommendation_data.get("estimated_impact", "Impact under analysis"),
+                reasoning=recommendation_data.get("reasoning", "Reconstructed from consensus payload"),
+                evidence=evidence,
+                parameters=recommendation_data.get("parameters", {}),
+                urgency=float(recommendation_data.get("urgency", 0.5)),
+                time_sensitive=bool(recommendation_data.get("time_sensitive", False)),
+                execution_window_minutes=recommendation_data.get("execution_window_minutes"),
+                depends_on=recommendation_data.get("depends_on", []),
+                conflicts_with=recommendation_data.get("conflicts_with", []),
+                created_at=created_at,
+                expires_at=expires_at
+            )
+            
+        except Exception as e:
+            logger.error(f"Error reconstructing recommendation: {e}")
+            # Return minimal valid recommendation
+            return AgentRecommendation(
+                agent_name=AgentType.COORDINATOR,
+                incident_id=payload.get("incident_id", "unknown"),
+                action_type="investigate",
+                action_id="error_fallback",
+                confidence=0.5,
+                risk_level="medium",
+                estimated_impact="Error during reconstruction",
+                reasoning=f"Reconstruction error: {str(e)}"
+            )
     
     async def _broadcast_message(self, message: PBFTMessage):
         """Broadcast message to all nodes."""
-        # TODO: Implement actual network broadcasting
-        # For now, just log the message
         logger.debug(f"Broadcasting {message.message_type.value} message from {message.node_id}")
+        
+        # Store in local message log
         self.message_log.append(message)
+        
+        # If WebSocket manager is available, broadcast to network
+        if self.websocket_manager:
+            try:
+                # Convert message to dict for JSON serialization
+                message_data = message.to_dict()
+                
+                # Create WebSocket message payload
+                ws_payload = {
+                    'type': 'consensus_message',
+                    'message_type': message.message_type.value,
+                    'node_id': message.node_id,
+                    'view': message.view,
+                    'sequence': message.sequence,
+                    'data': message_data
+                }
+                
+                # Broadcast to all connected nodes
+                await self.websocket_manager.broadcast(
+                    message_type='consensus',
+                    data=ws_payload,
+                    priority=2  # Medium priority for consensus messages
+                )
+                
+                logger.debug(f"Broadcast {message.message_type.value} to network via WebSocket")
+                
+            except Exception as e:
+                logger.error(f"Failed to broadcast message via WebSocket: {e}")
+                # Continue anyway - local message log is maintained
+        else:
+            # No WebSocket manager - operating in local mode
+            logger.debug(f"No WebSocket manager available, message stored locally only")
     
     async def _wait_for_consensus(self, sequence: int, timeout: float = 30.0) -> ConsensusDecision:
         """Wait for consensus on a specific sequence."""

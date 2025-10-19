@@ -183,22 +183,69 @@ class WebSocketManager:
             incident: Incident object
             phase: Current processing phase
         """
-        self.incident_flows[incident.id] = {
-            "id": incident.id,
-            "title": incident.title,
-            "severity": incident.severity.value if hasattr(incident.severity, 'value') else str(incident.severity),
-            "phase": phase,
-            "timestamp": datetime.utcnow().isoformat(),
-            "affected_services": getattr(incident, 'affected_services', []),
-            "estimated_impact": getattr(incident, 'estimated_impact', {})
-        }
+        # Get real incident data from lifecycle manager
+        from src.services.incident_lifecycle_manager import get_incident_lifecycle_manager
+        
+        lifecycle_manager = get_incident_lifecycle_manager()
+        try:
+            incident_status = lifecycle_manager.get_incident_status(incident.id)
+        except Exception as e:
+            logger.warning(f"Failed to get incident status for {incident.id}: {e}")
+            incident_status = None
+        
+        if incident_status and isinstance(incident_status, dict):
+            # Validate required keys
+            required_keys = ['current_state', 'priority', 'processing_duration_seconds', 
+                           'state_transitions', 'assigned_agents', 'is_escalated', 'workflow_id']
+            if all(key in incident_status for key in required_keys):
+                # Use real incident data
+                self.incident_flows[incident.id] = {
+                    "id": incident.id,
+                    "title": getattr(incident, 'title', f"Incident {incident.id}"),
+                    "severity": incident.severity.value if hasattr(incident.severity, 'value') else str(incident.severity),
+                    "phase": phase,
+                    "current_state": incident_status["current_state"],
+                    "priority": incident_status["priority"],
+                    "processing_duration": incident_status["processing_duration_seconds"],
+                    "state_transitions": incident_status["state_transitions"],
+                    "assigned_agents": incident_status["assigned_agents"],
+                    "is_escalated": incident_status["is_escalated"],
+                    "timestamp": datetime.utcnow().isoformat(),
+                    "affected_services": getattr(incident, 'affected_services', []),
+                    "estimated_impact": getattr(incident, 'estimated_impact', {}),
+                    "workflow_id": incident_status["workflow_id"]
+                }
+            else:
+                logger.warning(f"Incident status missing required keys for {incident.id}, using fallback")
+                # Fallback to basic incident data
+                self.incident_flows[incident.id] = {
+                    "id": incident.id,
+                    "title": getattr(incident, 'title', f"Incident {incident.id}"),
+                    "severity": incident.severity.value if hasattr(incident.severity, 'value') else str(incident.severity),
+                    "phase": phase,
+                    "timestamp": datetime.utcnow().isoformat(),
+                    "affected_services": getattr(incident, 'affected_services', []),
+                    "estimated_impact": getattr(incident, 'estimated_impact', {})
+                }
+        else:
+            # Fallback to basic incident data
+            self.incident_flows[incident.id] = {
+                "id": incident.id,
+                "title": getattr(incident, 'title', f"Incident {incident.id}"),
+                "severity": incident.severity.value if hasattr(incident.severity, 'value') else str(incident.severity),
+                "phase": phase,
+                "timestamp": datetime.utcnow().isoformat(),
+                "affected_services": getattr(incident, 'affected_services', []),
+                "estimated_impact": getattr(incident, 'estimated_impact', {})
+            }
         
         message = WebSocketMessage(
             type="incident_update",
             timestamp=datetime.utcnow(),
             data={
                 "incident": self.incident_flows[incident.id],
-                "active_incidents": list(self.incident_flows.values())
+                "active_incidents": list(self.incident_flows.values()),
+                "processing_metrics": lifecycle_manager.get_processing_metrics() if incident_status else {}
             },
             priority=3
         )

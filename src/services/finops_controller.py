@@ -107,8 +107,8 @@ class FinOpsController:
     
     def __init__(self):
         """Initialize FinOps controller."""
-        self.cost_explorer = boto3.client('ce', region_name=config.aws_region)
-        self.cloudwatch = boto3.client('cloudwatch', region_name=config.aws_region)
+        self.cost_explorer = boto3.client('ce', region_name=config.aws.region)
+        self.cloudwatch = boto3.client('cloudwatch', region_name=config.aws.region)
         self.pricing = boto3.client('pricing', region_name='us-east-1')  # Pricing API only in us-east-1
         
         # Budget configuration

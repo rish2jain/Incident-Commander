@@ -278,7 +278,9 @@ class AWSServiceFactory:
 
         async def _create_client():
             session = self._get_session()
-            return await session.client(service_name, **client_config)
+            client_cm = session.client(service_name, **client_config)
+            client = await client_cm.__aenter__()
+            return client
 
         # Create client with retry logic
         client = await retry_with_backoff(
@@ -316,7 +318,8 @@ class AWSServiceFactory:
             resource_config.update(credentials)
 
         session = self._get_session()
-        resource = await session.resource(service_name, **resource_config)
+        resource_cm = session.resource(service_name, **resource_config)
+        resource = await resource_cm.__aenter__()
 
         async with self._lock:
             self._active_resources.add(resource)
@@ -328,7 +331,7 @@ class AWSServiceFactory:
         if client is None:
             return
         try:
-            await client.close()
+            await client.__aexit__(None, None, None)
         except Exception as exc:
             logger.warning(f"Error closing AWS client: {exc}")
         finally:
@@ -340,7 +343,7 @@ class AWSServiceFactory:
         if resource is None:
             return
         try:
-            await resource.close()
+            await resource.__aexit__(None, None, None)
         except Exception as exc:
             logger.warning(f"Error closing AWS resource: {exc}")
         finally:

@@ -4,7 +4,7 @@ Configuration management for the Incident Commander system.
 
 import os
 from typing import Dict, Any, Optional
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 
@@ -111,16 +111,44 @@ class SecurityConfig:
     jwt_secret_key: Optional[str] = None
     encryption_key: Optional[str] = None
     api_rate_limit: int = 100
-    cors_origins: Optional[str] = None
+    cors_origins: list = field(default_factory=list)
+    require_auth: bool = False
+    demo_api_key: str = "demo-key-12345"
     
     @classmethod
     def from_env(cls) -> "SecurityConfig":
         """Create security config from environment variables."""
+        cors_origins_str = os.getenv("CORS_ORIGINS", "*")
+        cors_origins = cors_origins_str.split(",") if cors_origins_str != "*" else ["*"]
+        
         return cls(
-            jwt_secret_key=os.getenv("JWT_SECRET_KEY"),
+            jwt_secret_key=os.getenv("JWT_SECRET_KEY", "dev-secret-key-change-in-production"),
             encryption_key=os.getenv("ENCRYPTION_KEY"),
             api_rate_limit=int(os.getenv("API_RATE_LIMIT", "100")),
-            cors_origins=os.getenv("CORS_ORIGINS")
+            cors_origins=cors_origins,
+            require_auth=os.getenv("REQUIRE_AUTH", "false").lower() == "true",
+            demo_api_key=os.getenv("DEMO_API_KEY", "demo-key-12345")
+        )
+
+
+@dataclass
+class ObservabilityConfig:
+    """Observability and monitoring configuration."""
+    otlp_endpoint: Optional[str] = None
+    otlp_token: Optional[str] = None
+    prometheus_enabled: bool = True
+    tracing_enabled: bool = True
+    metrics_collection_interval: int = 30
+    
+    @classmethod
+    def from_env(cls) -> "ObservabilityConfig":
+        """Create observability config from environment variables."""
+        return cls(
+            otlp_endpoint=os.getenv("OTLP_ENDPOINT"),
+            otlp_token=os.getenv("OTLP_TOKEN"),
+            prometheus_enabled=os.getenv("PROMETHEUS_ENABLED", "true").lower() == "true",
+            tracing_enabled=os.getenv("TRACING_ENABLED", "true").lower() == "true",
+            metrics_collection_interval=int(os.getenv("METRICS_COLLECTION_INTERVAL", "30"))
         )
 
 
@@ -138,6 +166,7 @@ class ConfigManager:
         self.external_services = ExternalServiceConfig.from_env()
         self.redis = RedisConfig.from_env()
         self.security = SecurityConfig.from_env()
+        self.observability = ObservabilityConfig.from_env()
         
         # Environment detection
         self.environment = os.getenv("ENVIRONMENT", "development")

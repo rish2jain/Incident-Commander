@@ -10,6 +10,10 @@ import asyncio
 
 from src.api.routers import dashboard
 from src.services.websocket_manager import websocket_manager
+from src.services.auth_middleware import AuthenticationMiddleware, get_security_config
+from src.services.localstack_fixtures import initialize_localstack_for_testing
+from src.services.opentelemetry_integration import initialize_observability
+from src.services.metrics_endpoint import get_metrics_service, metrics_router
 from src.utils.logging import get_logger
 
 
@@ -22,19 +26,42 @@ async def lifespan(app: FastAPI):
     # Startup
     logger.info("Starting Incident Commander with enhanced features")
     
+    # Initialize LocalStack for testing
+    await initialize_localstack_for_testing()
+    
+    # Initialize observability
+    initialize_observability()
+    
     # Start WebSocket manager
     await websocket_manager.start()
+    
+    # Start metrics collection
+    metrics_service = get_metrics_service()
+    await metrics_service.start_background_collection()
     
     # Initialize demo scenarios
     from src.services.demo_scenario_manager import get_demo_manager
     demo_mgr = await get_demo_manager()
     logger.info("Demo scenario manager initialized")
     
+    logger.info("All services initialized successfully")
+    
     yield
     
     # Shutdown
     logger.info("Shutting down Incident Commander")
+    
+    # Stop metrics collection
+    await metrics_service.stop_background_collection()
+    
+    # Stop WebSocket manager
     await websocket_manager.stop()
+    
+    # Cleanup LocalStack
+    from src.services.localstack_fixtures import cleanup_localstack
+    await cleanup_localstack()
+    
+    logger.info("Shutdown complete")
 
 
 # Create FastAPI app with enhanced features
@@ -45,12 +72,18 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+# Security configuration
+security_config = get_security_config()
+
+# Authentication middleware
+app.add_middleware(AuthenticationMiddleware, security_config=security_config)
+
 # CORS middleware for dashboard
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Configure appropriately for production
+    allow_origins=security_config.cors_origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
     allow_headers=["*"],
 )
 
@@ -64,6 +97,9 @@ app.include_router(security.router)
 # Include AWS AI services router for hackathon compliance
 from src.api.routers import aws_ai_services
 app.include_router(aws_ai_services.router)
+
+# Include metrics router
+app.include_router(metrics_router)
 
 # Serve static files for dashboard
 try:
@@ -85,15 +121,24 @@ async def root():
             "Interactive Demo Scenarios",
             "Malicious Agent Detection & Isolation",
             "WebSocket Real-time Updates",
-            "Comprehensive Performance Metrics"
+            "Comprehensive Performance Metrics",
+            "JWT/API Key Authentication",
+            "LocalStack Testing Infrastructure",
+            "OpenTelemetry Observability",
+            "Prometheus Metrics Export",
+            "FinOps Cost Management"
         ],
         "endpoints": {
             "dashboard": "/dashboard/",
             "websocket": "/dashboard/ws",
-            "metrics": "/dashboard/metrics",
+            "metrics": "/metrics/",
+            "metrics_summary": "/metrics/summary",
+            "metrics_history": "/metrics/history",
             "demo_trigger": "/dashboard/trigger-demo",
             "byzantine_injection": "/dashboard/inject-byzantine-fault",
-            "reset": "/dashboard/reset-agents"
+            "reset": "/dashboard/reset-agents",
+            "health": "/health",
+            "system_status": "/system-status"
         }
     }
 

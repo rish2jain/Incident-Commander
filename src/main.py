@@ -61,6 +61,10 @@ app.include_router(dashboard.router)
 from src.api.routers import security
 app.include_router(security.router)
 
+# Include AWS AI services router for hackathon compliance
+from src.api.routers import aws_ai_services
+app.include_router(aws_ai_services.router)
+
 # Serve static files for dashboard
 try:
     app.mount("/static", StaticFiles(directory="dashboard/build"), name="static")

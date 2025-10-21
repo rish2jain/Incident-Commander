@@ -1,0 +1,654 @@
+import * as React from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Search,
+  Stethoscope,
+  Sparkles,
+  Wrench,
+  MessageSquare,
+  Clock,
+  CheckCircle,
+  AlertCircle,
+  XCircle,
+  Loader2,
+  TrendingUp,
+  Zap,
+  Activity,
+  BarChart3,
+} from "lucide-react";
+import { Badge } from "./ui/badge";
+import { ScrollArea } from "./ui/scroll-area";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { FloatingScrollIndicator } from "./ui/scroll-indicator";
+import { useAutoScroll } from "../lib/hooks/useAutoScroll";
+import { cn } from "../lib/utils";
+import {
+  useOptimizedMessageList,
+  useVirtualizedMessageList,
+  useMessageListPerformance,
+  MessageItem,
+} from "../lib/message-list-optimizer";
+import {
+  useStableCallback,
+  usePerformanceMonitor,
+} from "../lib/performance-manager";
+
+interface AgentAction extends MessageItem {
+  id: string;
+  agent_type:
+    | "detection"
+    | "diagnosis"
+    | "prediction"
+    | "resolution"
+    | "communication";
+  title: string;
+  description: string;
+  timestamp: string;
+  confidence?: number;
+  status: "pending" | "in_progress" | "completed" | "failed";
+  details?: Record<string, any>;
+  duration?: number;
+  impact?: string;
+  priority?: "low" | "medium" | "high" | "critical";
+  size?: number;
+}
+
+interface HighPerformanceActivityFeedProps {
+  actions: AgentAction[];
+  maxItems?: number;
+  showConfidence?: boolean;
+  className?: string;
+  autoScrollEnabled?: boolean;
+  onActionClick?: (action: AgentAction) => void;
+  enableVirtualization?: boolean;
+  itemHeight?: number;
+  showPerformanceMetrics?: boolean;
+}
+
+const agentConfig = {
+  detection: {
+    icon: Search,
+    color: "from-red-500 to-red-600",
+    bgColor: "from-red-500/10 to-red-600/10",
+    borderColor: "border-red-500/20",
+    textColor: "text-red-500",
+    name: "Detection",
+  },
+  diagnosis: {
+    icon: Stethoscope,
+    color: "from-teal-500 to-teal-600",
+    bgColor: "from-teal-500/10 to-teal-600/10",
+    borderColor: "border-teal-500/20",
+    textColor: "text-teal-500",
+    name: "Diagnosis",
+  },
+  prediction: {
+    icon: Sparkles,
+    color: "from-blue-500 to-blue-600",
+    bgColor: "from-blue-500/10 to-blue-600/10",
+    borderColor: "border-blue-500/20",
+    textColor: "text-blue-500",
+    name: "Prediction",
+  },
+  resolution: {
+    icon: Wrench,
+    color: "from-amber-500 to-amber-600",
+    bgColor: "from-amber-500/10 to-amber-600/10",
+    borderColor: "border-amber-500/20",
+    textColor: "text-amber-500",
+    name: "Resolution",
+  },
+  communication: {
+    icon: MessageSquare,
+    color: "from-purple-500 to-purple-600",
+    bgColor: "from-purple-500/10 to-purple-600/10",
+    borderColor: "border-purple-500/20",
+    textColor: "text-purple-500",
+    name: "Communication",
+  },
+};
+
+const statusConfig: Record<
+  string,
+  {
+    icon: React.ElementType;
+    color: string;
+    bgColor: string;
+    label: string;
+    animate?: boolean;
+  }
+> = {
+  pending: {
+    icon: Clock,
+    color: "text-amber-500",
+    bgColor: "bg-amber-500/10",
+    label: "Pending",
+  },
+  in_progress: {
+    icon: Loader2,
+    color: "text-blue-500",
+    bgColor: "bg-blue-500/10",
+    label: "In Progress",
+    animate: true,
+  },
+  completed: {
+    icon: CheckCircle,
+    color: "text-green-500",
+    bgColor: "bg-green-500/10",
+    label: "Completed",
+  },
+  failed: {
+    icon: XCircle,
+    color: "text-red-500",
+    bgColor: "bg-red-500/10",
+    label: "Failed",
+  },
+};
+
+// Performance-optimized activity item component
+const PerformanceActivityItem = React.memo(
+  function PerformanceActivityItem({
+    action,
+    index,
+    onClick,
+    style,
+  }: {
+    action: AgentAction;
+    index: number;
+    onClick?: (action: AgentAction) => void;
+    style?: React.CSSProperties;
+  }) {
+    const agentInfo = React.useMemo(
+      () => agentConfig[action.agent_type],
+      [action.agent_type]
+    );
+    const statusInfo = React.useMemo(
+      () => statusConfig[action.status],
+      [action.status]
+    );
+
+    const AgentIcon = agentInfo.icon;
+    const StatusIcon = statusInfo.icon;
+
+    const handleClick = useStableCallback(() => {
+      onClick?.(action);
+    }, [onClick, action.id]);
+
+    const formattedTime = React.useMemo(() => {
+      return new Date(action.timestamp).toLocaleTimeString();
+    }, [action.timestamp]);
+
+    const detailEntries = React.useMemo(() => {
+      return action.details ? Object.entries(action.details) : [];
+    }, [action.details]);
+
+    return (
+      <div style={style} className="px-3 py-2">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{
+            duration: 0.2, // Reduced animation duration for performance
+            delay: Math.min(index * 0.02, 0.2), // Reduced delay
+          }}
+          className="group relative"
+        >
+          <Card
+            className={cn(
+              "border-border/50 bg-card/50 backdrop-blur-sm hover:bg-card/80 transition-colors duration-200",
+              onClick && "cursor-pointer"
+            )}
+            onClick={handleClick}
+          >
+            <CardContent className="p-3">
+              {" "}
+              {/* Reduced padding for performance */}
+              <div className="flex gap-3">
+                {/* Agent Avatar */}
+                <div
+                  className={`flex-shrink-0 w-8 h-8 rounded-lg bg-gradient-to-br ${agentInfo.bgColor} border ${agentInfo.borderColor} flex items-center justify-center`}
+                >
+                  <AgentIcon className={`w-4 h-4 ${agentInfo.textColor}`} />
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  {/* Header */}
+                  <div className="flex items-start justify-between gap-2 mb-1">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h4 className="font-semibold text-xs text-foreground truncate">
+                          {agentInfo.name}
+                        </h4>
+                        <Badge
+                          variant="outline"
+                          className={cn(
+                            `text-xs ${statusInfo.bgColor} ${statusInfo.color} border-current/20`
+                          )}
+                        >
+                          <StatusIcon
+                            className={`w-2 h-2 mr-1 ${
+                              statusInfo.animate ? "animate-spin" : ""
+                            }`}
+                          />
+                          {statusInfo.label}
+                        </Badge>
+                      </div>
+                      <h5 className="font-medium text-xs text-foreground/90 mb-1 truncate">
+                        {action.title}
+                      </h5>
+                    </div>
+
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <Clock className="w-2 h-2" />
+                      {formattedTime}
+                    </div>
+                  </div>
+
+                  {/* Description - Truncated for performance */}
+                  <p className="text-xs text-muted-foreground leading-relaxed mb-2 line-clamp-2">
+                    {action.description}
+                  </p>
+
+                  {/* Footer - Simplified for performance */}
+                  <div className="flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-2">
+                      {action.duration && (
+                        <div className="flex items-center gap-1 text-muted-foreground">
+                          <Zap className="w-2 h-2" />
+                          {action.duration}ms
+                        </div>
+                      )}
+                      {action.priority && action.priority !== "low" && (
+                        <Badge
+                          variant="outline"
+                          className={cn(
+                            action.priority === "critical"
+                              ? "border-red-500/20 text-red-500"
+                              : action.priority === "high"
+                              ? "border-orange-500/20 text-orange-500"
+                              : "border-blue-500/20 text-blue-500"
+                          )}
+                        >
+                          {action.priority}
+                        </Badge>
+                      )}
+                    </div>
+
+                    {action.confidence !== undefined && (
+                      <div className="text-muted-foreground">
+                        {Math.round(action.confidence * 100)}%
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </div>
+    );
+  },
+  (prevProps, nextProps) => {
+    // Optimized comparison for better memoization
+    return (
+      prevProps.action.id === nextProps.action.id &&
+      prevProps.action.status === nextProps.action.status &&
+      prevProps.action.confidence === nextProps.action.confidence &&
+      prevProps.index === nextProps.index
+    );
+  }
+);
+
+// Performance metrics display component
+const PerformanceMetrics = React.memo(function PerformanceMetrics({
+  metrics,
+  performanceData,
+}: {
+  metrics: any;
+  performanceData: any;
+}) {
+  return (
+    <div className="flex items-center gap-2 text-xs">
+      <div className="flex items-center gap-1">
+        <Activity className="w-3 h-3 text-blue-500" />
+        <span className="text-muted-foreground">
+          {metrics.messagesPerSecond}/s
+        </span>
+      </div>
+      <div className="flex items-center gap-1">
+        <BarChart3 className="w-3 h-3 text-green-500" />
+        <span className="text-muted-foreground">
+          {metrics.averageProcessingTime.toFixed(1)}ms
+        </span>
+      </div>
+      <div className="flex items-center gap-1">
+        <TrendingUp className="w-3 h-3 text-purple-500" />
+        <span className="text-muted-foreground">
+          {(metrics.memoryUsage / 1024 / 1024).toFixed(1)}MB
+        </span>
+      </div>
+      {metrics.droppedMessages > 0 && (
+        <Badge
+          variant="outline"
+          className="text-xs border-amber-500/20 text-amber-500"
+        >
+          {metrics.droppedMessages} pruned
+        </Badge>
+      )}
+    </div>
+  );
+});
+
+export default function HighPerformanceActivityFeed({
+  actions,
+  maxItems = 100,
+  showConfidence = true,
+  className = "",
+  autoScrollEnabled = true,
+  onActionClick,
+  enableVirtualization = true,
+  itemHeight = 120,
+  showPerformanceMetrics = false,
+}: HighPerformanceActivityFeedProps) {
+  // Performance monitoring
+  usePerformanceMonitor("HighPerformanceActivityFeed");
+  const { performanceData, measureRenderTime } = useMessageListPerformance();
+
+  // Optimized message list with automatic performance adaptation
+  const {
+    messages: optimizedActions,
+    metrics,
+    addMessages,
+    clearMessages,
+    updateConfig,
+    totalCount,
+    isHighFrequency,
+    isUltraPerformance,
+  } = useOptimizedMessageList<AgentAction>([], {
+    maxMessages: maxItems,
+    enablePruning: true,
+    enableBatching: true,
+    performanceMode: "normal",
+  });
+
+  // Update messages when actions change
+  React.useEffect(() => {
+    if (actions.length > 0) {
+      // Convert actions to message format with priority and size estimation
+      const messageActions: AgentAction[] = actions.map((action) => ({
+        ...action,
+        priority:
+          action.status === "failed"
+            ? "critical"
+            : action.status === "in_progress"
+            ? "high"
+            : action.confidence && action.confidence > 0.9
+            ? "high"
+            : "medium",
+        size: JSON.stringify(action).length * 2, // Rough size estimation
+      }));
+
+      addMessages(messageActions);
+    }
+  }, [actions, addMessages]);
+
+  // Virtualization for large lists
+  const containerHeight = 600;
+  const {
+    visibleMessages,
+    visibleRange,
+    totalHeight,
+    offsetY,
+    handleScroll,
+    isVirtualized,
+  } = useVirtualizedMessageList(
+    optimizedActions,
+    containerHeight,
+    itemHeight,
+    5 // overscan
+  );
+
+  // Auto-scroll functionality with performance optimizations
+  const {
+    scrollRef,
+    scrollState,
+    isNearBottom,
+    isPaused,
+    scrollToBottom,
+    resumeAutoScroll,
+    shouldShowScrollToBottom,
+  } = useAutoScroll({
+    enabled: autoScrollEnabled,
+    dependencies: [optimizedActions.length],
+    threshold: 100,
+    resumeDelay: isHighFrequency ? 500 : 1500, // Faster resume for high frequency
+    smoothScroll: !isUltraPerformance,
+    maxScrollSpeed: isUltraPerformance ? 1 : isHighFrequency ? 3 : 5,
+    debounceDelay: isUltraPerformance ? 10 : isHighFrequency ? 25 : 100,
+  });
+
+  // Track new messages with performance optimization
+  const [newMessageCount, setNewMessageCount] = React.useState(0);
+  const previousCountRef = React.useRef(0);
+
+  React.useEffect(() => {
+    const newMessages = optimizedActions.length - previousCountRef.current;
+    if (newMessages > 0) {
+      setNewMessageCount((prev) => prev + newMessages);
+    }
+    previousCountRef.current = optimizedActions.length;
+  }, [optimizedActions.length]);
+
+  // Clear new message count when near bottom
+  React.useEffect(() => {
+    if (isNearBottom) {
+      setNewMessageCount(0);
+    }
+  }, [isNearBottom]);
+
+  // Stable callback handlers
+  const handleScrollToBottom = useStableCallback(() => {
+    scrollToBottom();
+    setNewMessageCount(0);
+  }, [scrollToBottom]);
+
+  const handleActionClick = useStableCallback(
+    (action: AgentAction) => {
+      onActionClick?.(action);
+    },
+    [onActionClick]
+  );
+
+  // Render messages with performance measurement
+  const renderMessages = React.useCallback(() => {
+    const messagesToRender = isVirtualized ? visibleMessages : optimizedActions;
+
+    return (
+      <div
+        style={
+          isVirtualized
+            ? {
+                height: totalHeight,
+                position: "relative",
+              }
+            : undefined
+        }
+      >
+        {isVirtualized && (
+          <div
+            style={{
+              transform: `translateY(${offsetY}px)`,
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+            }}
+          >
+            {messagesToRender.map((action, index) => (
+              <PerformanceActivityItem
+                key={action.id}
+                action={action}
+                index={visibleRange.start + index}
+                onClick={handleActionClick}
+                style={{ height: itemHeight }}
+              />
+            ))}
+          </div>
+        )}
+
+        {!isVirtualized && (
+          <AnimatePresence mode="popLayout">
+            {messagesToRender.length > 0 ? (
+              <div className="space-y-2">
+                {messagesToRender.map((action, index) => (
+                  <PerformanceActivityItem
+                    key={action.id}
+                    action={action}
+                    index={index}
+                    onClick={handleActionClick}
+                  />
+                ))}
+              </div>
+            ) : (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="flex flex-col items-center justify-center py-12 text-center"
+              >
+                <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mb-4">
+                  <MessageSquare className="w-8 h-8 text-muted-foreground" />
+                </div>
+                <h3 className="font-medium text-foreground mb-2">
+                  No Activity Yet
+                </h3>
+                <p className="text-sm text-muted-foreground max-w-sm">
+                  Agent activities will appear here as the system processes
+                  incidents and performs autonomous actions.
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        )}
+      </div>
+    );
+  }, [
+    isVirtualized,
+    visibleMessages,
+    optimizedActions,
+    totalHeight,
+    offsetY,
+    visibleRange.start,
+    itemHeight,
+    handleActionClick,
+  ]);
+
+  return (
+    <Card className={cn("h-full relative", className)}>
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 flex-wrap">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500/10 to-blue-600/10 border border-cyan-500/20 flex items-center justify-center">
+            <MessageSquare className="w-4 h-4 text-cyan-500" />
+          </div>
+          <span className="text-sm">High Performance Feed</span>
+
+          <div className="flex items-center gap-2 ml-auto">
+            <Badge variant="outline" className="text-xs">
+              {totalCount} events
+            </Badge>
+
+            {isPaused && (
+              <Badge
+                variant="outline"
+                className="bg-amber-500/10 text-amber-500 border-amber-500/20 animate-pulse text-xs"
+              >
+                Paused
+              </Badge>
+            )}
+
+            {isUltraPerformance && (
+              <Badge
+                variant="outline"
+                className="bg-red-500/10 text-red-500 border-red-500/20 text-xs"
+              >
+                Ultra Mode
+              </Badge>
+            )}
+
+            {isHighFrequency && !isUltraPerformance && (
+              <Badge
+                variant="outline"
+                className="bg-orange-500/10 text-orange-500 border-orange-500/20 text-xs"
+              >
+                High Freq
+              </Badge>
+            )}
+
+            {isVirtualized && (
+              <Badge
+                variant="outline"
+                className="bg-green-500/10 text-green-500 border-green-500/20 text-xs"
+              >
+                Virtualized
+              </Badge>
+            )}
+          </div>
+        </CardTitle>
+
+        {showPerformanceMetrics && (
+          <div className="mt-2">
+            <PerformanceMetrics
+              metrics={metrics}
+              performanceData={performanceData}
+            />
+          </div>
+        )}
+      </CardHeader>
+
+      <CardContent className="p-0 relative">
+        <div
+          className="h-[600px] overflow-auto"
+          ref={scrollRef as React.RefObject<HTMLDivElement>}
+          onScroll={isVirtualized ? handleScroll : undefined}
+        >
+          <div className="px-6 pb-6">{renderMessages()}</div>
+        </div>
+
+        {/* Floating Scroll Indicator */}
+        <FloatingScrollIndicator
+          isVisible={shouldShowScrollToBottom}
+          isPaused={isPaused}
+          isNearBottom={isNearBottom}
+          messageCount={newMessageCount}
+          onScrollToBottom={handleScrollToBottom}
+          hasNewMessages={newMessageCount > 0}
+        />
+
+        {/* Resume Auto-scroll Button */}
+        {isPaused && !isNearBottom && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            className="absolute top-4 right-4 z-10"
+          >
+            <div className="bg-background/95 backdrop-blur-sm border border-border/50 rounded-lg p-2 shadow-lg">
+              <div className="flex items-center gap-2 text-sm">
+                <div className="flex items-center gap-1 text-amber-500">
+                  <Clock className="w-3 h-3" />
+                  <span className="text-xs">Auto-scroll paused</span>
+                </div>
+                <button
+                  onClick={resumeAutoScroll}
+                  className="text-xs px-2 py-1 bg-primary/90 hover:bg-primary text-primary-foreground rounded transition-colors"
+                >
+                  Resume
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}

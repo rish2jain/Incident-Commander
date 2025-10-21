@@ -569,6 +569,24 @@ The system should consistently deliver sub-3-minute incident resolution.
         
         print(f"Completed: {success_count}/{total_steps} steps")
         
+        # Validate security headers are actually implemented in production entry points
+        production_files = ["src/main.py"]
+        security_validated = False
+        
+        for prod_file in production_files:
+            if os.path.exists(prod_file):
+                with open(prod_file, 'r') as f:
+                    content = f.read()
+                    if "SecurityHeadersMiddleware" in content and "X-Content-Type-Options" in content:
+                        print(f"✅ Security headers validated in {prod_file}")
+                        security_validated = True
+                        break
+        
+        if security_validated:
+            print("✅ Security headers validation successful")
+        else:
+            print("⚠️  Security headers not found in production entry points")
+        
         if success_count == total_steps:
             print("✅ Security hardening completed successfully!")
             print("🛡️  Production-ready security configuration applied")

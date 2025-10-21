@@ -12,6 +12,8 @@ import {
   Shield,
   Zap,
 } from "lucide-react";
+import { CompactConnectionStatus } from "./ConnectionStatusIndicator";
+import { CompactSyncStatus } from "./SyncStatusIndicator";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
@@ -514,17 +516,14 @@ function IncidentCommanderHeader({
             </motion.div>
 
             <div className="ml-auto flex items-center gap-3">
+              <CompactConnectionStatus />
+              <CompactSyncStatus />
               <Badge
                 variant="outline"
                 className="bg-background/50 border-border/50 text-xs"
               >
-                Last sync: {new Date().toLocaleTimeString()}
+                Last update: {new Date().toLocaleTimeString()}
               </Badge>
-              <motion.div
-                className="w-2 h-2 rounded-full bg-green-500"
-                animate={{ opacity: [1, 0.5, 1] }}
-                transition={{ duration: 2, repeat: Infinity }}
-              />
             </div>
           </div>
         </div>

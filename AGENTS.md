@@ -1,37 +1,34 @@
 # Repository Guidelines
 
-Incident Commander orchestrates multi-agent incident response across FastAPI services, workflow graphs, and cloud infrastructure. Use these guidelines to stay consistent with the established structure and delivery cadence.
-
 ## Project Structure & Module Organization
-- `src/`: FastAPI entrypoints, orchestrator workflows under `src/orchestrator/`, shared helpers in `src/utils/`, and incident models in `src/models/`.
-- `agents/<capability>/`: Individual agent logic; mirror capability folders in `tests/` for coverage.
-- `tests/`: Unit suites in `tests/unit/`, integration flows in `tests/integration/`, and chaos/load exercises in dedicated subfolders.
-- Supporting assets: `infrastructure/` for CDK stacks, `docs/` for published guides, `Research/` for experiments, and `docker/` for container recipes.
+- `src/`: FastAPI entrypoints, orchestrator workflows, and shared utilities.
+- `agents/<capability>/`: Individual agent logic mirrored by capability-specific tests.
+- `tests/`: Unit suites in `tests/unit/`, integration flows in `tests/integration/`, chaos/load exercises under dedicated subfolders.
+- Supporting assets: `infrastructure/` for CDK stacks, `docs/` for guides, `Research/` for experiments, and `docker/` for container images.
 
 ## Build, Test, and Development Commands
-- `python -m venv .venv && source .venv/bin/activate`: Provision the Python 3.11 virtual environment.
+- `python -m venv .venv && source .venv/bin/activate`: Create and activate the Python 3.11 virtual environment.
 - `pip install -r requirements.txt`: Install backend and agent dependencies.
-- `uvicorn src.main:app --reload --port 8000`: Run the local FastAPI gateway with hot reload.
-- `docker-compose up -d`: Launch LocalStack, queues, and databases for orchestration acceptance tests.
-- `pytest --cov=src`: Execute unit/integration suites and verify ≥80% statement coverage.
+- `uvicorn src.main:app --reload --port 8000`: Run the FastAPI gateway locally with hot reload.
+- `docker-compose up -d`: Launch LocalStack, queues, and backing services for orchestration acceptance tests.
+- `pytest --cov=src`: Execute unit/integration suites and enforce ≥80% statement coverage.
 
 ## Coding Style & Naming Conventions
-- Target Python 3.11 with full type hints; ensure `mypy src agents` succeeds.
-- Follow snake_case modules, PascalCase classes, and `test_<module>_<behavior>` names.
-- Run `pre-commit run --all-files` to apply formatters, linters, and security hooks before pushing.
+- Target Python 3.11 with full type hints; keep `mypy src agents` clean.
+- Follow snake_case modules, PascalCase classes, and `test_<module>_<behavior>` patterns.
+- Run `pre-commit run --all-files` before committing to apply formatters, linters, and security hooks.
 
 ## Testing Guidelines
-- Prefer unit coverage for agent behaviors and orchestrator state machines in `tests/unit/`.
-- Use fixtures in `tests/conftest.py` for Slack, Bedrock, and LocalStack stubs.
-- Gate disruptive scenarios in `tests/chaos/` and `tests/load/`; keep assertions deterministic.
-- Capture regressions with focused tests whenever incidents are resolved.
+- Use `pytest` fixtures from `tests/conftest.py` to stub Slack, Bedrock, and LocalStack services.
+- Prefer focused unit tests for orchestrator state machines and agent behaviors; escalate scenarios to integration when dependencies matter.
+- Maintain deterministic assertions in chaos/load suites and monitor coverage thresholds via `pytest --cov=src`.
 
 ## Commit & Pull Request Guidelines
-- Use Conventional Commits (`feat:`, `fix:`, `docs:`, `infra:`) and keep each commit scoped to one logical change.
-- Reference incident IDs or `.kiro/steering/` notes in PR descriptions alongside testing evidence and relevant screenshots.
-- Request reviews from both agent owners and infrastructure maintainers when changes span domains.
+- Adopt Conventional Commits (e.g., `feat:`, `fix:`, `docs:`) scoped to one logical change.
+- Reference incident IDs or `.kiro/steering/` notes in PR descriptions and attach testing evidence or relevant screenshots.
+- Request reviews from agent owners and infrastructure maintainers when changes span domains.
 
 ## Security & Configuration Tips
-- Store secrets in `.env` files aligned with `.env.example`; never commit credentials.
-- Exercise destructive AWS actions through LocalStack (`awslocal ...`) and guard production via IAM roles in `infrastructure/config/`.
-- Register guardrails and access policies when introducing new agents or capabilities.
+- Store secrets in `.env` aligned with `.env.example`; never commit credentials.
+- Exercise destructive AWS actions through LocalStack (`awslocal ...`) before promoting changes.
+- Register guardrails and IAM policies when adding agents or capabilities, and keep infrastructure settings in `infrastructure/config/`.

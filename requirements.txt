@@ -47,8 +47,8 @@ mypy>=1.7.0
 
 # Search and Analytics
 opensearch-py>=3.0.0
-mangum>=0.17.0# Byzan
-tine Consensus Dependencies
+mangum>=0.17.0
+# Byzantine Consensus Dependencies
 cryptography>=41.0.0
 pycryptodome>=3.19.0
 
@@ -73,11 +73,6 @@ python-jose>=3.3.0
 # OpenTelemetry and Observability
 opentelemetry-api>=1.21.0
 opentelemetry-sdk>=1.21.0
-opentelemetry-exporter-otlp>=1.21.0
-opentelemetry-exporter-prometheus>=1.12.0rc1
-opentelemetry-instrumentation-fastapi>=0.42b0
-opentelemetry-instrumentation-boto3sqs>=0.42b0
-opentelemetry-instrumentation-redis>=0.42b0
 
 # Prometheus Metrics
 prometheus-client>=0.19.0

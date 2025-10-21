@@ -444,7 +444,32 @@ class IncidentLifecycleManager:
             "is_escalated": context.current_state == IncidentState.ESCALATED,
             "is_completed": context.current_state in [IncidentState.CLOSED, IncidentState.FAILED]
         }
-    
+
+    def get_active_incidents_summary(self) -> List[Dict[str, Any]]:
+        """Summarize only active incidents for dashboard consumption."""
+        summaries: List[Dict[str, Any]] = []
+        now = datetime.utcnow()
+
+        for context in self.active_incidents.values():
+            # Skip completed incidents
+            if context.current_state in [IncidentState.CLOSED, IncidentState.FAILED]:
+                continue
+                
+            processing_duration = (now - context.start_time).total_seconds()
+            summaries.append({
+                "incident_id": context.incident_id,
+                "current_state": context.current_state.value,
+                "priority": context.priority.name,
+                "start_time": context.start_time.isoformat(),
+                "processing_duration_seconds": processing_duration,
+                "assigned_agents": sorted(context.assigned_agents),
+                "is_escalated": context.current_state == IncidentState.ESCALATED,
+                "is_completed": False,  # All remaining incidents are active
+                "metrics": context.processing_metrics,
+            })
+
+        return summaries
+
     def get_processing_metrics(self) -> Dict[str, Any]:
         """Get overall processing metrics and performance statistics."""
         active_count = len([

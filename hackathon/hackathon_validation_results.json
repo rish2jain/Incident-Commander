@@ -1,16 +1,16 @@
 {
-  "validation_time": "2025-10-19T16:06:47.780355",
+  "validation_time": "2025-10-20T15:34:04.009267",
   "all_endpoints_passed": true,
-  "total_endpoints": 4,
-  "successful_endpoints": 4,
-  "average_response_time_ms": 186.77,
+  "total_endpoints": 7,
+  "successful_endpoints": 7,
+  "average_response_time_ms": 171.63,
   "base_url": "https://h8xlzr74h8.execute-api.us-east-1.amazonaws.com",
   "results": [
     {
       "endpoint": "main",
       "url": "https://h8xlzr74h8.execute-api.us-east-1.amazonaws.com",
       "status_code": 200,
-      "response_time_ms": 459.19,
+      "response_time_ms": 536.88,
       "success": true,
       "content_type": "application/json",
       "response_size": 553,
@@ -38,14 +38,14 @@
       "endpoint": "health",
       "url": "https://h8xlzr74h8.execute-api.us-east-1.amazonaws.com/health",
       "status_code": 200,
-      "response_time_ms": 84.97,
+      "response_time_ms": 111.37,
       "success": true,
       "content_type": "application/json",
       "response_size": 122,
       "json_response": {
         "status": "healthy",
         "service": "Incident Commander Demo",
-        "timestamp": "2025-10-19T16:06:47.588240",
+        "timestamp": "2025-10-20T15:34:03.453306",
         "version": "1.0.0"
       },
       "json_valid": true,
@@ -55,7 +55,7 @@
       "endpoint": "demo_incident",
       "url": "https://h8xlzr74h8.execute-api.us-east-1.amazonaws.com/demo/incident",
       "status_code": 200,
-      "response_time_ms": 111.73,
+      "response_time_ms": 94.56,
       "success": true,
       "content_type": "application/json",
       "response_size": 248,
@@ -78,7 +78,7 @@
       "endpoint": "demo_stats",
       "url": "https://h8xlzr74h8.execute-api.us-east-1.amazonaws.com/demo/stats",
       "status_code": 200,
-      "response_time_ms": 91.19,
+      "response_time_ms": 82.38,
       "success": true,
       "content_type": "application/json",
       "response_size": 177,
@@ -93,6 +93,105 @@
       },
       "json_valid": true,
       "content_valid": true
+    },
+    {
+      "endpoint": "aws_ai_services",
+      "url": "https://h8xlzr74h8.execute-api.us-east-1.amazonaws.com/real-aws-ai/services/status",
+      "status_code": 200,
+      "response_time_ms": 82.13,
+      "success": true,
+      "content_type": "application/json",
+      "response_size": 553,
+      "json_response": {
+        "service": "Autonomous Incident Commander",
+        "description": "AI-powered multi-agent system for zero-touch incident resolution",
+        "features": [
+          "5 specialized AI agents powered by Claude 3.5 Sonnet",
+          "Zero-touch autonomous incident resolution",
+          "Byzantine consensus for fault-tolerant decisions",
+          "95% MTTR reduction (30+ minutes \u2192 3 minutes)",
+          "Predictive incident prevention",
+          "Real-time multi-agent coordination"
+        ],
+        "endpoints": [
+          "/health - Service health check",
+          "/demo/incident - Demo incident resolution",
+          "/demo/stats - Performance statistics"
+        ]
+      },
+      "json_valid": true,
+      "content_issues": [
+        "Missing required field: real_aws_ai_services",
+        "Missing required field: total_services",
+        "Missing required field: prize_eligibility",
+        "Should show 7 real AWS AI services"
+      ]
+    },
+    {
+      "endpoint": "prize_eligibility",
+      "url": "https://h8xlzr74h8.execute-api.us-east-1.amazonaws.com/real-aws-ai/prize-eligibility",
+      "status_code": 200,
+      "response_time_ms": 207.29,
+      "success": true,
+      "content_type": "application/json",
+      "response_size": 553,
+      "json_response": {
+        "service": "Autonomous Incident Commander",
+        "description": "AI-powered multi-agent system for zero-touch incident resolution",
+        "features": [
+          "5 specialized AI agents powered by Claude 3.5 Sonnet",
+          "Zero-touch autonomous incident resolution",
+          "Byzantine consensus for fault-tolerant decisions",
+          "95% MTTR reduction (30+ minutes \u2192 3 minutes)",
+          "Predictive incident prevention",
+          "Real-time multi-agent coordination"
+        ],
+        "endpoints": [
+          "/health - Service health check",
+          "/demo/incident - Demo incident resolution",
+          "/demo/stats - Performance statistics"
+        ]
+      },
+      "json_valid": true,
+      "content_issues": [
+        "Missing required field: prize_categories",
+        "Missing required field: total_prize_eligibility",
+        "Missing required field: real_integrations",
+        "Should confirm real AWS integrations"
+      ]
+    },
+    {
+      "endpoint": "aws_ai_showcase",
+      "url": "https://h8xlzr74h8.execute-api.us-east-1.amazonaws.com/real-aws-ai/demo/full-showcase",
+      "status_code": 200,
+      "response_time_ms": 86.82,
+      "success": true,
+      "content_type": "application/json",
+      "response_size": 553,
+      "json_response": {
+        "service": "Autonomous Incident Commander",
+        "description": "AI-powered multi-agent system for zero-touch incident resolution",
+        "features": [
+          "5 specialized AI agents powered by Claude 3.5 Sonnet",
+          "Zero-touch autonomous incident resolution",
+          "Byzantine consensus for fault-tolerant decisions",
+          "95% MTTR reduction (30+ minutes \u2192 3 minutes)",
+          "Predictive incident prevention",
+          "Real-time multi-agent coordination"
+        ],
+        "endpoints": [
+          "/health - Service health check",
+          "/demo/incident - Demo incident resolution",
+          "/demo/stats - Performance statistics"
+        ]
+      },
+      "json_valid": true,
+      "content_issues": [
+        "Missing required field: demo_title",
+        "Missing required field: aws_ai_analysis",
+        "Missing required field: services_demonstrated",
+        "Should demonstrate at least 5 AWS AI services"
+      ]
     }
   ]
 }

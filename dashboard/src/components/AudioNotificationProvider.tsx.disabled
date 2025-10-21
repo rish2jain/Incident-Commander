@@ -1,0 +1,129 @@
+/**
+ * Audio Notification Provider
+ * Provides audio notification integration for dashboard components
+ * Requirements: 3.5 - Add configurable audio notifications for major incident lifecycle events
+ */
+
+"use client";
+
+import React, { createContext, useContext, useEffect } from "react";
+import { useAudioNotifications } from "../lib/hooks/useAudioNotifications";
+import { usePhaseTransitions } from "../lib/hooks/usePhaseTransitions";
+import { useAgentCompletions } from "../lib/hooks/useAgentCompletions";
+import { useConflictResolution } from "../lib/hooks/useConflictResolution";
+import { NotificationEvent } from "../lib/audio-notification-manager";
+
+interface AudioNotificationContextType {
+  playNotification: (event: NotificationEvent) => Promise<void>;
+  isEnabled: boolean;
+  isInitialized: boolean;
+}
+
+const AudioNotificationContext =
+  createContext<AudioNotificationContextType | null>(null);
+
+export function useAudioNotificationContext() {
+  const context = useContext(AudioNotificationContext);
+  if (!context) {
+    throw new Error(
+      "useAudioNotificationContext must be used within AudioNotificationProvider"
+    );
+  }
+  return context;
+}
+
+interface AudioNotificationProviderProps {
+  children: React.ReactNode;
+  autoInitialize?: boolean;
+}
+
+export default function AudioNotificationProvider({
+  children,
+  autoInitialize = false,
+}: AudioNotificationProviderProps) {
+  const { config, isInitialized, playNotification, initialize } =
+    useAudioNotifications();
+
+  // Subscribe to phase transitions
+  const { lastTransition } = usePhaseTransitions();
+
+  // Subscribe to agent completions
+  const { lastCompletion } = useAgentCompletions();
+
+  // Subscribe to conflict resolution
+  const { lastConflict, lastResolution } = useConflictResolution();
+
+  // Auto-initialize on user interaction if enabled
+  useEffect(() => {
+    if (autoInitialize && !isInitialized) {
+      const handleUserInteraction = async () => {
+        await initialize();
+        // Remove listeners after initialization
+        document.removeEventListener("click", handleUserInteraction);
+        document.removeEventListener("keydown", handleUserInteraction);
+      };
+
+      document.addEventListener("click", handleUserInteraction, { once: true });
+      document.addEventListener("keydown", handleUserInteraction, {
+        once: true,
+      });
+
+      return () => {
+        document.removeEventListener("click", handleUserInteraction);
+        document.removeEventListener("keydown", handleUserInteraction);
+      };
+    }
+  }, [autoInitialize, isInitialized, initialize]);
+
+  // Play notifications for phase transitions
+  useEffect(() => {
+    if (lastTransition && isInitialized) {
+      if (lastTransition.to === "resolved") {
+        playNotification("incident_resolved");
+      } else {
+        playNotification("phase_transition");
+      }
+    }
+  }, [lastTransition, isInitialized, playNotification]);
+
+  // Play notifications for agent completions
+  useEffect(() => {
+    if (lastCompletion && isInitialized) {
+      if (lastCompletion.success) {
+        playNotification("agent_completed");
+      } else {
+        playNotification("system_error");
+      }
+    }
+  }, [lastCompletion, isInitialized, playNotification]);
+
+  // Play notifications for conflicts
+  useEffect(() => {
+    if (lastConflict && isInitialized) {
+      if (lastConflict.escalatedToHuman) {
+        playNotification("human_escalation");
+      } else {
+        playNotification("conflict_detected");
+      }
+    }
+  }, [lastConflict, isInitialized, playNotification]);
+
+  // Play notifications for conflict resolutions
+  useEffect(() => {
+    if (lastResolution && isInitialized) {
+      playNotification("conflict_resolved");
+    }
+  }, [lastResolution, isInitialized, playNotification]);
+
+  const contextValue: AudioNotificationContextType = {
+    playNotification,
+    isEnabled: config.enabled,
+    isInitialized,
+  };
+
+  return (
+    <AudioNotificationContext.Provider value={contextValue}>
+      {children}
+    </AudioNotificationContext.Provider>
+  );
+}

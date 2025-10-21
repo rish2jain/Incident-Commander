@@ -98,6 +98,10 @@ app.include_router(security.router)
 from src.api.routers import aws_ai_services
 app.include_router(aws_ai_services.router)
 
+# Include real AWS AI showcase for prize eligibility
+from src.api.routers import real_aws_ai_showcase
+app.include_router(real_aws_ai_showcase.router)
+
 # Include metrics router
 app.include_router(metrics_router)
 

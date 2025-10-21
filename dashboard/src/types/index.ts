@@ -66,3 +66,122 @@ export interface DashboardState {
   systemStatus: "autonomous" | "monitoring" | "incident" | "maintenance";
   isConnected: boolean;
 }
+
+// Auto-scroll related types
+export interface AutoScrollConfig {
+  threshold: number;
+  resumeDelay: number;
+  smoothScroll: boolean;
+  maxScrollSpeed: number;
+  debounceDelay: number;
+}
+
+export interface ScrollState {
+  isAutoScrollEnabled: boolean;
+  isUserScrolling: boolean;
+  isNearBottom: boolean;
+  lastScrollPosition: number;
+  messageCount: number;
+  isPaused: boolean;
+  lastUserInteraction: number;
+}
+
+export interface ScrollMetrics {
+  scrollTop: number;
+  scrollHeight: number;
+  clientHeight: number;
+  distanceFromBottom: number;
+}
+
+// Incident Status Tracking types
+export interface IncidentStatus {
+  id: string;
+  phase:
+    | "detection"
+    | "diagnosis"
+    | "prediction"
+    | "resolution"
+    | "communication"
+    | "resolved";
+  progress: number; // 0-100
+  startTime: Date;
+  estimatedCompletion?: Date;
+  isComplete: boolean;
+  resolutionTime?: number;
+  severity?: "low" | "medium" | "high" | "critical";
+  title?: string;
+  description?: string;
+}
+
+export interface StatusTransition {
+  from: string;
+  to: string;
+  timestamp: Date;
+  duration: number;
+}
+
+export interface IncidentResolution {
+  incidentId: string;
+  isResolved: boolean;
+  resolutionTime: number; // in seconds
+  totalPhases: number;
+  completedPhases: number;
+  currentPhase?: string;
+  resolutionSummary?: string;
+  actionsPerformed: string[];
+  businessImpact: {
+    costSaved: number;
+    downtime: number;
+    affectedUsers: number;
+  };
+  showCelebration: boolean;
+  celebrationDuration: number;
+  fadeOutDelay: number;
+}
+
+// Connection Management types
+export interface ConnectionConfig {
+  wsUrl: string;
+  reconnectInterval: number;
+  maxReconnectAttempts: number;
+  heartbeatInterval: number;
+  connectionTimeout: number;
+  exponentialBackoff: boolean;
+  maxReconnectDelay: number;
+}
+
+export interface ConnectionState {
+  status:
+    | "connecting"
+    | "connected"
+    | "disconnected"
+    | "error"
+    | "reconnecting";
+  lastConnected: Date | null;
+  reconnectAttempts: number;
+  latency: number;
+  messageQueue: QueuedMessage[];
+  connectionQuality: "excellent" | "good" | "poor" | "unknown";
+  lastHeartbeat: Date | null;
+  isOnline: boolean;
+}
+
+export interface QueuedMessage {
+  id: string;
+  type: string;
+  data: any;
+  timestamp: Date;
+  retryCount: number;
+  maxRetries: number;
+}
+
+export interface ConnectionMetrics {
+  totalConnections: number;
+  totalDisconnections: number;
+  totalReconnections: number;
+  averageLatency: number;
+  uptime: number;
+  lastConnectionTime: Date | null;
+  messagesQueued: number;
+  messagesReplayed: number;
+}

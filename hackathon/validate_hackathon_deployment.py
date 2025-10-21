@@ -26,7 +26,12 @@ class HackathonValidator:
             'main': '',
             'health': '/health',
             'demo_incident': '/demo/incident',
-            'demo_stats': '/demo/stats'
+            'demo_stats': '/demo/stats',
+            'aws_ai_services': '/real-aws-ai/services/status',
+            'prize_eligibility': '/real-aws-ai/prize-eligibility',
+            'aws_ai_showcase': '/real-aws-ai/demo/full-showcase',
+            'react_dashboard': '/simple-demo',
+            'dashboard_metrics': '/dashboard/standalone-metrics'
         }
         self.results = []
     
@@ -100,6 +105,33 @@ class HackathonValidator:
             
             if response.get('aws_services') != 8:
                 issues.append("Should show 8 AWS services integrated")
+        
+        elif endpoint == 'aws_ai_services':
+            required_fields = ['real_aws_ai_services', 'total_services', 'prize_eligibility']
+            for field in required_fields:
+                if field not in response:
+                    issues.append(f"Missing required field: {field}")
+            
+            if response.get('total_services') != 7:
+                issues.append("Should show 7 real AWS AI services")
+        
+        elif endpoint == 'prize_eligibility':
+            required_fields = ['prize_categories', 'total_prize_eligibility', 'real_integrations']
+            for field in required_fields:
+                if field not in response:
+                    issues.append(f"Missing required field: {field}")
+            
+            if not response.get('real_integrations'):
+                issues.append("Should confirm real AWS integrations")
+        
+        elif endpoint == 'aws_ai_showcase':
+            required_fields = ['demo_title', 'aws_ai_analysis', 'services_demonstrated']
+            for field in required_fields:
+                if field not in response:
+                    issues.append(f"Missing required field: {field}")
+            
+            if len(response.get('services_demonstrated', [])) < 5:
+                issues.append("Should demonstrate at least 5 AWS AI services")
         
         return issues
     
@@ -175,6 +207,9 @@ class HackathonValidator:
             print("1. Main API: Shows system overview and capabilities")
             print("2. Demo Incident: Shows autonomous resolution example")
             print("3. Demo Stats: Shows business impact metrics")
+            print("4. AWS AI Services: Shows real AWS AI integrations")
+            print("5. Prize Eligibility: Confirms prize category eligibility")
+            print("6. AWS AI Showcase: Complete AWS AI demonstration")
             
             print("\n🏆 Submission Checklist:")
             print("✅ AWS deployment live and tested")
@@ -196,7 +231,10 @@ class HackathonValidator:
         commands = [
             ("System Overview", f"curl -s {self.base_url} | jq ."),
             ("Demo Incident", f"curl -s {self.base_url}/demo/incident | jq ."),
-            ("Demo Stats", f"curl -s {self.base_url}/demo/stats | jq .")
+            ("Demo Stats", f"curl -s {self.base_url}/demo/stats | jq ."),
+            ("AWS AI Services Status", f"curl -s {self.base_url}/real-aws-ai/services/status | jq ."),
+            ("Prize Eligibility Check", f"curl -s {self.base_url}/real-aws-ai/prize-eligibility | jq ."),
+            ("Full AWS AI Showcase", f"curl -s {self.base_url}/real-aws-ai/demo/full-showcase | jq .")
         ]
         
         for name, command in commands:

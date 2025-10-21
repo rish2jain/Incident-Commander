@@ -1,0 +1,312 @@
+/**
+ * Enhanced Visual Feedback Demo Component
+ * Demonstrates all the enhanced visual feedback features
+ * Requirements: 3.1, 3.2, 3.3, 3.4, 3.5 - Complete visual feedback system
+ */
+
+"use client";
+
+import React, { useState } from "react";
+import { motion } from "framer-motion";
+import {
+  Play,
+  Settings,
+  Zap,
+  Brain,
+  Activity,
+  Volume2,
+  Eye,
+} from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { Button } from "./ui/button";
+import PhaseTransitionIndicator from "./PhaseTransitionIndicator";
+import AgentCompletionIndicator from "./AgentCompletionIndicator";
+import ProgressTimeline from "./ProgressTimeline";
+import ConflictResolutionVisualization from "./ConflictResolutionVisualization";
+import AudioNotificationSettings from "./AudioNotificationSettings";
+import AudioNotificationProvider from "./AudioNotificationProvider";
+import { usePhaseTransitions } from "../lib/hooks/usePhaseTransitions";
+import { useAgentCompletions } from "../lib/hooks/useAgentCompletions";
+import { useProgressTimeline } from "../lib/hooks/useProgressTimeline";
+import { useConflictResolution } from "../lib/hooks/useConflictResolution";
+import { AgentType } from "../lib/agent-completion-manager";
+import { IncidentPhase } from "../lib/phase-transition-manager";
+
+interface EnhancedVisualFeedbackDemoProps {
+  className?: string;
+}
+
+const DemoControls = () => {
+  const { transitionToPhase, reset: resetPhases } = usePhaseTransitions();
+  const { registerCompletion, clearHistory: clearCompletions } =
+    useAgentCompletions();
+  const {
+    startIncident,
+    addEvent,
+    reset: resetTimeline,
+  } = useProgressTimeline();
+  const { registerConflict, clearHistory: clearConflicts } =
+    useConflictResolution();
+
+  const [isRunningDemo, setIsRunningDemo] = useState(false);
+
+  const runPhaseDemo = async () => {
+    setIsRunningDemo(true);
+
+    // Start incident timeline
+    startIncident("demo-incident-001");
+
+    const phases: IncidentPhase[] = [
+      "detection",
+      "diagnosis",
+      "prediction",
+      "resolution",
+      "communication",
+      "resolved",
+    ];
+
+    for (let i = 0; i < phases.length; i++) {
+      const phase = phases[i];
+
+      // Transition to phase
+      transitionToPhase(phase);
+
+      // Add timeline event
+      addEvent({
+        phase,
+        title: `${
+          phase.charAt(0).toUpperCase() + phase.slice(1)
+        } Phase Started`,
+        description: `Autonomous system initiated ${phase} procedures`,
+        status: "in_progress",
+        progress: 0,
+        estimatedDuration: 30000 + Math.random() * 60000,
+      });
+
+      // Simulate progress
+      for (let progress = 0; progress <= 100; progress += 25) {
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
+        addEvent({
+          phase,
+          title: `${phase.charAt(0).toUpperCase() + phase.slice(1)} Progress`,
+          description: `Phase ${progress}% complete`,
+          status: progress === 100 ? "completed" : "in_progress",
+          progress,
+          actualDuration:
+            progress === 100 ? 2000 + Math.random() * 3000 : undefined,
+        });
+      }
+
+      // Register agent completion
+      if (i < phases.length - 1) {
+        // Don't register for resolved phase
+        const agentTypes: AgentType[] = [
+          "detection",
+          "diagnosis",
+          "prediction",
+          "resolution",
+          "communication",
+        ];
+        const agentType = agentTypes[i % agentTypes.length];
+
+        registerCompletion(
+          agentType,
+          {
+            id: `demo-action-${i}`,
+            agent_type: agentType,
+            title: `${phase.charAt(0).toUpperCase() + phase.slice(1)} Complete`,
+            description: `Successfully completed ${phase} analysis`,
+            timestamp: new Date().toISOString(),
+            confidence: 0.85 + Math.random() * 0.15,
+            status: "completed",
+          },
+          2000 + Math.random() * 3000,
+          true
+        );
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
+
+    setIsRunningDemo(false);
+  };
+
+  const simulateConflict = () => {
+    const recommendations = [
+      {
+        agentType: "diagnosis" as AgentType,
+        actionId: "restart-service",
+        title: "Restart Service",
+        description: "Restart the affected service to resolve the issue",
+        confidence: 0.85,
+        reasoning:
+          "Service logs show memory leak patterns that typically resolve with restart",
+        timestamp: new Date(),
+        priority: "high" as const,
+        estimatedImpact: "2-3 minutes downtime",
+        riskLevel: "medium" as const,
+      },
+      {
+        agentType: "resolution" as AgentType,
+        actionId: "scale-horizontally",
+        title: "Scale Horizontally",
+        description: "Add more instances to handle the load",
+        confidence: 0.75,
+        reasoning: "CPU and memory metrics indicate resource exhaustion",
+        timestamp: new Date(),
+        priority: "medium" as const,
+        estimatedImpact: "No downtime, gradual improvement",
+        riskLevel: "low" as const,
+      },
+      {
+        agentType: "prediction" as AgentType,
+        actionId: "rollback-deployment",
+        title: "Rollback Deployment",
+        description: "Rollback to previous stable version",
+        confidence: 0.9,
+        reasoning:
+          "Issue started after recent deployment, correlation is strong",
+        timestamp: new Date(),
+        priority: "critical" as const,
+        estimatedImpact: "5 minutes downtime, full resolution",
+        riskLevel: "low" as const,
+      },
+    ];
+
+    registerConflict(recommendations, "action_disagreement");
+  };
+
+  const resetAll = () => {
+    resetPhases();
+    clearCompletions();
+    resetTimeline();
+    clearConflicts();
+  };
+
+  return (
+    <Card className="mb-6">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Play className="w-5 h-5 text-primary" />
+          Demo Controls
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="flex flex-wrap gap-3">
+          <Button
+            onClick={runPhaseDemo}
+            disabled={isRunningDemo}
+            className="flex items-center gap-2"
+          >
+            <Zap className="w-4 h-4" />
+            {isRunningDemo ? "Running Demo..." : "Run Phase Demo"}
+          </Button>
+
+          <Button
+            onClick={simulateConflict}
+            className="flex items-center gap-2"
+          >
+            <Brain className="w-4 h-4" />
+            Simulate Conflict
+          </Button>
+
+          <Button onClick={resetAll} className="flex items-center gap-2">
+            <Activity className="w-4 h-4" />
+            Reset All
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+export default function EnhancedVisualFeedbackDemo({
+  className = "",
+}: EnhancedVisualFeedbackDemoProps) {
+  const [showAudioSettings, setShowAudioSettings] = useState(false);
+
+  return (
+    <AudioNotificationProvider autoInitialize={true}>
+      <div className={`space-y-6 ${className}`}>
+        {/* Header */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Eye className="w-6 h-6 text-primary" />
+                Enhanced Visual Feedback System
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Button
+                  onClick={() => setShowAudioSettings(!showAudioSettings)}
+                  className="flex items-center gap-2"
+                >
+                  <Volume2 className="w-4 h-4" />
+                  Audio Settings
+                </Button>
+              </div>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground">
+              This demo showcases all the enhanced visual feedback features
+              including phase transitions, agent completion animations,
+              real-time progress timeline, conflict resolution visualizations,
+              and configurable audio notifications.
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Demo Controls */}
+        <DemoControls />
+
+        {/* Audio Settings */}
+        {showAudioSettings && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+          >
+            <AudioNotificationSettings
+              isOpen={showAudioSettings}
+              onClose={() => setShowAudioSettings(false)}
+            />
+          </motion.div>
+        )}
+
+        {/* Visual Feedback Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Phase Transitions */}
+          <PhaseTransitionIndicator
+            showProgress={true}
+            showTransitionHistory={true}
+          />
+
+          {/* Agent Completions */}
+          <AgentCompletionIndicator
+            showRecentCompletions={true}
+            showStats={true}
+            maxRecentItems={5}
+          />
+        </div>
+
+        {/* Progress Timeline */}
+        <ProgressTimeline
+          showEstimates={true}
+          showMetrics={true}
+          showEvents={true}
+        />
+
+        {/* Conflict Resolution */}
+        <ConflictResolutionVisualization
+          showActiveConflicts={true}
+          showRecentConflicts={true}
+          showMetrics={true}
+          maxRecentItems={3}
+        />
+      </div>
+    </AudioNotificationProvider>
+  );
+}

@@ -1,0 +1,1380 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Incident Commander - Agent Actions Live</title>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Inter", sans-serif;
+        background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 100%);
+        color: #ffffff;
+        overflow-x: hidden;
+      }
+
+      .header {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 1rem 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .logo i {
+        font-size: 2rem;
+        color: #00d4ff;
+      }
+
+      .logo h1 {
+        font-size: 1.3rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #00d4ff, #0099cc);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .header-metrics {
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+      }
+
+      .metric-badge {
+        text-align: right;
+      }
+
+      .metric-label {
+        font-size: 0.7rem;
+        color: #888;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      .metric-value {
+        font-size: 1.8rem;
+        font-weight: 900;
+        color: #00ff88;
+      }
+
+      .main-layout {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto 1fr;
+        gap: 1rem;
+        padding: 1rem;
+        height: calc(100vh - 80px);
+      }
+
+      /* All 5 Agents - Horizontal Layout */
+      .agents-row {
+        grid-column: 1 / 3;
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 1rem;
+      }
+
+      .agent-card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 2px solid;
+        border-radius: 16px;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .agent-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          currentColor,
+          transparent
+        );
+        animation: shimmer 2s infinite;
+      }
+
+      @keyframes shimmer {
+        0% {
+          transform: translateX(-100%);
+        }
+        100% {
+          transform: translateX(100%);
+        }
+      }
+
+      .agent-card.detection {
+        border-color: #ff6b6b;
+        color: #ff6b6b;
+      }
+
+      .agent-card.diagnosis {
+        border-color: #00d4ff;
+        color: #00d4ff;
+      }
+
+      .agent-card.prediction {
+        border-color: #00ff88;
+        color: #00ff88;
+      }
+
+      .agent-card.resolution {
+        border-color: #ffa500;
+        color: #ffa500;
+      }
+
+      .agent-card.communication {
+        border-color: #8a2be2;
+        color: #8a2be2;
+      }
+
+      .agent-card.active {
+        box-shadow: 0 0 30px currentColor;
+        transform: scale(1.05);
+      }
+
+      .agent-icon {
+        font-size: 2.5rem;
+        text-align: center;
+        margin-bottom: 0.75rem;
+      }
+
+      .agent-name {
+        font-size: 0.9rem;
+        font-weight: 700;
+        text-align: center;
+        color: #fff;
+        margin-bottom: 0.75rem;
+      }
+
+      .agent-status-badge {
+        text-align: center;
+        padding: 0.4rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .agent-status-badge.idle {
+        background: rgba(136, 136, 136, 0.2);
+        color: #888;
+      }
+
+      .agent-status-badge.analyzing {
+        background: rgba(255, 215, 0, 0.3);
+        color: #ffd700;
+        animation: pulse-status 1.5s infinite;
+      }
+
+      .agent-status-badge.decided {
+        background: rgba(0, 255, 136, 0.3);
+        color: #00ff88;
+      }
+
+      .agent-status-badge.executing {
+        background: rgba(255, 165, 0, 0.3);
+        color: #ffa500;
+        animation: pulse-status 1s infinite;
+      }
+
+      @keyframes pulse-status {
+        0%,
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.7;
+          transform: scale(1.05);
+        }
+      }
+
+      .agent-current-action {
+        background: rgba(0, 0, 0, 0.4);
+        border-radius: 8px;
+        padding: 1rem;
+        min-height: 140px;
+      }
+
+      .action-title {
+        font-size: 0.75rem;
+        color: #888;
+        text-transform: uppercase;
+        margin-bottom: 0.5rem;
+        letter-spacing: 0.5px;
+      }
+
+      .action-text {
+        font-size: 0.85rem;
+        color: #fff;
+        line-height: 1.5;
+        margin-bottom: 0.75rem;
+        font-weight: 500;
+      }
+
+      .action-reasoning {
+        font-size: 0.75rem;
+        color: #aaa;
+        font-style: italic;
+        line-height: 1.4;
+      }
+
+      .action-decision {
+        margin-top: 0.75rem;
+        padding: 0.5rem;
+        background: rgba(0, 255, 136, 0.15);
+        border-left: 3px solid #00ff88;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #00ff88;
+      }
+
+      /* Timeline Feed - Accessible ordering */
+      .timeline-section {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 1.5rem;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        scroll-behavior: smooth;
+      }
+
+      /* Visual reverse order while maintaining DOM order for accessibility */
+      #timeline-feed {
+        display: flex;
+        flex-direction: column-reverse;
+      }
+
+      .section-header {
+        position: sticky;
+        top: 0;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(10px);
+        padding: 0.75rem 0 1rem 0;
+        margin-bottom: 1rem;
+        border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        z-index: 10;
+      }
+
+      .section-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #fff;
+      }
+
+      /* Timeline Event */
+      .timeline-event {
+        margin-bottom: 1rem;
+        padding: 1.25rem;
+        background: rgba(0, 0, 0, 0.3);
+        border-left: 4px solid;
+        border-radius: 8px;
+        animation: slideIn 0.4s ease;
+      }
+
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .timeline-event.detection {
+        border-color: #ff6b6b;
+      }
+      .timeline-event.diagnosis {
+        border-color: #00d4ff;
+      }
+      .timeline-event.prediction {
+        border-color: #00ff88;
+      }
+      .timeline-event.resolution {
+        border-color: #ffa500;
+      }
+      .timeline-event.communication {
+        border-color: #8a2be2;
+      }
+      .timeline-event.system {
+        border-color: #fff;
+      }
+
+      .event-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75rem;
+      }
+
+      .event-agent {
+        font-size: 0.9rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .event-time {
+        font-size: 0.75rem;
+        color: #888;
+        font-family: monospace;
+      }
+
+      .event-content {
+        font-size: 0.9rem;
+        line-height: 1.6;
+        color: #ddd;
+      }
+
+      .event-content strong {
+        color: #fff;
+        display: block;
+        margin-bottom: 0.25rem;
+      }
+
+      .event-tag {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        margin-top: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .event-tag.critical {
+        background: rgba(255, 107, 107, 0.2);
+        color: #ff6b6b;
+      }
+      .event-tag.analysis {
+        background: rgba(0, 212, 255, 0.2);
+        color: #00d4ff;
+      }
+      .event-tag.vote {
+        background: rgba(138, 43, 226, 0.2);
+        color: #8a2be2;
+      }
+      .event-tag.action {
+        background: rgba(255, 165, 0, 0.2);
+        color: #ffa500;
+      }
+      .event-tag.success {
+        background: rgba(0, 255, 136, 0.2);
+        color: #00ff88;
+      }
+
+      /* Workflow Progress */
+      .workflow-progress {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .workflow-step {
+        padding: 1.25rem;
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 12px;
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.3s ease;
+        order: 1;
+      }
+
+      .workflow-step.active {
+        border-color: #00ff88;
+        box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+        order: 0;
+      }
+
+      .workflow-step.completed {
+        opacity: 0.6;
+        order: 2;
+      }
+
+      .step-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 0.75rem;
+      }
+
+      .step-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #00d4ff, #0099cc);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        flex-shrink: 0;
+      }
+
+      .step-icon.active {
+        background: linear-gradient(135deg, #00ff88, #00c466);
+        animation: pulse-icon 1.5s infinite;
+      }
+
+      .step-icon.completed {
+        background: rgba(0, 212, 255, 0.3);
+      }
+
+      @keyframes pulse-icon {
+        0%,
+        100% {
+          transform: scale(1);
+          box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.7);
+        }
+        50% {
+          transform: scale(1.1);
+          box-shadow: 0 0 0 10px rgba(0, 255, 136, 0);
+        }
+      }
+
+      .step-title {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #fff;
+      }
+
+      .step-timing {
+        font-size: 0.75rem;
+        color: #888;
+        margin-top: 0.25rem;
+      }
+
+      .step-timing.active {
+        color: #00ff88;
+        font-weight: 700;
+      }
+
+      /* Trigger Button */
+      .trigger-section {
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .trigger-btn {
+        width: 100%;
+        padding: 1rem;
+        background: linear-gradient(135deg, #8a2be2, #4b0082);
+        border: none;
+        border-radius: 12px;
+        color: white;
+        font-weight: 700;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+      }
+
+      .trigger-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(138, 43, 226, 0.4);
+      }
+
+      .trigger-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      /* Consensus Badge */
+      .consensus-badge {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: linear-gradient(
+          135deg,
+          rgba(138, 43, 226, 0.95),
+          rgba(75, 0, 130, 0.95)
+        );
+        backdrop-filter: blur(10px);
+        padding: 2rem 3rem;
+        border-radius: 20px;
+        border: 3px solid #8a2be2;
+        box-shadow: 0 0 50px rgba(138, 43, 226, 0.5);
+        z-index: 1000;
+        display: none;
+        text-align: center;
+        animation: popIn 0.5s ease;
+      }
+
+      @keyframes popIn {
+        from {
+          opacity: 0;
+          transform: translate(-50%, -50%) scale(0.8);
+        }
+        to {
+          opacity: 1;
+          transform: translate(-50%, -50%) scale(1);
+        }
+      }
+
+      .consensus-badge.show {
+        display: block;
+      }
+
+      /* Focus styles for accessibility */
+      .consensus-badge:focus {
+        outline: 3px solid #00ff88;
+        outline-offset: 2px;
+      }
+
+      button:focus,
+      .trigger-button:focus {
+        outline: 2px solid #00ff88;
+        outline-offset: 2px;
+      }
+
+      .consensus-title {
+        font-size: 1.8rem;
+        font-weight: 900;
+        color: #fff;
+        margin-bottom: 1rem;
+      }
+
+      .consensus-details {
+        font-size: 1.1rem;
+        color: #ddd;
+        margin-bottom: 0.5rem;
+      }
+
+      .consensus-confidence {
+        font-size: 2.5rem;
+        font-weight: 900;
+        color: #00ff88;
+        margin-top: 1rem;
+      }
+
+      /* Scroll indicator for timeline */
+      .scroll-indicator {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: rgba(0, 212, 255, 0.9);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none;
+        z-index: 20;
+      }
+
+      .scroll-indicator.show {
+        opacity: 1;
+      }
+
+      .scroll-indicator.new-message {
+        background: rgba(0, 255, 136, 0.9);
+        animation: pulse-indicator 2s ease-out;
+      }
+
+      @keyframes pulse-indicator {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.1);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="header">
+      <div class="logo">
+        <i class="fas fa-shield-halved"></i>
+        <h1>Autonomous Incident Commander - Live Agent Actions</h1>
+      </div>
+      <div class="header-metrics">
+        <div class="metric-badge">
+          <div class="metric-label">MTTR</div>
+          <div class="metric-value" id="header-mttr">0:00</div>
+        </div>
+        <div class="metric-badge">
+          <div class="metric-label">Cost Saved</div>
+          <div class="metric-value" id="header-savings">$0</div>
+        </div>
+      </div>
+    </header>
+
+    <main class="main-layout">
+      <!-- Top Row: All 5 Agents Side by Side -->
+      <div class="agents-row">
+        <!-- Detection Agent -->
+        <div class="agent-card detection" id="card-detection">
+          <div class="agent-icon">🔍</div>
+          <div class="agent-name">Detection</div>
+          <div class="agent-status-badge idle" id="status-detection">Idle</div>
+          <div class="agent-current-action">
+            <div class="action-title">Current Action</div>
+            <div class="action-text" id="action-detection">
+              Monitoring system metrics...
+            </div>
+            <div class="action-reasoning" id="reasoning-detection"></div>
+            <div
+              class="action-decision"
+              id="decision-detection"
+              style="display: none"
+            ></div>
+          </div>
+        </div>
+
+        <!-- Diagnosis Agent -->
+        <div class="agent-card diagnosis" id="card-diagnosis">
+          <div class="agent-icon">🧠</div>
+          <div class="agent-name">Diagnosis</div>
+          <div class="agent-status-badge idle" id="status-diagnosis">Idle</div>
+          <div class="agent-current-action">
+            <div class="action-title">Current Action</div>
+            <div class="action-text" id="action-diagnosis">
+              Awaiting incident data...
+            </div>
+            <div class="action-reasoning" id="reasoning-diagnosis"></div>
+            <div
+              class="action-decision"
+              id="decision-diagnosis"
+              style="display: none"
+            ></div>
+          </div>
+        </div>
+
+        <!-- Prediction Agent -->
+        <div class="agent-card prediction" id="card-prediction">
+          <div class="agent-icon">🔮</div>
+          <div class="agent-name">Prediction</div>
+          <div class="agent-status-badge idle" id="status-prediction">Idle</div>
+          <div class="agent-current-action">
+            <div class="action-title">Current Action</div>
+            <div class="action-text" id="action-prediction">
+              Forecasting trends...
+            </div>
+            <div class="action-reasoning" id="reasoning-prediction"></div>
+            <div
+              class="action-decision"
+              id="decision-prediction"
+              style="display: none"
+            ></div>
+          </div>
+        </div>
+
+        <!-- Resolution Agent -->
+        <div class="agent-card resolution" id="card-resolution">
+          <div class="agent-icon">🛠️</div>
+          <div class="agent-name">Resolution</div>
+          <div class="agent-status-badge idle" id="status-resolution">Idle</div>
+          <div class="agent-current-action">
+            <div class="action-title">Current Action</div>
+            <div class="action-text" id="action-resolution">
+              Preparing remediation...
+            </div>
+            <div class="action-reasoning" id="reasoning-resolution"></div>
+            <div
+              class="action-decision"
+              id="decision-resolution"
+              style="display: none"
+            ></div>
+          </div>
+        </div>
+
+        <!-- Communication Agent -->
+        <div class="agent-card communication" id="card-communication">
+          <div class="agent-icon">📢</div>
+          <div class="agent-name">Communication</div>
+          <div class="agent-status-badge idle" id="status-communication">
+            Idle
+          </div>
+          <div class="agent-current-action">
+            <div class="action-title">Current Action</div>
+            <div class="action-text" id="action-communication">
+              Ready to notify...
+            </div>
+            <div class="action-reasoning" id="reasoning-communication"></div>
+            <div
+              class="action-decision"
+              id="decision-communication"
+              style="display: none"
+            ></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Left: Live Event Timeline (Newest First) -->
+      <div class="timeline-section" id="timeline-container">
+        <div class="section-header">
+          <div class="section-title">
+            <i class="fas fa-clock"></i>
+            Live Event Timeline
+          </div>
+        </div>
+        <div class="scroll-indicator" id="scroll-indicator">
+          📍 New Activity
+        </div>
+        <div
+          id="timeline-feed"
+          aria-live="polite"
+          role="log"
+          aria-label="Agent activity timeline"
+        >
+          <div style="text-align: center; color: #888; padding: 2rem">
+            <i
+              class="fas fa-hourglass-half"
+              style="font-size: 2rem; opacity: 0.3"
+            ></i>
+            <p style="margin-top: 1rem">Waiting for incident...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Right: Workflow Progress -->
+      <div class="timeline-section">
+        <div class="section-header">
+          <div class="section-title">
+            <i class="fas fa-list-check"></i>
+            Incident Workflow
+          </div>
+        </div>
+        <div class="workflow-progress" id="workflow-steps">
+          <div class="workflow-step pending" id="step-1">
+            <div class="step-header">
+              <div class="step-icon">1</div>
+              <div>
+                <div class="step-title">📡 Incident Detection</div>
+                <div class="step-timing" id="time-1">Waiting...</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="workflow-step pending" id="step-2">
+            <div class="step-header">
+              <div class="step-icon">2</div>
+              <div>
+                <div class="step-title">🔍 Root Cause Analysis</div>
+                <div class="step-timing" id="time-2">Waiting...</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="workflow-step pending" id="step-3">
+            <div class="step-header">
+              <div class="step-icon">3</div>
+              <div>
+                <div class="step-title">🗳️ Byzantine Consensus</div>
+                <div class="step-timing" id="time-3">Waiting...</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="workflow-step pending" id="step-4">
+            <div class="step-header">
+              <div class="step-icon">4</div>
+              <div>
+                <div class="step-title">⚡ Automated Remediation</div>
+                <div class="step-timing" id="time-4">Waiting...</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="workflow-step pending" id="step-5">
+            <div class="step-header">
+              <div class="step-icon">5</div>
+              <div>
+                <div class="step-title">✅ Verification Complete</div>
+                <div class="step-timing" id="time-5">Waiting...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="trigger-section">
+          <button
+            class="trigger-btn"
+            onclick="triggerIncident()"
+            id="trigger-btn"
+          >
+            <i class="fas fa-bolt"></i>
+            Trigger Database Cascade Incident
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <!-- Consensus Popup -->
+    <div
+      class="consensus-badge"
+      id="consensus-popup"
+      role="alert"
+      aria-live="assertive"
+      tabindex="-1"
+    >
+      <div class="consensus-title">🗳️ BYZANTINE CONSENSUS</div>
+      <div class="consensus-details">All 5 agents have voted</div>
+      <div class="consensus-confidence" id="consensus-confidence">96.8%</div>
+      <div class="consensus-details" style="margin-top: 0.5rem">
+        Agreement Reached
+      </div>
+    </div>
+
+    <script>
+      let incidentActive = false;
+      let mttrSeconds = 0;
+      let mttrInterval = null;
+      const timelineFeed = document.getElementById("timeline-feed");
+      const timelineContainer = document.getElementById("timeline-container");
+      const scrollIndicator = document.getElementById("scroll-indicator");
+      let userScrolledAway = false;
+      let scrollTimeout = null;
+
+      function addTimelineEvent(agent, content, tag) {
+        const event = document.createElement("div");
+        event.className = `timeline-event ${agent}`;
+
+        const timestamp = new Date().toLocaleTimeString("en-US", {
+          hour12: false,
+        });
+
+        const agentNames = {
+          detection: "🔍 Detection",
+          diagnosis: "🧠 Diagnosis",
+          prediction: "🔮 Prediction",
+          resolution: "🛠️ Resolution",
+          communication: "📢 Communication",
+          system: "⚙️ System",
+        };
+
+        // Create DOM elements safely instead of using innerHTML
+        const eventHeader = document.createElement("div");
+        eventHeader.className = "event-header";
+
+        const eventAgent = document.createElement("div");
+        eventAgent.className = "event-agent";
+        eventAgent.textContent = agentNames[agent] || agent;
+
+        const eventTime = document.createElement("div");
+        eventTime.className = "event-time";
+        eventTime.textContent = timestamp;
+
+        eventHeader.appendChild(eventAgent);
+        eventHeader.appendChild(eventTime);
+
+        const eventContent = document.createElement("div");
+        eventContent.className = "event-content";
+        eventContent.innerHTML = content; // Preserve intentional markup
+
+        event.appendChild(eventHeader);
+        event.appendChild(eventContent);
+
+        // Safely handle tag if present
+        if (tag && typeof tag === "string" && /^[a-z-]+$/.test(tag)) {
+          const eventTag = document.createElement("div");
+          eventTag.className = "event-tag";
+          eventTag.classList.add(tag);
+          eventTag.textContent = tag;
+          event.appendChild(eventTag);
+        }
+
+        // Add role and timestamp for accessibility
+        event.setAttribute("role", "article");
+        event.setAttribute(
+          "aria-label",
+          `${agentNames[agent] || agent} event at ${timestamp}`
+        );
+
+        // Append to maintain DOM order (CSS handles visual reverse)
+        timelineFeed.appendChild(event);
+
+        // Smart auto-scroll with user interaction detection
+        autoScrollToNewest();
+      }
+
+      function updateAgent(agent, status, action, reasoning, decision) {
+        // Update status badge
+        const statusEl = document.getElementById(`status-${agent}`);
+        statusEl.textContent = status;
+        statusEl.className = `agent-status-badge ${status.toLowerCase()}`;
+
+        // Highlight active agent
+        const card = document.getElementById(`card-${agent}`);
+        if (status === "Analyzing" || status === "Executing") {
+          card.classList.add("active");
+        } else {
+          card.classList.remove("active");
+        }
+
+        // Update action text
+        document.getElementById(`action-${agent}`).textContent = action;
+
+        // Update reasoning
+        const reasoningEl = document.getElementById(`reasoning-${agent}`);
+        if (reasoning) {
+          reasoningEl.textContent = reasoning;
+          reasoningEl.style.display = "block";
+        } else {
+          reasoningEl.style.display = "none";
+        }
+
+        // Update decision
+        const decisionEl = document.getElementById(`decision-${agent}`);
+        if (decision) {
+          decisionEl.textContent = decision;
+          decisionEl.style.display = "block";
+        } else {
+          decisionEl.style.display = "none";
+        }
+      }
+
+      function updateWorkflow(step, status, timing) {
+        const stepEl = document.getElementById(`step-${step}`);
+        stepEl.className = `workflow-step ${status}`;
+
+        const icon = stepEl.querySelector(".step-icon");
+        icon.className = `step-icon ${status}`;
+
+        const timeEl = document.getElementById(`time-${step}`);
+        if (timing) {
+          timeEl.textContent = timing;
+          timeEl.className = `step-timing ${status}`;
+        }
+      }
+
+      function startMTTR() {
+        mttrSeconds = 0;
+        timelineFeed.innerHTML = "";
+        mttrInterval = setInterval(updateMTTR, 1000);
+      }
+
+      function stopMTTR() {
+        if (mttrInterval) {
+          clearInterval(mttrInterval);
+          mttrInterval = null;
+        }
+      }
+
+      function updateMTTR() {
+        mttrSeconds++;
+        const minutes = Math.floor(mttrSeconds / 60);
+        const seconds = mttrSeconds % 60;
+        const display = `${minutes}:${seconds.toString().padStart(2, "0")}`;
+
+        document.getElementById("header-mttr").textContent = display;
+      }
+
+      function showConsensusPopup() {
+        const popup = document.getElementById("consensus-popup");
+        const previousFocus = document.activeElement;
+
+        popup.classList.add("show");
+        // Move focus to popup for accessibility
+        popup.focus();
+
+        setTimeout(() => {
+          popup.classList.remove("show");
+          // Return focus to previous element
+          if (previousFocus && previousFocus.focus) {
+            previousFocus.focus();
+          }
+        }, 3000);
+      }
+
+      async function triggerIncident() {
+        if (incidentActive) return;
+
+        incidentActive = true;
+        startMTTR();
+
+        // STEP 1: Detection (0-2s) -> Now 0-7s
+        updateWorkflow(1, "active", "Detecting incident...");
+
+        updateAgent(
+          "detection",
+          "Analyzing",
+          "Analyzing database connection pool metrics",
+          "Database connections spiking from 50 to 500 in 30 seconds. Error rate increasing.",
+          null
+        );
+
+        addTimelineEvent(
+          "detection",
+          "<strong>🚨 INCIDENT DETECTED</strong><br>Database connection pool exhausted<br>• Connections: 500/500 (100% utilization)<br>• Error rate: 47% (up from 0.1%)<br>• Latency: 8,500ms (up from 120ms)<br>Severity: CRITICAL",
+          "critical"
+        );
+
+        await sleep(7000); // Changed from 2000
+
+        updateAgent(
+          "detection",
+          "Decided",
+          "Database cascade failure confirmed",
+          "Pattern matches known cascade failure signature.",
+          "✅ DECISION: Escalate to diagnosis team"
+        );
+
+        updateWorkflow(1, "completed", "✓ Completed in 7.0s");
+
+        // STEP 2: Diagnosis (2-5s) -> Now 7-18s
+        await sleep(1800); // Changed from 500
+        updateWorkflow(2, "active", "Analyzing root cause...");
+
+        updateAgent(
+          "diagnosis",
+          "Analyzing",
+          "Running root cause analysis on database metrics",
+          "Checking: connection leaks, query timeouts, resource constraints, cascading failures",
+          null
+        );
+
+        addTimelineEvent(
+          "diagnosis",
+          "<strong>🔬 ROOT CAUSE ANALYSIS</strong><br>Analyzing 5 potential failure modes...<br>• Connection leak: 23% probability<br>• Query timeout cascade: 87% probability ✅<br>• Memory exhaustion: 12% probability<br>• Network partition: 5% probability",
+          "analysis"
+        );
+
+        await sleep(7000); // Changed from 2000
+
+        updateAgent(
+          "diagnosis",
+          "Decided",
+          "Root cause: Slow query cascade",
+          "Query analytics_daily_rollup_20251019 running for 47s, blocking 12 queries.",
+          "✅ DECISION: Kill slow query + Scale connection pool"
+        );
+
+        addTimelineEvent(
+          "diagnosis",
+          "<strong>💡 ROOT CAUSE IDENTIFIED</strong><br>Slow Query Cascade<br>• Query ID: analytics_daily_rollup_20251019<br>• Runtime: 47 seconds (timeout: 30s)<br>• Blocking: 12 queries in queue<br>Recommended Fix: Terminate query + Scale pool",
+          "analysis"
+        );
+
+        updateWorkflow(2, "completed", "✓ Completed in 8.8s");
+
+        // STEP 3: Consensus (5-8s) -> Now 18-30s
+        await sleep(1800); // Changed from 500
+        updateWorkflow(3, "active", "Agents voting...");
+
+        // Prediction votes
+        updateAgent(
+          "prediction",
+          "Analyzing",
+          "Forecasting impact of proposed remediation",
+          "If we scale pool without killing query: 89% chance of continued degradation. If we kill query: 96% success rate.",
+          null
+        );
+
+        addTimelineEvent(
+          "prediction",
+          "<strong>🔮 IMPACT FORECAST</strong><br>Analyzing remediation scenarios...<br>• Scale only: 89% degradation risk<br>• Kill query only: 94% success<br>• Dual approach: 96% success ✅<br>Recommendation: Dual remediation",
+          "analysis"
+        );
+
+        await sleep(3500); // Changed from 1000
+
+        updateAgent(
+          "prediction",
+          "Decided",
+          "Dual approach recommended",
+          "Combined remediation has highest success probability.",
+          "✅ VOTE: Approve dual remediation (96% confidence)"
+        );
+
+        // Resolution votes
+        updateAgent(
+          "resolution",
+          "Analyzing",
+          "Validating remediation feasibility",
+          "Checking AWS RDS capacity, query termination safety, rollback procedures.",
+          null
+        );
+
+        await sleep(2800); // Changed from 800
+
+        updateAgent(
+          "resolution",
+          "Decided",
+          "Remediation validated",
+          "All safety checks passed. Rollback plan confirmed.",
+          "✅ VOTE: Execute remediation (99% confidence)"
+        );
+
+        // Communication votes
+        updateAgent(
+          "communication",
+          "Analyzing",
+          "Assessing notification requirements",
+          "Evaluating stakeholder impact and communication strategy.",
+          null
+        );
+
+        await sleep(1800); // Changed from 500
+
+        updateAgent(
+          "communication",
+          "Decided",
+          "Notification plan ready",
+          "Engineering team + status page + post-mortem ticket.",
+          "✅ VOTE: Proceed with remediation (95% confidence)"
+        );
+
+        addTimelineEvent(
+          "diagnosis",
+          "<strong>🗳️ BYZANTINE CONSENSUS - ROUND 1/3</strong><br>Proposal: Kill slow query + Scale connection pool<br><br>Votes:<br>• 🔍 Detection: ✅ AGREE (Confidence: 96%)<br>• 🧠 Diagnosis: ✅ AGREE (Confidence: 98%)<br>• 🔮 Prediction: ✅ AGREE (Confidence: 96%)<br>• 🛠️ Resolution: ✅ AGREE (Confidence: 99%)<br>• 📢 Communication: ✅ AGREE (Confidence: 95%)<br><br>CONSENSUS REACHED: 100% agreement (5/5 agents)<br>Combined Confidence: 96.8%",
+          "consensus"
+        );
+
+        showConsensusPopup();
+        updateWorkflow(3, "completed", "✓ Consensus in 9.8s");
+
+        // STEP 4: Execution (8-15s) -> Now 30-50s
+        await sleep(3500); // Changed from 1000
+        updateWorkflow(4, "active", "Executing fix...");
+
+        updateAgent(
+          "resolution",
+          "Executing",
+          "Terminating slow query",
+          "Step 1: Terminating query analytics_daily_rollup_20251019...",
+          null
+        );
+
+        addTimelineEvent(
+          "resolution",
+          "<strong>⚡ EXECUTING REMEDIATION</strong><br>Step 1: Terminating slow query...<br>• Query ID: analytics_daily_rollup_20251019<br>• Status: TERMINATED ✅<br>• Time: 0.3s",
+          "action"
+        );
+
+        await sleep(7000); // Changed from 2000
+
+        updateAgent(
+          "resolution",
+          "Executing",
+          "Scaling connection pool",
+          "Step 2: Scaling from 500 to 1000 connections via AWS RDS autoscaling...",
+          null
+        );
+
+        addTimelineEvent(
+          "resolution",
+          "<strong>⚡ SCALING CONNECTION POOL</strong><br>Step 2: Increasing connection limit...<br>• From: 500 connections<br>• To: 1000 connections<br>• Status: SCALING... (8s remaining)",
+          "action"
+        );
+
+        await sleep(10500); // Changed from 3000
+
+        addTimelineEvent(
+          "resolution",
+          "<strong>SCALING COMPLETE</strong><br>• New capacity: 1000 connections<br>• Current usage: 127 (12.7%)<br>• Error rate: 0.1% (normal)<br>• Latency: 118ms (normal)",
+          "action"
+        );
+
+        updateWorkflow(4, "completed", "✓ Executed in 18.6s");
+
+        // STEP 5: Verification (15-17s) -> Now 50-60s
+        await sleep(3500); // Changed from 1000
+        updateWorkflow(5, "active", "Verifying...");
+
+        updateAgent(
+          "communication",
+          "Executing",
+          "Notifying stakeholders and updating status",
+          "Sending notifications, updating dashboards, creating post-mortem ticket",
+          null
+        );
+
+        await sleep(5300); // Changed from 1500
+
+        // Properly calculate minutes and seconds for MTTR display
+        const minutes = Math.floor(mttrSeconds / 60);
+        const seconds = mttrSeconds % 60;
+        const finalMTTR = `${minutes}:${seconds.toString().padStart(2, "0")}`;
+        const costSaved = "$103,313";
+
+        addTimelineEvent(
+          "communication",
+          `<strong>📢 INCIDENT RESOLVED</strong><br>Final Status: All systems nominal<br><br>Metrics:<br>• Total Resolution Time: ${mttrSeconds} seconds<br>• Users Affected: 0<br>• Cost Saved: ${costSaved}<br>• Traditional MTTR: 30 minutes<br>• AI MTTR: ${mttrSeconds} seconds (${Math.round(
+            (1800 / mttrSeconds) * 100
+          )}% improvement)<br><br>Notifications Sent:<br>✅ Engineering team<br>✅ Status page updated<br>✅ Post-mortem ticket created`,
+          "consensus"
+        );
+
+        const mttrElement = document.getElementById("header-mttr");
+        const savingsElement = document.getElementById("header-savings");
+        if (mttrElement) mttrElement.textContent = finalMTTR;
+        if (savingsElement) savingsElement.textContent = costSaved;
+        updateWorkflow(5, "completed", `✓ Total MTTR: ${finalMTTR}`);
+
+        stopMTTR();
+
+        // Reset agents after completion
+        setTimeout(() => {
+          [
+            "detection",
+            "diagnosis",
+            "prediction",
+            "resolution",
+            "communication",
+          ].forEach((agent) => {
+            updateAgent(
+              agent,
+              "Idle",
+              agent === "detection"
+                ? "Monitoring system metrics..."
+                : agent === "diagnosis"
+                ? "Awaiting incident data..."
+                : agent === "prediction"
+                ? "Forecasting trends..."
+                : agent === "resolution"
+                ? "Preparing remediation..."
+                : "Ready to notify...",
+              null,
+              null
+            );
+          });
+          incidentActive = false;
+        }, 5000);
+      }
+
+      function sleep(ms) {
+        return new Promise((resolve) => setTimeout(resolve, ms));
+      }
+
+      // Enhanced auto-scroll functionality
+      function autoScrollToNewest() {
+        if (!timelineContainer || userScrolledAway) return;
+
+        // Show new message indicator
+        showScrollIndicator();
+
+        // Smooth scroll to top (newest messages in column-reverse)
+        requestAnimationFrame(() => {
+          timelineContainer.scrollTo({
+            top: 0,
+            behavior: "smooth",
+          });
+        });
+      }
+
+      function showScrollIndicator() {
+        if (scrollIndicator) {
+          scrollIndicator.classList.add("show", "new-message");
+
+          // Clear existing timeout
+          if (scrollTimeout) {
+            clearTimeout(scrollTimeout);
+          }
+
+          // Hide indicator after 2 seconds
+          scrollTimeout = setTimeout(() => {
+            scrollIndicator.classList.remove("show", "new-message");
+          }, 2000);
+        }
+      }
+
+      function handleUserScroll() {
+        if (!timelineContainer) return;
+
+        // Check if user scrolled away from top (newest messages)
+        const isAtTop = timelineContainer.scrollTop <= 20;
+        userScrolledAway = !isAtTop;
+
+        // Update scroll indicator
+        if (userScrolledAway && scrollIndicator) {
+          scrollIndicator.textContent = "↑ Scroll to see latest";
+          scrollIndicator.classList.add("show");
+          scrollIndicator.classList.remove("new-message");
+        } else if (scrollIndicator) {
+          scrollIndicator.classList.remove("show");
+        }
+      }
+
+      // Add scroll event listener
+      if (timelineContainer) {
+        timelineContainer.addEventListener("scroll", handleUserScroll, {
+          passive: true,
+        });
+
+        // Also detect user interaction to pause auto-scroll
+        timelineContainer.addEventListener(
+          "wheel",
+          () => {
+            userScrolledAway = true;
+            setTimeout(() => {
+              handleUserScroll();
+            }, 100);
+          },
+          { passive: true }
+        );
+
+        timelineContainer.addEventListener(
+          "touchstart",
+          () => {
+            userScrolledAway = true;
+            setTimeout(() => {
+              handleUserScroll();
+            }, 100);
+          },
+          { passive: true }
+        );
+      }
+
+      // Auto-start demo only if explicitly requested via URL parameter
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get("auto-demo") === "true") {
+        setTimeout(triggerIncident, 3000);
+      }
+    </script>
+  </body>
+</html>

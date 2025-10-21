@@ -26,7 +26,7 @@ from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.exceptions import InvalidSignature
 
 from src.models.incident import Incident
-from src.models.agent import AgentRecommendation, ConsensusDecision, AgentType
+from src.models.agent import AgentRecommendation, ConsensusDecision, AgentType, ActionType, RiskLevel
 from src.utils.logging import get_logger
 from src.utils.exceptions import ByzantineConsensusError, MaliciousAgentDetected
 
@@ -103,6 +103,17 @@ class NodeInfo:
 
 
 @dataclass
+class AgentValidationResult:
+    """Result of agent validation for Byzantine detection."""
+    agent_name: str
+    is_valid: bool
+    confidence_score: float
+    validation_errors: List[str] = field(default_factory=list)
+    integrity_hash: Optional[str] = None
+    timestamp: datetime = field(default_factory=datetime.utcnow)
+
+
+@dataclass
 class ConsensusRound:
     """Tracks a single consensus round."""
     sequence: int
@@ -141,13 +152,13 @@ class ByzantineFaultTolerantConsensus:
         # Network communication
         self.websocket_manager = websocket_manager
         
+        # Node management
+        self.nodes: Dict[str, NodeInfo] = {}
+        
         # PBFT state
         self.current_view = 0
         self.sequence_number = 0
         self.primary_node = self._calculate_primary(self.current_view)
-        
-        # Node management
-        self.nodes: Dict[str, NodeInfo] = {}
         self.private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
         self.public_key = self.private_key.public_key()
         
@@ -376,13 +387,19 @@ class ByzantineFaultTolerantConsensus:
             self.consensus_times.append(consensus_time)
             
             # Create consensus decision
+            # Validate proposal is a proper AgentRecommendation instance
+            if not isinstance(round_info.proposal, AgentRecommendation):
+                raise ValueError(f"Expected AgentRecommendation, got {type(round_info.proposal)}")
+            
+            agent_recommendations = [round_info.proposal]
+            
             decision = ConsensusDecision(
                 incident_id=round_info.proposal.incident_id if hasattr(round_info.proposal, 'incident_id') else "unknown",
                 selected_action=round_info.proposal.action_id if hasattr(round_info.proposal, 'action_id') else "unknown",
                 action_type=str(round_info.proposal.action_type) if hasattr(round_info.proposal, 'action_type') else "unknown",
                 final_confidence=1.0,  # PBFT provides certainty
                 participating_agents=[msg.node_id for msg in round_info.commit_msgs.values()],
-                agent_recommendations=[round_info.proposal],
+                agent_recommendations=agent_recommendations,
                 consensus_method="pbft",
                 conflicts_detected=False,
                 requires_human_approval=False,
@@ -488,6 +505,30 @@ class ByzantineFaultTolerantConsensus:
         if not node_ids:
             return self.node_id
         return node_ids[view % len(node_ids)]
+    
+    def _safe_enum_construction(self, enum_class, value, default=None):
+        """Safely construct enum from value, handling both raw values and enum instances.
+        
+        Args:
+            enum_class: The enum class to construct
+            value: The value to convert to enum
+            default: Optional default value to return if conversion fails
+            
+        Returns:
+            Enum instance
+            
+        Raises:
+            ValueError: If value cannot be converted and no default provided
+        """
+        if isinstance(value, enum_class):
+            return value
+        try:
+            return enum_class(value)
+        except (ValueError, TypeError) as e:
+            if default is not None:
+                logger.warning(f"Failed to convert {value} to {enum_class.__name__}, using default {default}: {e}")
+                return default
+            raise ValueError(f"Cannot convert {value} to {enum_class.__name__}: {e}") from e
     
     def _calculate_digest(self, recommendation: AgentRecommendation) -> str:
         """Calculate cryptographic digest of recommendation."""
@@ -602,14 +643,15 @@ class ByzantineFaultTolerantConsensus:
                 logger.error(f"Failed to parse recommendation string: {recommendation_data}")
                 # Return minimal recommendation as fallback
                 return AgentRecommendation(
-                    agent_name=AgentType.COORDINATOR,
+                    agent_name=AgentType.DETECTION,
                     incident_id=payload.get("incident_id", "unknown"),
-                    action_type="investigate",
+                    action_type=ActionType.NO_ACTION,
                     action_id="fallback",
                     confidence=0.5,
-                    risk_level="medium",
+                    risk_level=RiskLevel.LOW,
                     estimated_impact="Unknown impact due to parsing error",
-                    reasoning="Failed to reconstruct full recommendation from payload"
+                    reasoning="Failed to reconstruct full recommendation from payload",
+                    urgency=0.1
                 )
         
         # Reconstruct full AgentRecommendation object
@@ -642,12 +684,12 @@ class ByzantineFaultTolerantConsensus:
             # Create AgentRecommendation with all fields
             return AgentRecommendation(
                 id=recommendation_data.get("id", str(uuid.uuid4())),
-                agent_name=agent_name or AgentType.COORDINATOR,
+                agent_name=agent_name or AgentType.DETECTION,
                 incident_id=recommendation_data.get("incident_id", payload.get("incident_id", "unknown")),
-                action_type=recommendation_data.get("action_type", "investigate"),
+                action_type=self._safe_enum_construction(ActionType, recommendation_data.get("action_type", ActionType.NO_ACTION.value)),
                 action_id=recommendation_data.get("action_id", "reconstructed"),
                 confidence=float(recommendation_data.get("confidence", 0.7)),
-                risk_level=recommendation_data.get("risk_level", "medium"),
+                risk_level=self._safe_enum_construction(RiskLevel, recommendation_data.get("risk_level", RiskLevel.LOW.value)),
                 estimated_impact=recommendation_data.get("estimated_impact", "Impact under analysis"),
                 reasoning=recommendation_data.get("reasoning", "Reconstructed from consensus payload"),
                 evidence=evidence,
@@ -665,14 +707,15 @@ class ByzantineFaultTolerantConsensus:
             logger.error(f"Error reconstructing recommendation: {e}")
             # Return minimal valid recommendation
             return AgentRecommendation(
-                agent_name=AgentType.COORDINATOR,
+                agent_name=AgentType.DETECTION,
                 incident_id=payload.get("incident_id", "unknown"),
-                action_type="investigate",
+                action_type=ActionType.NO_ACTION,
                 action_id="error_fallback",
                 confidence=0.5,
-                risk_level="medium",
+                risk_level=RiskLevel.LOW,
                 estimated_impact="Error during reconstruction",
-                reasoning=f"Reconstruction error: {str(e)}"
+                reasoning=f"Reconstruction error: {str(e)}",
+                urgency=0.1
             )
     
     async def _broadcast_message(self, message: PBFTMessage):
@@ -755,3 +798,25 @@ class ByzantineFaultTolerantConsensus:
                 for node_id, info in self.nodes.items()
             }
         }
+
+# Global instance for dependency injection
+_byzantine_consensus_engine = None
+
+
+def get_byzantine_consensus_engine() -> ByzantineFaultTolerantConsensus:
+    """Get or create the global Byzantine consensus engine instance."""
+    global _byzantine_consensus_engine
+    
+    if _byzantine_consensus_engine is None:
+        _byzantine_consensus_engine = ByzantineFaultTolerantConsensus(
+            node_id="primary_consensus_node",
+            total_nodes=4  # Default for 5-agent system with fault tolerance
+        )
+    
+    return _byzantine_consensus_engine
+
+
+def reset_byzantine_consensus_engine():
+    """Reset the global Byzantine consensus engine (for testing)."""
+    global _byzantine_consensus_engine
+    _byzantine_consensus_engine = None

@@ -6,6 +6,7 @@ import asyncio
 import pytest
 from datetime import datetime, timedelta
 from unittest.mock import Mock, AsyncMock
+from cryptography.hazmat.primitives import serialization
 
 from src.services.byzantine_consensus import (
     ByzantineFaultTolerantConsensus,
@@ -299,12 +300,18 @@ class TestByzantineFaultTolerantConsensus:
         # Mock broadcast to do nothing (simulate network partition)
         pbft_engine._broadcast_message = AsyncMock()
         
-        # Attempt consensus with very short timeout
+        # Attempt consensus with short internal timeout
+        # We'll patch the internal timeout to be shorter for testing
+        original_wait = pbft_engine._wait_for_consensus
+        
+        async def short_wait(sequence, timeout=0.2):
+            return await original_wait(sequence, timeout)
+        
+        pbft_engine._wait_for_consensus = short_wait
+        
+        # Attempt consensus - should timeout internally
         with pytest.raises(ByzantineConsensusError, match="Consensus timeout"):
-            await asyncio.wait_for(
-                pbft_engine.propose_action(mock_incident, mock_recommendation),
-                timeout=0.1
-            )
+            await pbft_engine.propose_action(mock_incident, mock_recommendation)
     
     def test_metrics_collection(self, pbft_engine):
         """Test metrics collection."""
@@ -346,10 +353,14 @@ class TestByzantineFaultTolerantConsensus:
         """Test that system handles up to f Byzantine nodes correctly."""
         # With 4 nodes, can tolerate 1 Byzantine node
         assert pbft_engine.fault_tolerance == 1
+        assert pbft_engine.quorum_size == 3  # Need 3 nodes for consensus
+        
+        # Register all 4 nodes first
+        for i in range(4):
+            pbft_engine.register_node(f"node_{i}", b"key")
         
         # Isolate 1 node (at the limit)
-        pbft_engine.register_node("byzantine_1", b"key")
-        await pbft_engine._isolate_byzantine_node("byzantine_1")
+        await pbft_engine._isolate_byzantine_node("node_0")
         
         # System should still be operational
         assert len(pbft_engine.isolated_nodes) == 1

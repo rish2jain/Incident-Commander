@@ -67,8 +67,8 @@ def validate_professional_text_optimization():
         results["tests"].append(test_result)
         print("   ❌ Dashboard component not found")
     
-    # Test 2: New Demo Recording Validation
-    print("\n🎬 Test 2: New Demo Recording Validation")
+    # Test 3: Demo Recording Validation
+    print("\n🎬 Test 3: Demo Recording Validation")
     demo_recordings_path = Path("demo_recordings")
     
     if demo_recordings_path.exists():
@@ -104,7 +104,7 @@ def validate_professional_text_optimization():
         recording_status = "COMPLETE" if (latest_video and len(latest_screenshots) >= 5 and latest_metrics) else "PARTIAL"
         
         test_result = {
-            "test": "New Demo Recording",
+            "test": "Demo Recording: Validation",
             "status": recording_status,
             "details": f"Video: {'✅' if latest_video else '❌'}, Screenshots: {len(latest_screenshots)}, Metrics: {'✅' if latest_metrics else '❌'}",
             "latest_video": str(latest_video) if latest_video else None,
@@ -115,7 +115,7 @@ def validate_professional_text_optimization():
         print(f"   {'✅' if recording_status == 'COMPLETE' else '⚠️'} {test_result['details']}")
     else:
         test_result = {
-            "test": "New Demo Recording",
+            "test": "Demo Recording: Validation",
             "status": "FAIL", 
             "details": "Demo recordings directory not found"
         }
@@ -124,7 +124,7 @@ def validate_professional_text_optimization():
     
     # Test 2: Demo Recording Assets
     print("\n🎬 Test 2: Demo Recording Assets")
-    demo_dir = Path("../demo_recordings")
+    demo_dir = Path("demo_recordings")
     
     screenshots_dir = demo_dir / "screenshots"
     videos_dir = demo_dir / "videos"

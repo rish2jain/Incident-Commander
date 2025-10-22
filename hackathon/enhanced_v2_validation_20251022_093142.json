@@ -27,9 +27,9 @@
       "status": "GOOD"
     },
     "file_archival": {
-      "score": 100.01,
+      "score": 100.0,
       "max_score": 100,
-      "percentage": 100.01,
+      "percentage": 100.0,
       "status": "EXCELLENT"
     }
   },

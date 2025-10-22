@@ -1,6 +1,6 @@
 "use client";
 
-import { RefinedDashboard } from "@/components/RefinedDashboard";
+import { EnhancedOperationsDashboard } from "@/components/EnhancedOperationsDashboard";
 
 /**
  * Operations Dashboard Route
@@ -17,5 +17,5 @@ import { RefinedDashboard } from "@/components/RefinedDashboard";
  * NOT for demos - use /demo or /transparency instead
  */
 export default function OpsPage() {
-  return <RefinedDashboard />;
+  return <EnhancedOperationsDashboard />;
 }

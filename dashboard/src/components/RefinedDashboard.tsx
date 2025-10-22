@@ -321,7 +321,7 @@ const SIMULATED_DASHBOARD_METRICS: IncidentMetrics = {
   activeIncidents: 1,
   resolvedToday: 18,
   averageResolutionTime: 1.3,
-  preventionRate: 92,
+  preventionRate: 85,
 };
 
 const SIMULATED_SYSTEM_HEALTH: SystemHealth = {

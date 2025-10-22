@@ -6,8 +6,7 @@ This script demonstrates the system's production readiness based on the
 comprehensive validation framework and AWS best practices analysis.
 """
 
-import json
-from datetime import datetime, timedelta
+from datetime import datetime
 
 def generate_validation_report():
     """Generate a comprehensive validation report demonstrating production readiness."""

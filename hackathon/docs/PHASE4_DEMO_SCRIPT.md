@@ -2,7 +2,7 @@
 
 **Last Updated**: October 22, 2025 - LATEST DEMO RECORDING UPDATE
 **Includes**: Enhanced Dashboard UX (Byzantine Consensus Viz, Trust Indicators, Agent Transparency)
-**Latest Recording**: Session 20251022_010547 (155.8s comprehensive coverage)
+**Latest Recording**: Session 20251022_093751 (132.4s comprehensive coverage)
 
 ## Demo Overview
 
@@ -10,7 +10,7 @@
 **Audience**: Hackathon judges and technical evaluators
 **Key Message**: Production-ready AI incident management with proven business value
 **New Features**: Interactive dashboard with visible Byzantine consensus and RAG sources
-**Latest Assets**: 23 screenshots, 155.8s HD recording with complete feature coverage
+**Latest Assets**: 23 screenshots, 132.4s HD recording with complete feature coverage
 
 ## Pre-Demo Setup (30 seconds)
 
@@ -33,7 +33,7 @@ make demo-interactive
 
 ### Option 1: Latest Comprehensive Demo (2.5 minutes) - RECOMMENDED FOR SUBMISSION
 
-**Video**: `demo_recordings/videos/8040e397c9b2ba50df917ec8eaba4408.webm` (Session 20251022_010547)
+**Video**: `demo_recordings/videos/8040e397c9b2ba50df917ec8eaba4408.webm` (Session 20251022_093751)
 **Narrative**: "Let me show you the world's first production-ready AI incident commander with proven $2.8M annual savings."
 
 **Sequence**:

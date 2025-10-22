@@ -14,15 +14,19 @@ def fix_dashboard_lambda():
     
     lambda_client = boto3.client('lambda', region_name='us-east-1')
     
+    # Single source of truth for API endpoint
+    API_ENDPOINT = "https://tjhp32nhdc.execute-api.us-east-1.amazonaws.com"
+    
     # Simple working Lambda code
-    lambda_code = '''
+    lambda_code = f'''
 import json
 
 def lambda_handler(event, context):
     """Serve the Incident Commander dashboard."""
     
-    # Simple HTML dashboard
-    html = """<!DOCTYPE html>
+    try:
+        # Simple HTML dashboard
+        html = """<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -168,12 +172,12 @@ This is a real working system deployed on AWS Lambda and API Gateway.</div>
 
         <div style="text-align: center; margin-top: 40px; padding: 20px; border-top: 1px solid rgba(255,255,255,0.2);">
             <p><strong>Autonomous Incident Commander</strong> - Production-ready autonomous incident response</p>
-            <p>API Base: https://h8xlzr74h8.execute-api.us-east-1.amazonaws.com</p>
+            <p>API Base: {API_ENDPOINT}</p>
         </div>
     </div>
 
     <script>
-        const API_BASE = 'https://h8xlzr74h8.execute-api.us-east-1.amazonaws.com';
+        const API_BASE = '{API_ENDPOINT}';
         
         async function makeApiCall(endpoint, description) {
             const endpointElement = document.getElementById('current-endpoint');
@@ -220,6 +224,15 @@ This is a real working system deployed on AWS Lambda and API Gateway.</div>
         },
         'body': html
     }
+    
+    except Exception as e:
+        return {{
+            'statusCode': 500,
+            'headers': {{
+                'Content-Type': 'application/json'
+            }},
+            'body': json.dumps({{'error': str(e)}})
+        }}
 '''
     
     try:
@@ -230,7 +243,7 @@ This is a real working system deployed on AWS Lambda and API Gateway.</div>
         )
         
         print("✅ Dashboard Lambda function updated successfully")
-        print(f"🌐 Dashboard URL: https://tjhp32nhdc.execute-api.us-east-1.amazonaws.com")
+        print(f"🌐 Dashboard URL: {API_ENDPOINT}")
         return True
         
     except Exception as e:

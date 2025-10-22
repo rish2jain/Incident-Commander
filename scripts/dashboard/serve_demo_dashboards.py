@@ -18,7 +18,7 @@ class DemoDashboardServer:
     
     def __init__(self, port=8080):
         self.port = port
-        self.dashboard_dir = Path("dashboard")
+        self.dashboard_dir = Path(__file__).resolve().parent.parent.parent / "dashboard"
         
     def start_server(self):
         """Start the dashboard server."""
@@ -26,11 +26,9 @@ class DemoDashboardServer:
             print("❌ Dashboard directory not found!")
             return False
             
-        # Change to dashboard directory
-        os.chdir(self.dashboard_dir)
-        
         try:
-            handler = http.server.SimpleHTTPRequestHandler
+            import functools
+            handler = functools.partial(http.server.SimpleHTTPRequestHandler, directory=str(self.dashboard_dir))
             with socketserver.TCPServer(("", self.port), handler) as httpd:
                 print(f"🚀 Demo Dashboard Server Started!")
                 print(f"🏆 Comprehensive Dashboard: http://localhost:{self.port}/comprehensive_demo_dashboard.html")

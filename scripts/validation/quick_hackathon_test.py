@@ -50,7 +50,8 @@ def test_local_endpoints():
                         print(f"      🏆 Hackathon compliant: {compliant}")
                         if compliant:
                             print(f"      ✅ All prize categories eligible")
-                except:
+                except Exception as e:
+                    # Could not parse JSON response
                     pass
             
             results.append((endpoint, response.status_code == 200))
@@ -72,6 +73,8 @@ def test_local_endpoints():
         assert True
     else:
         assert len(working_endpoints) > 0, f"No endpoints are working. Results: {results}"
+    
+    return results
 
 def test_deployed_endpoints():
     """Test deployed AWS endpoints."""
@@ -111,6 +114,8 @@ def test_deployed_endpoints():
     # Assert that at least some endpoints are working
     working_endpoints = [result for endpoint, result in results if result is True]
     assert len(working_endpoints) > 0, f"No deployed endpoints are working. Results: {results}"
+    
+    return results
 
 def main():
     """Run hackathon readiness tests."""

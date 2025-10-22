@@ -102,13 +102,8 @@ ULTIMATE_INTEGRATION_STATUS.md
 INTEGRATION_COMPLETE.md
 INFRASTRUCTURE_DEPLOYMENT_READY.md
 
-# Hackathon documentation folder
-docs/hackathon/
-docs/hackathon/project_story.md
-docs/hackathon/demo_video_script.md
-docs/hackathon/submission_package.md
-docs/hackathon/architecture_diagram.md
-docs/hackathon/future_enhancements.md
+# Hackathon documentation folder (consolidated in hackathon/docs/)
+# docs/hackathon/ - REMOVED (now hackathon/docs/)
 
 # Deployment and validation scripts (hackathon-specific)
 deploy_ultimate_system.py

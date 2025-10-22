@@ -11,8 +11,8 @@ from src.models.agent import AgentType, AgentStatus, AgentMessage
 from src.models.incident import Incident
 
 
-class TestAgent(BaseAgent):
-    """Test implementation of BaseAgent for testing."""
+class MockAgent(BaseAgent):
+    """Mock implementation of BaseAgent for testing."""
     
     def __init__(self, name: str = "test_agent"):
         super().__init__(AgentType.DETECTION, name)
@@ -32,7 +32,7 @@ class TestBaseAgent:
     
     def test_agent_initialization(self):
         """Test agent initializes with correct defaults."""
-        agent = TestAgent("test")
+        agent = MockAgent("test")
         
         assert agent.agent_type == AgentType.DETECTION
         assert agent.name == "test"
@@ -46,7 +46,7 @@ class TestBaseAgent:
     
     def test_update_status_success(self):
         """Test successful status update."""
-        agent = TestAgent()
+        agent = MockAgent()
         initial_processing_count = agent.processing_count
         
         agent._update_status_success(test_param="test_value")
@@ -58,7 +58,7 @@ class TestBaseAgent:
     
     def test_update_status_error(self):
         """Test error status update."""
-        agent = TestAgent()
+        agent = MockAgent()
         initial_error_count = agent.error_count
         
         agent._update_status_error("Test error", error_code=500)
@@ -71,7 +71,7 @@ class TestBaseAgent:
     
     def test_error_threshold_unhealthy(self):
         """Test agent becomes unhealthy after too many errors."""
-        agent = TestAgent()
+        agent = MockAgent()
         
         # Trigger multiple errors to exceed threshold
         for i in range(12):  # Threshold is 10
@@ -82,7 +82,7 @@ class TestBaseAgent:
     
     async def test_get_status(self):
         """Test status retrieval."""
-        agent = TestAgent("status_test")
+        agent = MockAgent("status_test")
         
         status = await agent.get_status()
         
@@ -95,7 +95,7 @@ class TestBaseAgent:
     
     def test_update_heartbeat(self):
         """Test heartbeat update."""
-        agent = TestAgent()
+        agent = MockAgent()
         old_heartbeat = agent.last_heartbeat
         
         agent.update_heartbeat()
@@ -104,7 +104,7 @@ class TestBaseAgent:
     
     def test_increment_processing_count(self):
         """Test processing count increment."""
-        agent = TestAgent()
+        agent = MockAgent()
         initial_count = agent.processing_count
         
         agent.increment_processing_count()
@@ -113,7 +113,7 @@ class TestBaseAgent:
     
     def test_increment_error_count(self):
         """Test error count increment and health status."""
-        agent = TestAgent()
+        agent = MockAgent()
         initial_count = agent.error_count
         
         # Increment errors but stay below threshold
@@ -136,7 +136,7 @@ class TestBaseAgentAsync:
     
     async def test_abstract_methods_implemented(self):
         """Test that abstract methods are properly implemented."""
-        agent = TestAgent()
+        agent = MockAgent()
         
         # These should not raise NotImplementedError
         result = await agent.process_incident(Mock())

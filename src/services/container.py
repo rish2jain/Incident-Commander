@@ -59,13 +59,13 @@ class ServiceContainer:
             self._performance_optimizer = await get_performance_optimizer()
             self._scaling_manager = await get_scaling_manager()
             self._cost_optimizer = await get_cost_optimizer()
-            self._broadcaster = get_realtime_broadcaster(self._aws_factory)
+            self._broadcaster = get_realtime_broadcaster()
             self._explainability = await get_explainability_service()
             self._finops = await get_finops_service()
             self._analytics = get_analytics_service()
             self._operator_controls = get_operator_control_service()
             self._rag_memory = ScalableRAGMemory(self._aws_factory)
-            self._byzantine_consensus = get_byzantine_consensus_engine(self._aws_factory)
+            self._byzantine_consensus = get_byzantine_consensus_engine()
 
     async def shutdown(self) -> None:
         async with self._lock:

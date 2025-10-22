@@ -192,6 +192,16 @@ class LocalStackManager:
             return
         
         try:
+            # Check if Step Functions is available in LocalStack
+            import aiohttp
+            async with aiohttp.ClientSession() as session:
+                async with session.get('http://localhost:4566/_localstack/health') as resp:
+                    health_data = await resp.json()
+                    if health_data.get('services', {}).get('stepfunctions') == 'disabled':
+                        logger.warning("Step Functions is not available in LocalStack Community edition - skipping initialization")
+                        self._initialized_services.add('stepfunctions')
+                        return
+            
             service_factory = self.get_service_factory()
             client = await service_factory.get_stepfunctions_client()
             

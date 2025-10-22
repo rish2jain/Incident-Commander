@@ -24,7 +24,7 @@ class WebSocketValidator:
     
     def __init__(self):
         self.api_base = "http://localhost:8000"
-        self.ws_url = "ws://localhost:8000/ws"
+        self.ws_url = "ws://localhost:8000/dashboard/ws"
         self.messages_received = []
         
     async def test_api_health(self):
@@ -56,14 +56,19 @@ class WebSocketValidator:
                 ping_msg = {"type": "ping", "timestamp": datetime.utcnow().isoformat()}
                 await websocket.send(json.dumps(ping_msg))
                 
-                # Wait for welcome message and pong
-                for _ in range(2):
-                    message = await asyncio.wait_for(websocket.recv(), timeout=5.0)
-                    data = json.loads(message)
-                    self.messages_received.append(data)
-                    print(f"📨 Received: {data['type']}")
+                # Wait for initial message
+                message = await asyncio.wait_for(websocket.recv(), timeout=5.0)
+                data = json.loads(message)
+                self.messages_received.append(data)
+                print(f"📨 Received: {data['type']}")
                 
-                return True
+                # Check if we got a valid response
+                if data.get('type') in ['message_batch', 'initial_state', 'pong']:
+                    print("✅ WebSocket communication successful")
+                    return True
+                else:
+                    print(f"❌ Unexpected message type: {data.get('type')}")
+                    return False
                 
         except Exception as e:
             print(f"❌ WebSocket connection failed: {e}")

@@ -5,6 +5,7 @@ from fastapi.responses import HTMLResponse
 from typing import Dict, Any, List, Optional
 import json
 import uuid
+import asyncio
 
 from src.services.websocket_manager import get_websocket_manager, WebSocketManager
 from src.services.byzantine_consensus import ByzantineFaultTolerantConsensus
@@ -15,11 +16,14 @@ from src.services.dashboard_state import (
     get_current_decision_brief,
     get_finops_summary,
 )
+from src.utils.logging import get_logger
 from src.services.demo_scenario_manager import (
     ScenarioType,
     ByzantineFaultType,
     get_demo_manager,
 )
+
+logger = get_logger("dashboard_api")
 from src.models.incident import Incident
 from src.utils.logging import get_logger
 
@@ -700,18 +704,24 @@ async def get_dashboard_metrics(
 
 @router.post("/trigger-demo")
 async def trigger_demo_incident(
-    scenario_type: str = "database_failure",
-    demo_manager = Depends(lambda: asyncio.create_task(get_demo_manager()))
+    request_body: Dict[str, Any] = Body(...),
+    demo_mgr = Depends(get_demo_manager)
 ):
     """Trigger a demo incident scenario."""
-    from src.services.demo_scenario_manager import ScenarioType, get_demo_manager
+    from src.services.demo_scenario_manager import ScenarioType
     
     try:
+        # Get scenario type from request body
+        scenario_type = request_body.get("scenario_type", "database_failure")
+        logger.info(f"Attempting to trigger scenario: {scenario_type}")
+        
         # Convert string to enum
         scenario_enum = ScenarioType(scenario_type)
-        demo_mgr = await get_demo_manager()
+        logger.info(f"Scenario enum created: {scenario_enum}")
         
+        logger.info(f"Calling trigger_demo_scenario with: {scenario_enum}")
         scenario_id = await demo_mgr.trigger_demo_scenario(scenario_enum)
+        logger.info(f"Scenario triggered successfully: {scenario_id}")
         
         return {
             "status": "demo_triggered",
@@ -720,6 +730,7 @@ async def trigger_demo_incident(
             "message": f"Demo scenario '{scenario_type}' has been triggered"
         }
     except ValueError as e:
+        logger.error(f"ValueError triggering demo: {e}")
         raise HTTPException(status_code=400, detail=f"Invalid scenario type: {scenario_type}")
     except Exception as e:
         logger.error(f"Error triggering demo: {e}")

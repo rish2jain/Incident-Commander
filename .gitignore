@@ -48,6 +48,16 @@ Thumbs.db
 # AWS
 .aws/
 
+# Security files
+*.key
+*.pem
+*.p12
+*.pfx
+*.crt
+*.cer
+secrets.json
+credentials.json
+
 # Logs
 *.log
 logs/
@@ -192,6 +202,10 @@ winning_enhancements/
 # Next.js build artifacts
 dashboard/.next/
 .next/
+
+# TypeScript build artifacts
+*.tsbuildinfo
+dashboard/tsconfig.tsbuildinfo
 
 # Deployment packages (too large for GitHub)
 deployment_package/

@@ -1038,6 +1038,155 @@ class AgentSwarmCoordinator:
             "current_phase": state.phase.value if state.phase else None
         }
 
+    def list_incidents(
+        self,
+        status: Optional[str] = None,
+        severity: Optional[str] = None,
+        limit: int = 50,
+        offset: int = 0
+    ) -> List[Dict[str, Any]]:
+        """List incidents with optional filtering and pagination."""
+        incidents = []
+        
+        # Convert processing states to incident list
+        for incident_id, state in self.processing_states.items():
+            incident_data = {
+                "incident_id": incident_id,
+                "type": getattr(state.incident, 'incident_type', 'unknown'),
+                "severity": getattr(state.incident, 'severity', 'medium'),
+                "status": self._get_incident_status_string(state),
+                "detected_at": state.start_time.isoformat() if state.start_time else datetime.now().isoformat(),
+                "duration": state.total_duration_seconds if state.total_duration_seconds else 0,
+                "description": getattr(state.incident, 'description', f'Incident {incident_id}'),
+                "phase": state.phase.value if state.phase else 'unknown',
+                "agents_involved": len(state.agent_executions),
+                "resolution_confidence": self._calculate_resolution_confidence(state)
+            }
+            incidents.append(incident_data)
+        
+        # Add some sample incidents if none exist (for demo purposes)
+        if not incidents:
+            incidents = self._generate_sample_incidents()
+        
+        # Apply filters
+        filtered_incidents = self._apply_incident_filters(incidents, status, severity)
+        
+        # Apply pagination
+        paginated_incidents = filtered_incidents[offset:offset + limit]
+        
+        return paginated_incidents
+    
+    def get_incidents_count(
+        self,
+        status: Optional[str] = None,
+        severity: Optional[str] = None
+    ) -> int:
+        """Get total count of incidents matching filters."""
+        incidents = []
+        
+        # Convert processing states to incident list
+        for incident_id, state in self.processing_states.items():
+            incident_data = {
+                "status": self._get_incident_status_string(state),
+                "severity": getattr(state.incident, 'severity', 'medium')
+            }
+            incidents.append(incident_data)
+        
+        # Add sample incidents if none exist
+        if not incidents:
+            incidents = self._generate_sample_incidents()
+        
+        # Apply filters and return count
+        filtered_incidents = self._apply_incident_filters(incidents, status, severity)
+        return len(filtered_incidents)
+    
+    def _get_incident_status_string(self, state: 'IncidentProcessingState') -> str:
+        """Convert processing state to status string."""
+        if state.phase == ProcessingPhase.COMPLETED:
+            return "resolved"
+        elif state.phase == ProcessingPhase.FAILED:
+            return "failed"
+        else:
+            return "active"
+    
+    def _calculate_resolution_confidence(self, state: 'IncidentProcessingState') -> float:
+        """Calculate resolution confidence based on agent consensus."""
+        if not state.agent_executions:
+            return 0.0
+        
+        completed_executions = [
+            exec for exec in state.agent_executions.values()
+            if exec.status == "completed" and exec.recommendations
+        ]
+        
+        if not completed_executions:
+            return 0.0
+        
+        # Average confidence from all completed agents
+        total_confidence = 0.0
+        count = 0
+        
+        for execution in completed_executions:
+            for recommendation in execution.recommendations or []:
+                if hasattr(recommendation, 'confidence'):
+                    total_confidence += recommendation.confidence
+                    count += 1
+        
+        return total_confidence / count if count > 0 else 0.5
+    
+    def _apply_incident_filters(
+        self,
+        incidents: List[Dict[str, Any]],
+        status: Optional[str],
+        severity: Optional[str]
+    ) -> List[Dict[str, Any]]:
+        """Apply status and severity filters to incidents."""
+        filtered = incidents
+        
+        if status and status != "all":
+            filtered = [inc for inc in filtered if inc["status"] == status]
+        
+        if severity and severity != "all":
+            filtered = [inc for inc in filtered if inc["severity"] == severity]
+        
+        return filtered
+    
+    def _generate_sample_incidents(self) -> List[Dict[str, Any]]:
+        """Generate sample incidents for demo purposes."""
+        from datetime import datetime, timedelta
+        import random
+        
+        sample_incidents = []
+        incident_types = ["database_cascade", "api_timeout", "memory_leak", "network_partition", "security_breach"]
+        severities = ["critical", "high", "medium", "low"]
+        statuses = ["active", "resolved", "investigating"]
+        
+        # Generate 25 sample incidents
+        for i in range(25):
+            incident_time = datetime.now() - timedelta(
+                hours=random.randint(0, 72),
+                minutes=random.randint(0, 59)
+            )
+            
+            incident = {
+                "incident_id": f"INC-{1000 + i}",
+                "type": random.choice(incident_types),
+                "severity": random.choice(severities),
+                "status": random.choice(statuses),
+                "detected_at": incident_time.isoformat(),
+                "duration": random.randint(60, 3600),  # 1 minute to 1 hour
+                "description": f"Sample {random.choice(incident_types).replace('_', ' ').title()} incident",
+                "phase": "completed" if random.choice([True, False]) else "diagnosis",
+                "agents_involved": random.randint(2, 5),
+                "resolution_confidence": round(random.uniform(0.7, 0.98), 2)
+            }
+            sample_incidents.append(incident)
+        
+        # Sort by detected_at (newest first)
+        sample_incidents.sort(key=lambda x: x["detected_at"], reverse=True)
+        
+        return sample_incidents
+
     async def health_check(self) -> bool:
         """Perform health check for the coordinator."""
         try:

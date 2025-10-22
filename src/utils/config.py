@@ -114,6 +114,7 @@ class SecurityConfig:
     cors_origins: list = field(default_factory=list)
     require_auth: bool = False
     demo_api_key: str = "demo-key-12345"
+    api_base_url: str = "http://localhost:8000"
     
     @classmethod
     def from_env(cls) -> "SecurityConfig":
@@ -127,7 +128,8 @@ class SecurityConfig:
             api_rate_limit=int(os.getenv("API_RATE_LIMIT", "100")),
             cors_origins=cors_origins,
             require_auth=os.getenv("REQUIRE_AUTH", "false").lower() == "true",
-            demo_api_key=os.getenv("DEMO_API_KEY", "demo-key-12345")
+            demo_api_key=os.getenv("DEMO_API_KEY", "demo-key-12345"),
+            api_base_url=os.getenv("API_BASE_URL", "http://localhost:8000")
         )
 
 

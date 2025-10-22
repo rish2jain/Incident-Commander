@@ -13,10 +13,10 @@ from typing import Dict, Any, List
 
 from src.services.detection_accuracy_testing import (
     DetectionAccuracyTester,
-    TestScenarioType,
+    DetectionTestScenarioType,
     DetectionAccuracy,
-    TestAlert,
-    TestScenario,
+    DetectionTestAlert,
+    DetectionTestScenario,
     DetectionTestResult,
     AccuracyMetrics
 )
@@ -82,11 +82,11 @@ class TestDetectionAccuracyTester:
         scenario_types = {scenario.scenario_type for scenario in tester.test_scenarios}
         
         expected_types = {
-            TestScenarioType.SINGLE_SOURCE_ALERT,
-            TestScenarioType.MULTI_SOURCE_CORRELATION,
-            TestScenarioType.ALERT_STORM,
-            TestScenarioType.FALSE_POSITIVE,
-            TestScenarioType.BASELINE_NOISE
+            DetectionTestScenarioType.SINGLE_SOURCE_ALERT,
+            DetectionTestScenarioType.MULTI_SOURCE_CORRELATION,
+            DetectionTestScenarioType.ALERT_STORM,
+            DetectionTestScenarioType.FALSE_POSITIVE,
+            DetectionTestScenarioType.BASELINE_NOISE
         }
         
         assert expected_types.issubset(scenario_types)
@@ -102,7 +102,7 @@ class TestDetectionAccuracyTester:
         )
         
         assert len(alerts) == 100
-        assert all(isinstance(alert, TestAlert) for alert in alerts)
+        assert all(isinstance(alert, DetectionTestAlert) for alert in alerts)
         assert all(alert.metric_name == "cpu_usage" for alert in alerts)
         assert all(alert.threshold == 80.0 for alert in alerts)
     
@@ -147,11 +147,11 @@ class TestDetectionAccuracyTester:
     async def test_single_detection_test(self, tester, mock_agent):
         """Test running a single detection test."""
         # Create a simple test scenario
-        scenario = TestScenario(
+        scenario = DetectionTestScenario(
             name="test_scenario",
-            scenario_type=TestScenarioType.SINGLE_SOURCE_ALERT,
+            scenario_type=DetectionTestScenarioType.SINGLE_SOURCE_ALERT,
             alerts=[
-                TestAlert(
+                DetectionTestAlert(
                     source="cloudwatch",
                     metric_name="CPUUtilization",
                     value=95.0,
@@ -181,7 +181,7 @@ class TestDetectionAccuracyTester:
         tester.test_results = [
             DetectionTestResult(
                 scenario_name="test1",
-                scenario_type=TestScenarioType.SINGLE_SOURCE_ALERT,
+                scenario_type=DetectionTestScenarioType.SINGLE_SOURCE_ALERT,
                 expected_incident=True,
                 detected_incident=True,
                 expected_confidence=0.8,
@@ -195,7 +195,7 @@ class TestDetectionAccuracyTester:
             ),
             DetectionTestResult(
                 scenario_name="test2",
-                scenario_type=TestScenarioType.FALSE_POSITIVE,
+                scenario_type=DetectionTestScenarioType.FALSE_POSITIVE,
                 expected_incident=False,
                 detected_incident=False,
                 expected_confidence=0.2,
@@ -277,7 +277,7 @@ class TestDetectionAccuracyTester:
     def test_mock_monitoring_sources_creation(self, tester):
         """Test creation of mock monitoring sources."""
         alerts = [
-            TestAlert(
+            DetectionTestAlert(
                 source="cloudwatch",
                 metric_name="CPUUtilization",
                 value=95.0,
@@ -285,7 +285,7 @@ class TestDetectionAccuracyTester:
                 timestamp=datetime.utcnow(),
                 severity="critical"
             ),
-            TestAlert(
+            DetectionTestAlert(
                 source="datadog",
                 metric_name="memory.usage",
                 value=0.9,
@@ -308,7 +308,7 @@ class TestDetectionAccuracyTester:
     
     def test_alert_to_dict_conversion(self, tester):
         """Test alert to dictionary conversion."""
-        alert = TestAlert(
+        alert = DetectionTestAlert(
             source="cloudwatch",
             metric_name="CPUUtilization",
             value=95.0,
@@ -357,7 +357,7 @@ class TestDetectionAccuracyTester:
         tester.test_results = [
             DetectionTestResult(
                 scenario_name="test1",
-                scenario_type=TestScenarioType.SINGLE_SOURCE_ALERT,
+                scenario_type=DetectionTestScenarioType.SINGLE_SOURCE_ALERT,
                 expected_incident=True,
                 detected_incident=True,
                 expected_confidence=0.8,
@@ -412,11 +412,11 @@ class TestDetectionAccuracyTester:
         slow_agent.analyze_incident_data = slow_analyze
         
         # Create scenario with short timeout
-        scenario = TestScenario(
+        scenario = DetectionTestScenario(
             name="timeout_test",
-            scenario_type=TestScenarioType.SINGLE_SOURCE_ALERT,
+            scenario_type=DetectionTestScenarioType.SINGLE_SOURCE_ALERT,
             alerts=[
-                TestAlert(
+                DetectionTestAlert(
                     source="cloudwatch",
                     metric_name="CPUUtilization",
                     value=95.0,

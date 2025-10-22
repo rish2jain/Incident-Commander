@@ -1,0 +1,40 @@
+{
+  "validation_timestamp": "2025-10-21T12:43:41.102893",
+  "overall_score": 25.0,
+  "readiness_level": "NEEDS IMPROVEMENT",
+  "readiness_icon": "\u26a0\ufe0f",
+  "feature_validations": {
+    "glassmorphism_video": {
+      "status": "success",
+      "video_exists": true,
+      "file_size_mb": 18.015307426452637,
+      "size_correct": true,
+      "format_correct": true,
+      "creation_date": "2025-10-21 12:36:01",
+      "glassmorphism_features": true,
+      "recent_recording": true,
+      "score": 100.0
+    },
+    "glassmorphism_dashboard": {
+      "status": "error",
+      "error": "HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /enhanced-insights-demo (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x10abb9a50>: Failed to establish a new connection: [Errno 61] Connection refused'))",
+      "score": 0
+    },
+    "ui_performance": {
+      "status": "error",
+      "error": "HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /enhanced-insights-demo (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x10abbbc90>: Failed to establish a new connection: [Errno 61] Connection refused'))",
+      "score": 0
+    },
+    "accessibility_compliance": {
+      "status": "error",
+      "error": "HTTPConnectionPool(host='localhost', port=8000): Max retries exceeded with url: /enhanced-insights-demo (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x10abbb8d0>: Failed to establish a new connection: [Errno 61] Connection refused'))",
+      "score": 0
+    }
+  },
+  "glassmorphism_features": {
+    "video_ready": true,
+    "dashboard_ready": false,
+    "performance_optimized": false,
+    "accessibility_compliant": false
+  }
+}

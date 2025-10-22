@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+
 export default function DemoPage() {
-  return null; // Redirect handled by next.config.js
+  redirect("/insights-demo");
 }

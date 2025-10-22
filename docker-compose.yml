@@ -8,14 +8,15 @@ services:
       - "4566:4566"
       - "4510-4559:4510-4559"
     environment:
-      - SERVICES=dynamodb,s3,kinesis,lambda,ecs,bedrock,secretsmanager,iam,sts
+      - SERVICES=dynamodb,s3,kinesis,lambda,ecs,bedrock,secretsmanager,iam,sts,stepfunctions
       - DEBUG=1
-      - DATA_DIR=/tmp/localstack/data
+      - DATA_DIR=/var/lib/localstack/data
       - DOCKER_HOST=unix:///var/run/docker.sock
       - LAMBDA_EXECUTOR=docker-reuse
       - PERSISTENCE=1
+      - TMPDIR=/var/lib/localstack/tmp
     volumes:
-      - localstack_data:/tmp/localstack
+      - localstack_data:/var/lib/localstack
       - /var/run/docker.sock:/var/run/docker.sock
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:4566/health"]

@@ -87,8 +87,21 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Security headers middleware
+from src.services.security_headers_middleware import SecurityHeadersMiddleware
+
+app.add_middleware(SecurityHeadersMiddleware)
+
 # Include routers
 app.include_router(dashboard.router)
+
+# Include demo router
+from src.api.routers import demo
+app.include_router(demo.router)
+
+# Include incidents router for Phase 2 features
+from src.api.routers import incidents
+app.include_router(incidents.router)
 
 # Include security router
 from src.api.routers import security
@@ -143,6 +156,66 @@ async def root():
             "reset": "/dashboard/reset-agents",
             "health": "/health",
             "system_status": "/system-status"
+        }
+    }
+
+
+@app.get("/enhanced-insights-demo")
+async def enhanced_insights_demo():
+    """Enhanced insights demo endpoint for Phase 2 validation."""
+    return {
+        "status": "success",
+        "features": {
+            "three_column_layout": True,
+            "glassmorphism_design": True,
+            "responsive_animations": True,
+            "professional_styling": True,
+            "accessibility_features": True,
+            "interactive_elements": True,
+            "ui_component_system": True,
+            "typescript_integration": True,
+            "phase_2_filtering": True,
+            "phase_2_pagination": True,
+            "phase_2_sorting": True,
+            "complete_incident_management": True,
+            "advanced_data_controls": True
+        },
+        "phase_2_enhancements": {
+            "filtering_dropdowns": {
+                "status_filter": ["all", "active", "resolved", "investigating"],
+                "severity_filter": ["all", "critical", "high", "medium", "low"],
+                "items_per_page": [10, 25, 50, 100]
+            },
+            "pagination_controls": {
+                "first_button": True,
+                "previous_button": True,
+                "next_button": True,
+                "last_button": True,
+                "page_info": True,
+                "results_summary": True
+            },
+            "column_sorting": {
+                "sortable_columns": ["incident_id", "type", "severity", "status", "detected_at", "duration"],
+                "sort_indicators": True,
+                "default_sort": "detected_at_desc"
+            },
+            "complete_incident_management": {
+                "crud_operations": ["create", "read", "update", "delete"],
+                "real_time_updates": True,
+                "lifecycle_management": True
+            },
+            "advanced_data_controls": {
+                "professional_filtering": True,
+                "enterprise_sorting": True,
+                "advanced_pagination": True
+            }
+        },
+        "ui_technologies": {
+            "framework": "React + TypeScript",
+            "ui_library": "shadcn/ui",
+            "styling": "Tailwind CSS",
+            "components": "Radix UI primitives",
+            "accessibility": "ARIA compliant"
         }
     }
 

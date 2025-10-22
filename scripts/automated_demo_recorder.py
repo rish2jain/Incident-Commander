@@ -429,7 +429,7 @@ async def main():
     elif dashboard_type == "react":
         default_url = "http://localhost:3000/simple-demo?auto-demo=true"
     elif dashboard_type == "insights":
-        default_url = "http://localhost:3000/insights-demo?auto-demo=true"
+        default_url = "http://localhost:3000/enhanced-insights-demo?auto-demo=true"
     else:
         default_url = "http://localhost:3000/agent_actions_dashboard.html?auto-demo=true"
     

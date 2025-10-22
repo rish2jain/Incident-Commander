@@ -27,7 +27,7 @@ from src.services.monitoring import MonitoringDataSource
 logger = get_logger(__name__)
 
 
-class TestScenarioType(Enum):
+class DetectionTestScenarioType(Enum):
     """Types of detection test scenarios."""
     SINGLE_SOURCE_ALERT = "single_source_alert"
     MULTI_SOURCE_CORRELATION = "multi_source_correlation"
@@ -47,7 +47,7 @@ class DetectionAccuracy(Enum):
 
 
 @dataclass
-class TestAlert:
+class DetectionTestAlert:
     """Synthetic alert for testing."""
     source: str
     metric_name: str
@@ -60,11 +60,11 @@ class TestAlert:
 
 
 @dataclass
-class TestScenario:
+class DetectionTestScenario:
     """Detection test scenario definition."""
     name: str
-    scenario_type: TestScenarioType
-    alerts: List[TestAlert]
+    scenario_type: DetectionTestScenarioType
+    alerts: List[DetectionTestAlert]
     expected_incident: bool
     expected_confidence: float
     expected_severity: IncidentSeverity
@@ -76,7 +76,7 @@ class TestScenario:
 class DetectionTestResult:
     """Result of a detection test."""
     scenario_name: str
-    scenario_type: TestScenarioType
+    scenario_type: DetectionTestScenarioType
     expected_incident: bool
     detected_incident: bool
     expected_confidence: float
@@ -116,7 +116,7 @@ class DetectionAccuracyTester:
         self.logger = logger
         
         # Test scenarios and results
-        self.test_scenarios: List[TestScenario] = []
+        self.test_scenarios: List[DetectionTestScenario] = []
         self.test_results: List[DetectionTestResult] = []
         
         # Performance tracking
@@ -135,11 +135,11 @@ class DetectionAccuracyTester:
         
         # Single source alert scenarios
         self.test_scenarios.extend([
-            TestScenario(
+            DetectionTestScenario(
                 name="high_cpu_single_source",
-                scenario_type=TestScenarioType.SINGLE_SOURCE_ALERT,
+                scenario_type=DetectionTestScenarioType.SINGLE_SOURCE_ALERT,
                 alerts=[
-                    TestAlert(
+                    DetectionTestAlert(
                         source="cloudwatch",
                         metric_name="CPUUtilization",
                         value=95.0,
@@ -155,11 +155,11 @@ class DetectionAccuracyTester:
                 description="Single high CPU alert should trigger incident"
             ),
             
-            TestScenario(
+            DetectionTestScenario(
                 name="memory_leak_gradual",
-                scenario_type=TestScenarioType.SINGLE_SOURCE_ALERT,
+                scenario_type=DetectionTestScenarioType.SINGLE_SOURCE_ALERT,
                 alerts=[
-                    TestAlert(
+                    DetectionTestAlert(
                         source="datadog",
                         metric_name="memory.usage",
                         value=0.92,
@@ -178,11 +178,11 @@ class DetectionAccuracyTester:
         
         # Multi-source correlation scenarios
         self.test_scenarios.extend([
-            TestScenario(
+            DetectionTestScenario(
                 name="database_cascade_correlation",
-                scenario_type=TestScenarioType.MULTI_SOURCE_CORRELATION,
+                scenario_type=DetectionTestScenarioType.MULTI_SOURCE_CORRELATION,
                 alerts=[
-                    TestAlert(
+                    DetectionTestAlert(
                         source="cloudwatch",
                         metric_name="DatabaseConnections",
                         value=450,
@@ -191,7 +191,7 @@ class DetectionAccuracyTester:
                         severity="warning",
                         tags={"database": "primary-db"}
                     ),
-                    TestAlert(
+                    DetectionTestAlert(
                         source="datadog",
                         metric_name="query.duration.p99",
                         value=5.2,
@@ -200,7 +200,7 @@ class DetectionAccuracyTester:
                         severity="critical",
                         tags={"database": "primary-db"}
                     ),
-                    TestAlert(
+                    DetectionTestAlert(
                         source="application_logs",
                         metric_name="error_rate",
                         value=0.15,
@@ -216,11 +216,11 @@ class DetectionAccuracyTester:
                 description="Correlated database and application issues should have high confidence"
             ),
             
-            TestScenario(
+            DetectionTestScenario(
                 name="network_partition_correlation",
-                scenario_type=TestScenarioType.MULTI_SOURCE_CORRELATION,
+                scenario_type=DetectionTestScenarioType.MULTI_SOURCE_CORRELATION,
                 alerts=[
-                    TestAlert(
+                    DetectionTestAlert(
                         source="cloudwatch",
                         metric_name="NetworkPacketsIn",
                         value=0,
@@ -229,7 +229,7 @@ class DetectionAccuracyTester:
                         severity="critical",
                         tags={"instance": "i-789012", "az": "us-east-1a"}
                     ),
-                    TestAlert(
+                    DetectionTestAlert(
                         source="datadog",
                         metric_name="system.net.bytes_rcvd",
                         value=0,
@@ -248,9 +248,9 @@ class DetectionAccuracyTester:
         
         # Alert storm scenarios
         self.test_scenarios.extend([
-            TestScenario(
+            DetectionTestScenario(
                 name="ddos_alert_storm",
-                scenario_type=TestScenarioType.ALERT_STORM,
+                scenario_type=DetectionTestScenarioType.ALERT_STORM,
                 alerts=self._generate_alert_storm(
                     count=1000,
                     base_metric="request_rate",
@@ -265,9 +265,9 @@ class DetectionAccuracyTester:
                 timeout_seconds=60
             ),
             
-            TestScenario(
+            DetectionTestScenario(
                 name="cascading_microservice_storm",
-                scenario_type=TestScenarioType.ALERT_STORM,
+                scenario_type=DetectionTestScenarioType.ALERT_STORM,
                 alerts=self._generate_cascading_alerts(
                     services=["auth", "user", "order", "payment", "notification"],
                     alerts_per_service=200
@@ -282,11 +282,11 @@ class DetectionAccuracyTester:
         
         # False positive scenarios
         self.test_scenarios.extend([
-            TestScenario(
+            DetectionTestScenario(
                 name="maintenance_window_false_positive",
-                scenario_type=TestScenarioType.FALSE_POSITIVE,
+                scenario_type=DetectionTestScenarioType.FALSE_POSITIVE,
                 alerts=[
-                    TestAlert(
+                    DetectionTestAlert(
                         source="cloudwatch",
                         metric_name="CPUUtilization",
                         value=0,
@@ -302,11 +302,11 @@ class DetectionAccuracyTester:
                 description="Maintenance window should not trigger incident"
             ),
             
-            TestScenario(
+            DetectionTestScenario(
                 name="known_flaky_metric",
-                scenario_type=TestScenarioType.FALSE_POSITIVE,
+                scenario_type=DetectionTestScenarioType.FALSE_POSITIVE,
                 alerts=[
-                    TestAlert(
+                    DetectionTestAlert(
                         source="datadog",
                         metric_name="disk.io.wait",
                         value=0.95,
@@ -325,9 +325,9 @@ class DetectionAccuracyTester:
         
         # Baseline noise scenarios
         self.test_scenarios.extend([
-            TestScenario(
+            DetectionTestScenario(
                 name="normal_traffic_baseline",
-                scenario_type=TestScenarioType.BASELINE_NOISE,
+                scenario_type=DetectionTestScenarioType.BASELINE_NOISE,
                 alerts=self._generate_baseline_noise(count=50),
                 expected_incident=False,
                 expected_confidence=0.1,
@@ -337,7 +337,7 @@ class DetectionAccuracyTester:
         ])
     
     def _generate_alert_storm(self, count: int, base_metric: str, base_value: float, 
-                            threshold: float, duration_seconds: int) -> List[TestAlert]:
+                            threshold: float, duration_seconds: int) -> List[DetectionTestAlert]:
         """Generate synthetic alert storm for testing."""
         alerts = []
         start_time = datetime.utcnow()
@@ -353,7 +353,7 @@ class DetectionAccuracyTester:
             sources = ["cloudwatch", "datadog", "prometheus"]
             instances = [f"i-{random.randint(100000, 999999)}" for _ in range(20)]
             
-            alerts.append(TestAlert(
+            alerts.append(DetectionTestAlert(
                 source=random.choice(sources),
                 metric_name=base_metric,
                 value=value,
@@ -368,7 +368,7 @@ class DetectionAccuracyTester:
         
         return alerts
     
-    def _generate_cascading_alerts(self, services: List[str], alerts_per_service: int) -> List[TestAlert]:
+    def _generate_cascading_alerts(self, services: List[str], alerts_per_service: int) -> List[DetectionTestAlert]:
         """Generate cascading failure alerts across services."""
         alerts = []
         start_time = datetime.utcnow()
@@ -394,7 +394,7 @@ class DetectionAccuracyTester:
                 else:  # memory_usage
                     value, threshold = 0.92, 0.85
                 
-                alerts.append(TestAlert(
+                alerts.append(DetectionTestAlert(
                     source="datadog",
                     metric_name=f"{service}.{metric}",
                     value=value,
@@ -409,7 +409,7 @@ class DetectionAccuracyTester:
         
         return alerts
     
-    def _generate_baseline_noise(self, count: int) -> List[TestAlert]:
+    def _generate_baseline_noise(self, count: int) -> List[DetectionTestAlert]:
         """Generate normal baseline noise that shouldn't trigger incidents."""
         alerts = []
         start_time = datetime.utcnow()
@@ -427,7 +427,7 @@ class DetectionAccuracyTester:
             
             metric_name, value, threshold = random.choice(metrics)
             
-            alerts.append(TestAlert(
+            alerts.append(DetectionTestAlert(
                 source="cloudwatch",
                 metric_name=metric_name,
                 value=value,
@@ -440,7 +440,7 @@ class DetectionAccuracyTester:
         
         return alerts
     
-    async def run_detection_test(self, agent: RobustDetectionAgent, scenario: TestScenario) -> DetectionTestResult:
+    async def run_detection_test(self, agent: RobustDetectionAgent, scenario: DetectionTestScenario) -> DetectionTestResult:
         """Run a single detection test scenario."""
         start_time = time.time()
         
@@ -534,7 +534,7 @@ class DetectionAccuracyTester:
             if 'original_sources' in locals():
                 agent.monitoring_sources = original_sources
     
-    def _create_mock_monitoring_sources(self, alerts: List[TestAlert]) -> Dict[str, MonitoringDataSource]:
+    def _create_mock_monitoring_sources(self, alerts: List[DetectionTestAlert]) -> Dict[str, MonitoringDataSource]:
         """Create mock monitoring sources for test alerts."""
         sources = {}
         
@@ -566,7 +566,7 @@ class DetectionAccuracyTester:
         
         return sources
     
-    def _alert_to_dict(self, alert: TestAlert) -> Dict[str, Any]:
+    def _alert_to_dict(self, alert: DetectionTestAlert) -> Dict[str, Any]:
         """Convert TestAlert to dictionary format."""
         return {
             "source": alert.source,
@@ -712,9 +712,9 @@ class DetectionAccuracyTester:
             self.logger.info(f"Running alert storm benchmark with {count} alerts")
             
             # Generate alert storm scenario
-            storm_scenario = TestScenario(
+            storm_scenario = DetectionTestScenario(
                 name=f"benchmark_storm_{count}",
-                scenario_type=TestScenarioType.ALERT_STORM,
+                scenario_type=DetectionTestScenarioType.ALERT_STORM,
                 alerts=self._generate_alert_storm(
                     count=count,
                     base_metric="request_rate",

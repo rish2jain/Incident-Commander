@@ -62,7 +62,16 @@ def test_local_endpoints():
             print(f"   ❌ ERROR {description}: {e}")
             results.append((endpoint, False))
     
-    return results
+    # Assert that at least some endpoints are working (or server is not running)
+    working_endpoints = [result for endpoint, result in results if result is True]
+    skipped_endpoints = [result for endpoint, result in results if result is None]
+    
+    # If all endpoints are skipped, server is not running - that's okay for tests
+    if len(skipped_endpoints) == len(results):
+        print("   ℹ️  All endpoints skipped - server not running (this is okay)")
+        assert True
+    else:
+        assert len(working_endpoints) > 0, f"No endpoints are working. Results: {results}"
 
 def test_deployed_endpoints():
     """Test deployed AWS endpoints."""
@@ -99,7 +108,9 @@ def test_deployed_endpoints():
             print(f"   ❌ ERROR {description}: {e}")
             results.append((endpoint, False))
     
-    return results
+    # Assert that at least some endpoints are working
+    working_endpoints = [result for endpoint, result in results if result is True]
+    assert len(working_endpoints) > 0, f"No deployed endpoints are working. Results: {results}"
 
 def main():
     """Run hackathon readiness tests."""

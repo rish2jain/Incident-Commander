@@ -8,6 +8,7 @@ Tests the enhanced prediction, resolution, and communication agents.
 import asyncio
 import sys
 import os
+import pytest
 from datetime import datetime, timedelta
 
 # Add project root to path
@@ -24,6 +25,7 @@ from src.utils.logging import get_logger
 logger = get_logger(__name__)
 
 
+@pytest.mark.asyncio
 async def test_prediction_agent():
     """Test the enhanced prediction agent."""
     logger.info("Testing Prediction Agent...")
@@ -82,6 +84,7 @@ async def test_prediction_agent():
         return False
 
 
+@pytest.mark.asyncio
 async def test_resolution_agent():
     """Test the secure resolution agent."""
     logger.info("Testing Resolution Agent...")
@@ -138,6 +141,7 @@ async def test_resolution_agent():
         return False
 
 
+@pytest.mark.asyncio
 async def test_communication_agent():
     """Test the resilient communication agent."""
     logger.info("Testing Communication Agent...")
@@ -191,6 +195,7 @@ async def test_communication_agent():
         return False
 
 
+@pytest.mark.asyncio
 async def test_agent_integration():
     """Test agent integration with swarm coordinator."""
     logger.info("Testing Agent Integration...")

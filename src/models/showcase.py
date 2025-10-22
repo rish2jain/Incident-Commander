@@ -13,7 +13,7 @@ from dataclasses import dataclass, field, asdict
 from enum import Enum
 import json
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 from src.models.incident import Incident
 
 
@@ -85,7 +85,8 @@ class BusinessImpactModel(BaseModel):
     efficiency_improvement: float = Field(ge=0.0, description="Efficiency improvement factor")
     competitive_advantages: List[str]
     
-    @validator('roi_percentage')
+    @field_validator('roi_percentage')
+    @classmethod
     def validate_roi(cls, v):
         if v < -100:
             raise ValueError('ROI cannot be less than -100%')
@@ -133,7 +134,8 @@ class ShowcaseResponseModel(BaseModel):
     success_criteria: Dict[str, bool]
     overall_status: ShowcaseStatus = ShowcaseStatus.SUCCESS
     
-    @validator('success_criteria')
+    @field_validator('success_criteria')
+    @classmethod
     def validate_success_criteria(cls, v):
         required_criteria = [
             'execution_time_under_30s',

@@ -8,9 +8,11 @@ Run this after starting the FastAPI server to test real-time updates.
 import asyncio
 import json
 import websockets
+import pytest
 from datetime import datetime, timezone
 
 
+@pytest.mark.asyncio
 async def test_websocket_connection():
     """Test WebSocket connection and message reception."""
     uri = "ws://localhost:8000/ws"
@@ -48,6 +50,7 @@ async def test_websocket_connection():
         print(f"❌ WebSocket test failed: {e}")
 
 
+@pytest.mark.asyncio
 async def test_incident_trigger():
     """Test triggering an incident and receiving real-time updates."""
     import aiohttp

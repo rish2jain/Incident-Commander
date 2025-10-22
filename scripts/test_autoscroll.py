@@ -5,10 +5,12 @@ Takes screenshots at key moments to verify timeline scrolling
 """
 
 import asyncio
+import pytest
 from playwright.async_api import async_playwright
 from pathlib import Path
 import time
 
+@pytest.mark.asyncio
 async def test_autoscroll():
     """Test the autoscrolling behavior with screenshots"""
     

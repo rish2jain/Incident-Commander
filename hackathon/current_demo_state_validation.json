@@ -1,0 +1,59 @@
+{
+  "validation_timestamp": "2025-10-21T15:06:44.382752",
+  "overall_score": 98.3,
+  "readiness_level": "EXCELLENT - READY FOR SUBMISSION",
+  "readiness_icon": "\ud83c\udfc6",
+  "validations": {
+    "demo_assets": {
+      "status": "success",
+      "assets_present": {
+        "comprehensive_demo": true,
+        "final_demo": true,
+        "focused_demo": true,
+        "comprehensive_screenshots": true,
+        "comprehensive_metrics": true,
+        "archive_directory": true,
+        "archive_summary": true
+      },
+      "file_sizes": {
+        "comprehensive_demo": "10.7MB",
+        "final_demo": "3.8MB",
+        "focused_demo": "4.1MB",
+        "comprehensive_metrics": "0.0MB",
+        "archive_summary": "0.0MB"
+      },
+      "screenshot_count": 19,
+      "expected_screenshots": 19,
+      "archive_files_count": 7,
+      "comprehensive_optimal_size": true,
+      "comprehensive_size_mb": 10.662013053894043,
+      "score": 99.99999999999999
+    },
+    "demo_consistency": {
+      "status": "success",
+      "docs_updated": {
+        "hackathon/MASTER_SUBMISSION_GUIDE.md": true,
+        "hackathon/README.md": true,
+        "hackathon/INDEX.md": true,
+        "hackathon/COMPREHENSIVE_DEMO_SUMMARY.md": true
+      },
+      "video_references_correct": 4,
+      "archive_references_present": 3,
+      "score": 95.0
+    },
+    "submission_readiness": {
+      "status": "offline_success",
+      "api_healthy": false,
+      "demo_videos_ready": true,
+      "documentation_complete": true,
+      "archive_organized": true,
+      "score": 100.0
+    }
+  },
+  "demo_recommendations": [
+    "\ud83c\udfc6 Use comprehensive demo (2:15) for complete feature showcase",
+    "\ud83d\udcc1 Archive properly organized - older recordings preserved",
+    "\ud83d\udcda Documentation consistent with current demo assets",
+    "\ud83d\ude80 READY FOR IMMEDIATE DEVPOST SUBMISSION!"
+  ]
+}

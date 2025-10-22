@@ -25,6 +25,11 @@ def setup_test_environment():
         'REDIS_URL': 'redis://localhost:6379',
         'DATABASE_URL': 'sqlite:///:memory:',
         'OPENSEARCH_ENDPOINT': 'http://localhost:9200',
+        'API_BASE_URL': 'http://localhost:8000',
+        'BEDROCK_REGION': 'us-east-1',
+        'DYNAMODB_ENDPOINT': 'http://localhost:8000',
+        'S3_ENDPOINT': 'http://localhost:4566',
+        'KINESIS_ENDPOINT': 'http://localhost:4566',
     }
     
     for key, value in test_env.items():

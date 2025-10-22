@@ -7,6 +7,7 @@ Validates setup and configuration without running full demo
 import asyncio
 import os
 import sys
+import pytest
 from pathlib import Path
 
 # Add parent directory to path for imports
@@ -21,6 +22,7 @@ except ImportError:
 import yaml
 
 
+@pytest.mark.asyncio
 async def test_playwright_installation():
     """Test if Playwright is installed and browsers are available"""
     print("\n🧪 Testing Playwright Installation...")
@@ -50,7 +52,7 @@ def test_configuration():
 
     if not config_path.exists():
         print(f"❌ Configuration file not found: {config_path}")
-        return False
+        assert False, f"Configuration file not found: {config_path}"
 
     try:
         with open(config_path) as f:
@@ -60,14 +62,14 @@ def test_configuration():
         for key in required_keys:
             if key not in config:
                 print(f"❌ Missing configuration key: {key}")
-                return False
+                assert False, f"Missing configuration key: {key}"
 
         print("✅ Configuration file valid")
-        return True
+        assert True
 
     except Exception as e:
         print(f"❌ Configuration error: {e}")
-        return False
+        assert False, f"Configuration error: {e}"
 
 
 def test_output_directories():
@@ -87,13 +89,14 @@ def test_output_directories():
         import shutil
         shutil.rmtree(base_dir)
 
-        return True
+        assert True
 
     except Exception as e:
         print(f"❌ Directory creation error: {e}")
-        return False
+        assert False, f"Directory creation error: {e}"
 
 
+@pytest.mark.asyncio
 async def test_dashboard_connection():
     """Test connection to dashboard"""
     print("\n🧪 Testing Dashboard Connection...")
@@ -128,6 +131,7 @@ async def test_dashboard_connection():
         return None
 
 
+@pytest.mark.asyncio
 async def test_backend_connection():
     """Test connection to backend API"""
     print("\n🧪 Testing Backend Connection...")

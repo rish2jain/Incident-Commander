@@ -119,8 +119,19 @@ cd dashboard && npm run dev
 
 ## Reference Documents
 
-- `DASHBOARD_UPDATE_SUMMARY.md` – enhanced dashboard architecture and features
-- `docs/gap_analysis.md` – authoritative list of incomplete capabilities
-- `DEPLOYMENT_CHECKLIST_AND_ROLLBACK_PLAN.md` – production deployment procedures
-- `ENTERPRISE_DEPLOYMENT_GUIDE.md` – environment-specific configuration
-- `docs/demo/COMPREHENSIVE_DEMO_PLAYBOOKS.md` – live demo choreography
+### Quick Navigation
+- **[HACKATHON_INDEX.md](HACKATHON_INDEX.md)** – Complete documentation index and navigation guide
+
+### Key Documents
+- `../../DASHBOARD_UPDATE_SUMMARY.md` – Enhanced dashboard architecture and features
+- `PHASE4_DEMO_SCRIPT.md` – Current demo choreography
+- `VISUAL_ASSETS_GUIDE.md` – Screenshot and video guidelines
+- `UNIMPLEMENTED_FEATURES.md` – Future roadmap and planned features
+
+### Archive
+- `archive/historical/ARCHIVAL_INDEX.md` – Historical documentation (12 files archived Oct 21)
+
+### External References
+- `../../docs/gap_analysis.md` – Authoritative list of incomplete capabilities
+- `../../DEPLOYMENT_CHECKLIST_AND_ROLLBACK_PLAN.md` – Production deployment procedures
+- `../../ENTERPRISE_DEPLOYMENT_GUIDE.md` – Environment-specific configuration

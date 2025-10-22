@@ -406,7 +406,7 @@ export default function TransparencyDashboardPage() {
       icon="🧠"
     >
       {/* Status Bar */}
-      <DashboardSection variant="glass" className="mb-6">
+      <DashboardSection variant="glass" className="mb-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Badge variant={incidentActive ? "destructive" : "default"}>
@@ -436,9 +436,9 @@ export default function TransparencyDashboardPage() {
       <DashboardSection
         title="Select Incident Scenario"
         variant="glass"
-        className="mb-6"
+        className="mb-4"
       >
-        <DashboardGrid columns={2} className="mb-4">
+        <DashboardGrid columns={4} className="mb-3">
           {Object.entries(SCENARIOS).map(([key, scenario]) => (
             <div
               key={key}
@@ -446,22 +446,24 @@ export default function TransparencyDashboardPage() {
                 setSelectedScenario(key);
                 setShowCustomInput(false);
               }}
-              className={`interactive-card spacing-md rounded-lg border-2 transition-all ${
+              className={`interactive-card p-3 rounded-lg border-2 transition-all ${
                 selectedScenario === key && !showCustomInput
                   ? "border-blue-500 bg-blue-500/10"
                   : "border-slate-600 hover:border-blue-500/50"
               }`}
             >
-              <div className="flex justify-between items-start mb-2">
-                <h3 className="font-semibold">{scenario.name}</h3>
+              <div className="flex justify-between items-start mb-1">
+                <h3 className="font-semibold text-sm">{scenario.name}</h3>
                 <SeverityIndicator
                   severity={
                     scenario.severity as "critical" | "high" | "medium" | "low"
                   }
                 />
               </div>
-              <p className="text-sm text-status-neutral">{scenario.description}</p>
-              <div className="text-xs text-slate-400 mt-2">
+              <p className="text-xs text-status-neutral">
+                {scenario.description}
+              </p>
+              <div className="text-xs text-slate-400 mt-1">
                 MTTR: {scenario.mttr}s
               </div>
             </div>
@@ -471,16 +473,18 @@ export default function TransparencyDashboardPage() {
         {/* Custom Scenario */}
         <div
           onClick={() => setShowCustomInput(true)}
-          className={`spacing-md rounded-lg border-2 border-dashed cursor-pointer interactive-element transition-all ${
+          className={`p-3 rounded-lg border-2 border-dashed cursor-pointer interactive-element transition-all ${
             showCustomInput
               ? "border-purple-500 bg-purple-500/10"
               : "border-slate-600 hover:border-purple-500/50"
           }`}
         >
           <div className="text-center">
-            <div className="text-2xl mb-2">🧪</div>
-            <h3 className="font-semibold">Custom Scenario</h3>
-            <p className="text-sm text-status-neutral">Describe your own incident</p>
+            <div className="text-xl mb-1">🧪</div>
+            <h3 className="font-semibold text-sm">Custom Scenario</h3>
+            <p className="text-xs text-status-neutral">
+              Describe your own incident
+            </p>
           </div>
         </div>
 
@@ -496,7 +500,7 @@ export default function TransparencyDashboardPage() {
       </DashboardSection>
 
       {/* Main Transparency Tabs */}
-      <Tabs defaultValue="reasoning" className="space-y-6">
+      <Tabs defaultValue="reasoning" className="space-y-4">
         <TabsList className="grid w-full grid-cols-5 card-glass">
           <TabsTrigger value="reasoning" data-testid="tab-reasoning">
             Reasoning
@@ -522,17 +526,17 @@ export default function TransparencyDashboardPage() {
               <CardTitle>🧠 Agent Reasoning Process</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4 max-h-96 overflow-y-auto">
+              <div className="space-y-3 max-h-80 overflow-y-auto">
                 {agentReasonings.length === 0 ? (
-                  <div className="text-center text-status-neutral py-12">
-                    <div className="text-4xl mb-2">🤔</div>
+                  <div className="text-center text-status-neutral py-8">
+                    <div className="text-3xl mb-2">🤔</div>
                     <p>Trigger incident to see AI reasoning...</p>
                   </div>
                 ) : (
                   agentReasonings.map((reasoning) => (
                     <div
                       key={reasoning.id}
-                      className="border border-slate-600 rounded-lg p-4"
+                      className="border border-slate-600 rounded-lg p-3"
                     >
                       <div className="flex justify-between items-start mb-2">
                         <Badge variant="outline">{reasoning.agent}</Badge>
@@ -731,7 +735,9 @@ export default function TransparencyDashboardPage() {
                     </div>
                   </div>
                   <div className="spacing-md bg-slate-700/20 backdrop-blur-sm rounded-lg">
-                    <div className="text-sm text-status-neutral">Detection Time</div>
+                    <div className="text-sm text-status-neutral">
+                      Detection Time
+                    </div>
                     <div className="text-2xl font-mono text-blue-400">
                       {performanceMetrics.detectionTime}s
                     </div>

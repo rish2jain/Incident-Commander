@@ -6,14 +6,14 @@
  */
 
 :root {
-  /* === SPACING SYSTEM === */
+  /* === SPACING SYSTEM - OPTIMIZED FOR MINIMAL SCROLLING === */
   --space-xs: 0.25rem; /* 4px */
   --space-sm: 0.5rem; /* 8px */
-  --space-md: 1rem; /* 16px */
-  --space-lg: 1.5rem; /* 24px */
-  --space-xl: 2rem; /* 32px */
-  --space-2xl: 3rem; /* 48px */
-  --space-3xl: 4rem; /* 64px */
+  --space-md: 0.75rem; /* 12px - Reduced from 16px */
+  --space-lg: 1rem; /* 16px - Reduced from 24px */
+  --space-xl: 1.25rem; /* 20px - Reduced from 32px */
+  --space-2xl: 1.5rem; /* 24px - Reduced from 48px */
+  --space-3xl: 2rem; /* 32px - Reduced from 64px */
 
   /* === TYPOGRAPHY SCALE === */
   --text-xs: 0.75rem; /* 12px */
@@ -312,27 +312,27 @@
 
 /* Spacing utilities */
 .spacing-xs {
+  @apply p-1;
+} /* 4px - Minimal elements */
+.spacing-sm {
   @apply p-2;
 } /* 8px - Small elements */
-.spacing-sm {
+.spacing-md {
   @apply p-3;
 } /* 12px - Compact content */
-.spacing-md {
+.spacing-lg {
   @apply p-4;
 } /* 16px - Standard content */
-.spacing-lg {
+.spacing-xl {
   @apply p-6;
 } /* 24px - Sections */
-.spacing-xl {
-  @apply p-8;
-} /* 32px - Major sections */
 
 /* Focus States */
 .focus-ring-primary {
   @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900;
 }
 
-/* Layout Utilities */
+/* Layout Utilities - OPTIMIZED FOR MINIMAL SCROLLING */
 .dashboard-container {
   min-height: 100vh;
   background: linear-gradient(
@@ -342,29 +342,29 @@
     hsl(222.2 84% 4.9%) 100%
   );
   color: hsl(var(--foreground));
-  padding: var(--space-lg);
+  padding: var(--space-md); /* Reduced from lg */
 }
 
 .dashboard-header {
-  margin-bottom: var(--space-xl);
+  margin-bottom: var(--space-lg); /* Reduced from xl */
 }
 
 .dashboard-title {
-  font-size: var(--text-4xl);
+  font-size: var(--text-3xl); /* Reduced from 4xl */
   font-weight: 700;
-  margin-bottom: var(--space-sm);
+  margin-bottom: var(--space-xs); /* Reduced from sm */
   @apply gradient-primary;
 }
 
 .dashboard-subtitle {
   color: hsl(var(--muted-foreground));
-  font-size: var(--text-lg);
+  font-size: var(--text-base); /* Reduced from lg */
 }
 
-/* Grid Layouts */
+/* Grid Layouts - OPTIMIZED FOR MINIMAL SCROLLING */
 .dashboard-grid {
   display: grid;
-  gap: var(--space-lg);
+  gap: var(--space-md); /* Reduced from lg */
 }
 
 .dashboard-grid-2 {

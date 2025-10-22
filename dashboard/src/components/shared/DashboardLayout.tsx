@@ -32,13 +32,13 @@ export function DashboardLayout({
         <div className="flex items-center justify-between">
           <div>
             <h1 className="dashboard-title">
-              {icon && <span className="mr-3">{icon}</span>}
+              {icon && <span className="mr-2">{icon}</span>}
               {title}
             </h1>
             {subtitle && <p className="dashboard-subtitle">{subtitle}</p>}
           </div>
           {headerActions && (
-            <div className="flex items-center gap-4">{headerActions}</div>
+            <div className="flex items-center gap-3">{headerActions}</div>
           )}
         </div>
       </div>
@@ -72,7 +72,7 @@ export function DashboardSection({
   variant = "default",
 }: DashboardSectionProps) {
   const sectionClasses = cn(
-    "rounded-lg p-6",
+    "rounded-lg p-4",
     {
       "bg-slate-800/50 border border-slate-700": variant === "default",
       "card-glass": variant === "glass",
@@ -84,10 +84,10 @@ export function DashboardSection({
   return (
     <section className={sectionClasses}>
       {(title || actions) && (
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-4">
           <div>
             {title && (
-              <h2 className="text-xl font-semibold text-white mb-1">{title}</h2>
+              <h2 className="text-lg font-semibold text-white mb-1">{title}</h2>
             )}
             {subtitle && <p className="text-sm text-slate-400">{subtitle}</p>}
           </div>

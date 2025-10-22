@@ -2,20 +2,23 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import {
+  DashboardLayout,
+  DashboardSection,
+  DashboardGrid,
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from "../../src/components/ui/card";
-import { Button } from "../../src/components/ui/button";
-import { Badge } from "../../src/components/ui/badge";
-import {
+  Button,
+  Badge,
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "../../src/components/ui/tabs";
-import { Progress } from "../../src/components/ui/progress";
+  Progress,
+  ConfidenceScore,
+  SeverityIndicator,
+} from "../../src/components/shared";
 
 /**
  * Consolidated Transparency Dashboard
@@ -155,9 +158,16 @@ export default function TransparencyDashboardPage() {
 
   // Helper function for alternatives
   const generateAlternatives = (step: string) => {
-    const alternatives: Record<string, Array<{ option: string; probability: number; chosen: boolean }>> = {
+    const alternatives: Record<
+      string,
+      Array<{ option: string; probability: number; chosen: boolean }>
+    > = {
       "Analyzing symptoms": [
-        { option: "Database connection issue", probability: 0.87, chosen: true },
+        {
+          option: "Database connection issue",
+          probability: 0.87,
+          chosen: true,
+        },
         { option: "Network partition", probability: 0.23, chosen: false },
         { option: "Memory exhaustion", probability: 0.15, chosen: false },
       ],
@@ -221,7 +231,9 @@ export default function TransparencyDashboardPage() {
         agent,
         message: `${step} - Confidence: ${(confidence * 100).toFixed(1)}%`,
         confidence,
-        reasoning: `Analyzing ${step.toLowerCase()} with ${(confidence * 100).toFixed(1)}% confidence based on evidence`,
+        reasoning: `Analyzing ${step.toLowerCase()} with ${(
+          confidence * 100
+        ).toFixed(1)}% confidence based on evidence`,
         step,
         explanation: `${agent} agent processing ${step} with high confidence based on system metrics`,
         evidence,
@@ -388,115 +400,104 @@ export default function TransparencyDashboardPage() {
   }, [incidentActive, triggerIncident]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white p-6">
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-          🧠 AI Transparency Dashboard
-        </h1>
-        <p className="text-slate-400">
-          Complete AI explainability for incident response - Deep technical demonstration
-        </p>
-      </div>
-
+    <DashboardLayout
+      title="AI Transparency Dashboard"
+      subtitle="Complete AI explainability for incident response - Deep technical demonstration"
+      icon="🧠"
+    >
       {/* Status Bar */}
-      <Card className="bg-slate-800/50 border-slate-700 mb-6">
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Badge variant={incidentActive ? "destructive" : "default"}>
-                {incidentActive ? `Phase: ${currentPhase}` : "System Ready"}
-              </Badge>
-              <div className="text-sm text-slate-400">
-                MTTR:{" "}
-                <span className="text-green-400 font-mono">
-                  {formatTime(mttrSeconds)}
-                </span>
-              </div>
+      <DashboardSection variant="glass" className="mb-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Badge variant={incidentActive ? "destructive" : "default"}>
+              {incidentActive ? `Phase: ${currentPhase}` : "System Ready"}
+            </Badge>
+            <div className="text-sm text-status-neutral">
+              MTTR:{" "}
+              <span className="text-green-400 font-mono">
+                {formatTime(mttrSeconds)}
+              </span>
             </div>
-            <div className="flex-1 mx-6">
-              <Progress value={getPhaseProgress()} className="h-2" />
-            </div>
-            <Button
-              onClick={triggerIncident}
-              disabled={incidentActive}
-              className="bg-red-600 hover:bg-red-700"
-            >
-              {incidentActive ? "Analyzing..." : "🚨 Trigger Demo"}
-            </Button>
           </div>
-        </CardContent>
-      </Card>
+          <div className="flex-1 mx-6">
+            <Progress value={getPhaseProgress()} className="h-2" />
+          </div>
+          <Button
+            onClick={triggerIncident}
+            disabled={incidentActive}
+            className="bg-red-600 hover:bg-red-700 focus-ring-primary focus-ring-primary"
+          >
+            {incidentActive ? "Analyzing..." : "🚨 Trigger Demo"}
+          </Button>
+        </div>
+      </DashboardSection>
 
       {/* Scenario Selection */}
-      <Card className="bg-slate-800/50 border-slate-700 mb-6">
-        <CardHeader>
-          <CardTitle>Select Incident Scenario</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 gap-4 mb-4">
-            {Object.entries(SCENARIOS).map(([key, scenario]) => (
-              <div
-                key={key}
-                onClick={() => {
-                  setSelectedScenario(key);
-                  setShowCustomInput(false);
-                }}
-                className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                  selectedScenario === key && !showCustomInput
-                    ? "border-blue-500 bg-blue-500/10"
-                    : "border-slate-600 hover:border-blue-500/50"
-                }`}
-              >
-                <div className="flex justify-between items-start mb-2">
-                  <h3 className="font-semibold">{scenario.name}</h3>
-                  <Badge
-                    variant={
-                      scenario.severity === "critical" ? "destructive" : "secondary"
-                    }
-                  >
-                    {scenario.severity}
-                  </Badge>
-                </div>
-                <p className="text-sm text-slate-400">{scenario.description}</p>
-                <div className="text-xs text-slate-500 mt-2">
-                  MTTR: {scenario.mttr}s
-                </div>
+      <DashboardSection
+        title="Select Incident Scenario"
+        variant="glass"
+        className="mb-6"
+      >
+        <DashboardGrid columns={2} className="mb-4">
+          {Object.entries(SCENARIOS).map(([key, scenario]) => (
+            <div
+              key={key}
+              onClick={() => {
+                setSelectedScenario(key);
+                setShowCustomInput(false);
+              }}
+              className={`interactive-card spacing-md rounded-lg border-2 transition-all ${
+                selectedScenario === key && !showCustomInput
+                  ? "border-blue-500 bg-blue-500/10"
+                  : "border-slate-600 hover:border-blue-500/50"
+              }`}
+            >
+              <div className="flex justify-between items-start mb-2">
+                <h3 className="font-semibold">{scenario.name}</h3>
+                <SeverityIndicator
+                  severity={
+                    scenario.severity as "critical" | "high" | "medium" | "low"
+                  }
+                />
               </div>
-            ))}
-          </div>
-
-          {/* Custom Scenario */}
-          <div
-            onClick={() => setShowCustomInput(true)}
-            className={`p-4 rounded-lg border-2 border-dashed cursor-pointer transition-all ${
-              showCustomInput
-                ? "border-purple-500 bg-purple-500/10"
-                : "border-slate-600 hover:border-purple-500/50"
-            }`}
-          >
-            <div className="text-center">
-              <div className="text-2xl mb-2">🧪</div>
-              <h3 className="font-semibold">Custom Scenario</h3>
-              <p className="text-sm text-slate-400">Describe your own incident</p>
+              <p className="text-sm text-status-neutral">{scenario.description}</p>
+              <div className="text-xs text-slate-400 mt-2">
+                MTTR: {scenario.mttr}s
+              </div>
             </div>
-          </div>
+          ))}
+        </DashboardGrid>
 
-          {showCustomInput && (
-            <textarea
-              value={customScenario}
-              onChange={(e) => setCustomScenario(e.target.value)}
-              placeholder="Describe your incident scenario..."
-              className="w-full mt-4 p-3 bg-slate-700 border border-slate-600 rounded-lg text-sm"
-              rows={3}
-            />
-          )}
-        </CardContent>
-      </Card>
+        {/* Custom Scenario */}
+        <div
+          onClick={() => setShowCustomInput(true)}
+          className={`spacing-md rounded-lg border-2 border-dashed cursor-pointer interactive-element transition-all ${
+            showCustomInput
+              ? "border-purple-500 bg-purple-500/10"
+              : "border-slate-600 hover:border-purple-500/50"
+          }`}
+        >
+          <div className="text-center">
+            <div className="text-2xl mb-2">🧪</div>
+            <h3 className="font-semibold">Custom Scenario</h3>
+            <p className="text-sm text-status-neutral">Describe your own incident</p>
+          </div>
+        </div>
+
+        {showCustomInput && (
+          <textarea
+            value={customScenario}
+            onChange={(e) => setCustomScenario(e.target.value)}
+            placeholder="Describe your incident scenario..."
+            className="w-full mt-4 p-3 bg-slate-700 border border-slate-600 rounded-lg text-sm"
+            rows={3}
+          />
+        )}
+      </DashboardSection>
 
       {/* Main Transparency Tabs */}
       <Tabs defaultValue="reasoning" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5 bg-slate-800/50">
+        <TabsList className="grid w-full grid-cols-5 card-glass">
           <TabsTrigger value="reasoning" data-testid="tab-reasoning">
             Reasoning
           </TabsTrigger>
@@ -516,14 +517,14 @@ export default function TransparencyDashboardPage() {
 
         {/* Reasoning Tab */}
         <TabsContent value="reasoning" data-testid="panel-reasoning">
-          <Card className="bg-slate-800/50 border-slate-700">
+          <Card className="card-glass">
             <CardHeader>
               <CardTitle>🧠 Agent Reasoning Process</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4 max-h-96 overflow-y-auto">
                 {agentReasonings.length === 0 ? (
-                  <div className="text-center text-slate-400 py-12">
+                  <div className="text-center text-status-neutral py-12">
                     <div className="text-4xl mb-2">🤔</div>
                     <p>Trigger incident to see AI reasoning...</p>
                   </div>
@@ -540,12 +541,12 @@ export default function TransparencyDashboardPage() {
                         </Badge>
                       </div>
                       <h4 className="font-semibold mb-2">{reasoning.step}</h4>
-                      <p className="text-sm text-slate-400 mb-2">
+                      <p className="text-sm text-status-neutral mb-2">
                         {reasoning.explanation}
                       </p>
                       {reasoning.evidence && (
                         <div className="text-sm space-y-1">
-                          <p className="text-slate-400">Evidence:</p>
+                          <p className="text-status-neutral">Evidence:</p>
                           {reasoning.evidence.map((item, idx) => (
                             <div key={idx} className="flex items-start gap-2">
                               <span className="text-blue-400">•</span>
@@ -554,29 +555,32 @@ export default function TransparencyDashboardPage() {
                           ))}
                         </div>
                       )}
-                      {reasoning.alternatives && reasoning.alternatives.length > 0 && (
-                        <div className="mt-3 space-y-1">
-                          <p className="text-sm text-slate-400">Alternatives:</p>
-                          {reasoning.alternatives.map((alt, idx) => (
-                            <div
-                              key={idx}
-                              className={`text-sm p-2 rounded ${
-                                alt.chosen
-                                  ? "bg-green-500/20"
-                                  : "bg-slate-700/30"
-                              }`}
-                            >
-                              <div className="flex justify-between">
-                                <span>{alt.option}</span>
-                                <span>
-                                  {(alt.probability * 100).toFixed(0)}%
-                                  {alt.chosen && " ✓"}
-                                </span>
+                      {reasoning.alternatives &&
+                        reasoning.alternatives.length > 0 && (
+                          <div className="mt-3 space-y-1">
+                            <p className="text-sm text-status-neutral">
+                              Alternatives:
+                            </p>
+                            {reasoning.alternatives.map((alt, idx) => (
+                              <div
+                                key={idx}
+                                className={`text-sm p-2 rounded ${
+                                  alt.chosen
+                                    ? "bg-green-500/20"
+                                    : "bg-slate-700/20 backdrop-blur-sm"
+                                }`}
+                              >
+                                <div className="flex justify-between">
+                                  <span>{alt.option}</span>
+                                  <span>
+                                    {(alt.probability * 100).toFixed(0)}%
+                                    {alt.chosen && " ✓"}
+                                  </span>
+                                </div>
                               </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
+                            ))}
+                          </div>
+                        )}
                     </div>
                   ))
                 )}
@@ -587,19 +591,19 @@ export default function TransparencyDashboardPage() {
 
         {/* Decision Trees Tab */}
         <TabsContent value="decisions" data-testid="panel-decisions">
-          <Card className="bg-slate-800/50 border-slate-700">
+          <Card className="card-glass">
             <CardHeader>
               <CardTitle>🌳 Decision Tree Visualization</CardTitle>
             </CardHeader>
             <CardContent>
               {!decisionTree ? (
-                <div className="text-center text-slate-400 py-12">
+                <div className="text-center text-status-neutral py-12">
                   <div className="text-4xl mb-2">🌳</div>
                   <p>Decision tree will appear during analysis...</p>
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <div className="text-center p-4 bg-blue-500/20 rounded-lg">
+                  <div className="text-center spacing-md bg-blue-500/20 rounded-lg">
                     <h3 className="font-bold">{decisionTree.rootNode.label}</h3>
                     <Progress
                       value={decisionTree.rootNode.confidence * 100}
@@ -609,14 +613,17 @@ export default function TransparencyDashboardPage() {
                   {decisionTree.rootNode.children?.map((child) => (
                     <div
                       key={child.id}
-                      className="ml-8 p-3 bg-slate-700/30 rounded-lg"
+                      className="ml-8 p-3 bg-slate-700/20 backdrop-blur-sm rounded-lg"
                     >
                       <h4 className="font-medium">{child.label}</h4>
-                      <Progress value={child.confidence * 100} className="mt-2" />
+                      <Progress
+                        value={child.confidence * 100}
+                        className="mt-2"
+                      />
                       {child.children?.map((grandchild) => (
                         <div
                           key={grandchild.id}
-                          className="ml-8 mt-2 text-sm text-slate-400"
+                          className="ml-8 mt-2 text-sm text-status-neutral"
                         >
                           → {grandchild.label} (
                           {(grandchild.confidence * 100).toFixed(0)}%)
@@ -632,21 +639,23 @@ export default function TransparencyDashboardPage() {
 
         {/* Confidence Tab */}
         <TabsContent value="confidence" data-testid="panel-confidence">
-          <Card className="bg-slate-800/50 border-slate-700">
+          <Card className="card-glass">
             <CardHeader>
               <CardTitle>📈 Confidence & Uncertainty Analysis</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 {Object.entries(confidenceScores).map(([agent, confidence]) => (
-                  <div key={agent}>
-                    <div className="flex justify-between mb-2">
-                      <span>{agent}</span>
-                      <span className="font-mono">
-                        {(confidence * 100).toFixed(1)}%
-                      </span>
-                    </div>
-                    <Progress value={confidence * 100} className="h-3" />
+                  <div
+                    key={agent}
+                    className="flex items-center justify-between"
+                  >
+                    <span className="text-sm font-medium">{agent}</span>
+                    <ConfidenceScore
+                      confidence={confidence}
+                      size="md"
+                      className="flex-1 ml-4"
+                    />
                   </div>
                 ))}
               </div>
@@ -656,14 +665,14 @@ export default function TransparencyDashboardPage() {
 
         {/* Communication Tab */}
         <TabsContent value="communication" data-testid="panel-communication">
-          <Card className="bg-slate-800/50 border-slate-700">
+          <Card className="card-glass">
             <CardHeader>
               <CardTitle>💬 Inter-Agent Communication</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3 max-h-96 overflow-y-auto">
                 {agentCommunications.length === 0 ? (
-                  <div className="text-center text-slate-400 py-12">
+                  <div className="text-center text-status-neutral py-12">
                     <div className="text-4xl mb-2">💬</div>
                     <p>Agent communications will appear here...</p>
                   </div>
@@ -671,7 +680,7 @@ export default function TransparencyDashboardPage() {
                   agentCommunications.map((comm) => (
                     <div
                       key={comm.id}
-                      className="p-3 bg-slate-700/30 rounded-lg"
+                      className="p-3 bg-slate-700/20 backdrop-blur-sm rounded-lg"
                     >
                       <div className="flex justify-between text-sm mb-1">
                         <div>
@@ -696,38 +705,41 @@ export default function TransparencyDashboardPage() {
 
         {/* Analytics Tab */}
         <TabsContent value="analytics" data-testid="panel-analytics">
-          <Card className="bg-slate-800/50 border-slate-700">
+          <Card className="card-glass">
             <CardHeader>
               <CardTitle>📊 Performance Analytics</CardTitle>
             </CardHeader>
             <CardContent>
               {!performanceMetrics ? (
-                <div className="text-center text-slate-400 py-12">
+                <div className="text-center text-status-neutral py-12">
                   <div className="text-4xl mb-2">📊</div>
                   <p>Performance metrics will appear during resolution...</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 bg-slate-700/30 rounded-lg">
-                    <div className="text-sm text-slate-400">MTTR</div>
+                  <div className="spacing-md bg-slate-700/20 backdrop-blur-sm rounded-lg">
+                    <div className="text-sm text-status-neutral">MTTR</div>
                     <div className="text-2xl font-mono text-green-400">
                       {performanceMetrics.mttr}s
                     </div>
                   </div>
-                  <div className="p-4 bg-slate-700/30 rounded-lg">
-                    <div className="text-sm text-slate-400">Accuracy</div>
+                  <div className="spacing-md bg-slate-700/20 backdrop-blur-sm rounded-lg">
+                    <div className="text-sm text-status-neutral">Accuracy</div>
                     <div className="text-2xl font-mono text-green-400">
-                      {((performanceMetrics.accuracy || 0.95) * 100).toFixed(1)}%
+                      {((performanceMetrics.accuracy || 0.95) * 100).toFixed(1)}
+                      %
                     </div>
                   </div>
-                  <div className="p-4 bg-slate-700/30 rounded-lg">
-                    <div className="text-sm text-slate-400">Detection Time</div>
+                  <div className="spacing-md bg-slate-700/20 backdrop-blur-sm rounded-lg">
+                    <div className="text-sm text-status-neutral">Detection Time</div>
                     <div className="text-2xl font-mono text-blue-400">
                       {performanceMetrics.detectionTime}s
                     </div>
                   </div>
-                  <div className="p-4 bg-slate-700/30 rounded-lg">
-                    <div className="text-sm text-slate-400">Resolution Time</div>
+                  <div className="spacing-md bg-slate-700/20 backdrop-blur-sm rounded-lg">
+                    <div className="text-sm text-status-neutral">
+                      Resolution Time
+                    </div>
                     <div className="text-2xl font-mono text-blue-400">
                       {performanceMetrics.resolutionTime}s
                     </div>
@@ -738,6 +750,6 @@ export default function TransparencyDashboardPage() {
           </Card>
         </TabsContent>
       </Tabs>
-    </div>
+    </DashboardLayout>
   );
 }

@@ -15,8 +15,16 @@ import { RefinedDashboard } from "./RefinedDashboard";
 import { AgentTransparencyModal } from "./AgentTransparencyModal";
 import { ByzantineConsensusVisualization } from "./ByzantineConsensusVisualization";
 import { TrustIndicatorsGroup } from "./TrustIndicators";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import {
+  DashboardLayout,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Badge,
+  AgentStatus,
+  ConfidenceScore,
+} from "@/components/shared";
 
 // Example data types (should match your backend schema)
 interface AgentConfidenceData {
@@ -95,10 +103,7 @@ function EnhancedAgentCard({ agent, onClick }: EnhancedAgentCardProps) {
   };
 
   return (
-    <Card
-      className="cursor-pointer hover:border-blue-500/50 transition-all hover:shadow-lg"
-      onClick={onClick}
-    >
+    <Card className="interactive-card card-glass" onClick={onClick}>
       <CardHeader className="pb-3">
         <CardTitle className="text-sm font-medium flex items-center gap-2">
           <span className="text-2xl">{getAgentIcon(agent.agent_type)}</span>
@@ -109,7 +114,7 @@ function EnhancedAgentCard({ agent, onClick }: EnhancedAgentCardProps) {
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-xs text-muted-foreground">Confidence</span>
-            <span className="text-lg font-bold text-green-500">
+            <span className="text-lg font-semibold text-green-500">
               {Math.round(agent.current_confidence * 100)}%
             </span>
           </div>
@@ -126,282 +131,320 @@ function EnhancedAgentCard({ agent, onClick }: EnhancedAgentCardProps) {
  * Main Enhanced Dashboard Component
  */
 export function EnhancedOperationsDashboard() {
-  const [selectedAgent, setSelectedAgent] = useState<AgentConfidenceData | null>(null);
+  const [selectedAgent, setSelectedAgent] =
+    useState<AgentConfidenceData | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Sample agent data (replace with real WebSocket data)
-  const getSampleAgentData = useCallback((agentType: string): AgentConfidenceData => {
-    const agentDataMap: Record<string, AgentConfidenceData> = {
-      detection: {
-        agent_name: "Detection Agent",
-        agent_type: "detection",
-        current_confidence: 0.93,
-        status: "complete",
-        reasoning_summary:
-          "Identified anomaly correlation across 143 telemetry signals from CloudWatch, Datadog, and Prometheus. Pattern matches historical database connection pool exhaustion with 94% confidence.",
-        reasoning_factors: [
-          "Anomaly correlation across 143 telemetry signals",
-          "Baseline drift within acceptable 0.6% threshold",
-          "Pattern match: Database connection pool exhaustion (94% confidence)",
-          "Historical matches: 12 similar incidents in past 90 days",
-        ],
-        evidence_sources: ["CloudWatch Metrics", "Datadog APM", "Prometheus", "Custom Telemetry"],
-        uncertainty_factors: ["Synthetic monitors degraded in parallel region"],
-        risk_assessment: "Low risk - pattern is well-established with high historical accuracy",
-        confidence_components: {
-          data_quality: 0.96,
-          pattern_match: 0.94,
-          historical_accuracy: 0.91,
-          cross_validation: 0.89,
+  const getSampleAgentData = useCallback(
+    (agentType: string): AgentConfidenceData => {
+      const agentDataMap: Record<string, AgentConfidenceData> = {
+        detection: {
+          agent_name: "Detection Agent",
+          agent_type: "detection",
+          current_confidence: 0.93,
+          status: "complete",
+          reasoning_summary:
+            "Identified anomaly correlation across 143 telemetry signals from CloudWatch, Datadog, and Prometheus. Pattern matches historical database connection pool exhaustion with 94% confidence.",
+          reasoning_factors: [
+            "Anomaly correlation across 143 telemetry signals",
+            "Baseline drift within acceptable 0.6% threshold",
+            "Pattern match: Database connection pool exhaustion (94% confidence)",
+            "Historical matches: 12 similar incidents in past 90 days",
+          ],
+          evidence_sources: [
+            "CloudWatch Metrics",
+            "Datadog APM",
+            "Prometheus",
+            "Custom Telemetry",
+          ],
+          uncertainty_factors: [
+            "Synthetic monitors degraded in parallel region",
+          ],
+          risk_assessment:
+            "Low risk - pattern is well-established with high historical accuracy",
+          confidence_components: {
+            data_quality: 0.96,
+            pattern_match: 0.94,
+            historical_accuracy: 0.91,
+            cross_validation: 0.89,
+          },
+          rag_sources: [
+            {
+              type: "incident",
+              id: "INC-4512",
+              title: "Database Connection Pool Exhaustion - Production",
+              similarity: 0.94,
+              summary:
+                "Similar cascade failure in production. Root cause: Connection pool limit + retry storm",
+              resolution_time: 2.1,
+              success_rate: 1.0,
+            },
+            {
+              type: "incident",
+              id: "INC-3891",
+              title: "API Gateway Timeout Cascade",
+              similarity: 0.89,
+              summary:
+                "Connection pool exhaustion leading to timeout cascade. Resolved by scaling pool and circuit breakers",
+              resolution_time: 1.8,
+              success_rate: 1.0,
+            },
+            {
+              type: "runbook",
+              id: "RB-Database-007",
+              title: "Database Cascade Failure Response v2.3",
+              similarity: 0.86,
+              summary:
+                "Standard operating procedure for database connection issues",
+              success_rate: 0.98,
+            },
+          ],
+          aws_services_used: [
+            "Claude 3.5 Sonnet",
+            "Amazon CloudWatch",
+            "Bedrock AgentCore",
+          ],
+          guardrail_checks: [
+            {
+              name: "Command Safety Check",
+              status: "passed",
+              details: "No destructive commands detected in analysis",
+            },
+            {
+              name: "Rate Limit Compliance",
+              status: "passed",
+              details: "API calls within configured limits",
+            },
+            {
+              name: "Data Access Authorization",
+              status: "passed",
+              details: "All data sources authorized for this agent",
+            },
+          ],
         },
-        rag_sources: [
-          {
-            type: "incident",
-            id: "INC-4512",
-            title: "Database Connection Pool Exhaustion - Production",
-            similarity: 0.94,
-            summary: "Similar cascade failure in production. Root cause: Connection pool limit + retry storm",
-            resolution_time: 2.1,
-            success_rate: 1.0,
+        diagnosis: {
+          agent_name: "Diagnosis Agent",
+          agent_type: "diagnosis",
+          current_confidence: 0.97,
+          status: "complete",
+          reasoning_summary:
+            "Root cause identified via Bedrock AgentCore analysis of 15,000 log entries. Query plan regression detected causing lock wait accumulation beyond latency SLO.",
+          reasoning_factors: [
+            "Query plan regression detected via Bedrock AgentCore",
+            "Lock wait accumulation beyond latency SLO (500ms → 2.3s)",
+            "N+1 query pattern in auth service endpoints",
+            "Database connection pool at 98% utilization",
+          ],
+          evidence_sources: [
+            "Application Logs (15,247 entries)",
+            "Database Query Logs",
+            "APM Traces",
+            "Error Tracking System",
+          ],
+          uncertainty_factors: [
+            "Pending guardrail confirmation on proposed query optimization",
+          ],
+          risk_assessment:
+            "Very low - diagnosis confirmed by multiple independent data sources",
+          confidence_components: {
+            data_quality: 0.98,
+            pattern_match: 0.97,
+            historical_accuracy: 0.96,
+            cross_validation: 0.97,
           },
-          {
-            type: "incident",
-            id: "INC-3891",
-            title: "API Gateway Timeout Cascade",
-            similarity: 0.89,
-            summary: "Connection pool exhaustion leading to timeout cascade. Resolved by scaling pool and circuit breakers",
-            resolution_time: 1.8,
-            success_rate: 1.0,
-          },
-          {
-            type: "runbook",
-            id: "RB-Database-007",
-            title: "Database Cascade Failure Response v2.3",
-            similarity: 0.86,
-            summary: "Standard operating procedure for database connection issues",
-            success_rate: 0.98,
-          },
-        ],
-        aws_services_used: ["Claude 3.5 Sonnet", "Amazon CloudWatch", "Bedrock AgentCore"],
-        guardrail_checks: [
-          {
-            name: "Command Safety Check",
-            status: "passed",
-            details: "No destructive commands detected in analysis",
-          },
-          {
-            name: "Rate Limit Compliance",
-            status: "passed",
-            details: "API calls within configured limits",
-          },
-          {
-            name: "Data Access Authorization",
-            status: "passed",
-            details: "All data sources authorized for this agent",
-          },
-        ],
-      },
-      diagnosis: {
-        agent_name: "Diagnosis Agent",
-        agent_type: "diagnosis",
-        current_confidence: 0.97,
-        status: "complete",
-        reasoning_summary:
-          "Root cause identified via Bedrock AgentCore analysis of 15,000 log entries. Query plan regression detected causing lock wait accumulation beyond latency SLO.",
-        reasoning_factors: [
-          "Query plan regression detected via Bedrock AgentCore",
-          "Lock wait accumulation beyond latency SLO (500ms → 2.3s)",
-          "N+1 query pattern in auth service endpoints",
-          "Database connection pool at 98% utilization",
-        ],
-        evidence_sources: [
-          "Application Logs (15,247 entries)",
-          "Database Query Logs",
-          "APM Traces",
-          "Error Tracking System",
-        ],
-        uncertainty_factors: ["Pending guardrail confirmation on proposed query optimization"],
-        risk_assessment: "Very low - diagnosis confirmed by multiple independent data sources",
-        confidence_components: {
-          data_quality: 0.98,
-          pattern_match: 0.97,
-          historical_accuracy: 0.96,
-          cross_validation: 0.97,
+          rag_sources: [
+            {
+              type: "incident",
+              id: "INC-4512",
+              title: "Database Connection Pool Exhaustion",
+              similarity: 0.94,
+              summary:
+                "Same root cause identified - query plan regression + connection pool limits",
+              resolution_time: 2.1,
+            },
+            {
+              type: "knowledge",
+              id: "KB-SQL-042",
+              title: "Query Plan Regression Patterns",
+              similarity: 0.91,
+              summary:
+                "Common causes and detection methods for query plan degradation",
+            },
+          ],
+          aws_services_used: [
+            "Bedrock AgentCore",
+            "Amazon Q Business",
+            "OpenSearch",
+          ],
+          guardrail_checks: [
+            {
+              name: "PII Detection",
+              status: "passed",
+              details: "No PII found in analyzed logs",
+            },
+            {
+              name: "Data Retention Compliance",
+              status: "passed",
+              details: "All accessed data within retention policies",
+            },
+          ],
         },
-        rag_sources: [
-          {
-            type: "incident",
-            id: "INC-4512",
-            title: "Database Connection Pool Exhaustion",
-            similarity: 0.94,
-            summary: "Same root cause identified - query plan regression + connection pool limits",
-            resolution_time: 2.1,
+        prediction: {
+          agent_name: "Prediction Agent",
+          agent_type: "prediction",
+          current_confidence: 0.73,
+          status: "complete",
+          reasoning_summary:
+            "Nova Act mitigation planner evaluating 3 rollout paths. Titan embeddings show 73% cascade probability if left unresolved for 15 minutes. Predicting impact on 25,000 concurrent users.",
+          reasoning_factors: [
+            "Nova Act mitigation planner evaluating 3 rollout paths",
+            "Titan embeddings similarity: 73% cascade risk within 15 minutes",
+            "Projected user impact: 25,000 concurrent users",
+            "Revenue at risk: $168,000 based on historical downtime costs",
+          ],
+          evidence_sources: [
+            "Historical Incident Database",
+            "User Session Analytics",
+            "Revenue Impact Models",
+            "Cascade Simulation",
+          ],
+          uncertainty_factors: [
+            "Pending customer impact projection",
+            "External service dependencies not fully modeled",
+            "Traffic patterns may vary from historical baseline",
+          ],
+          risk_assessment:
+            "Moderate uncertainty - prediction based on historical patterns but current traffic differs from baseline",
+          confidence_components: {
+            data_quality: 0.82,
+            pattern_match: 0.73,
+            historical_accuracy: 0.78,
+            cross_validation: 0.61,
           },
-          {
-            type: "knowledge",
-            id: "KB-SQL-042",
-            title: "Query Plan Regression Patterns",
-            similarity: 0.91,
-            summary: "Common causes and detection methods for query plan degradation",
-          },
-        ],
-        aws_services_used: ["Bedrock AgentCore", "Amazon Q Business", "OpenSearch"],
-        guardrail_checks: [
-          {
-            name: "PII Detection",
-            status: "passed",
-            details: "No PII found in analyzed logs",
-          },
-          {
-            name: "Data Retention Compliance",
-            status: "passed",
-            details: "All accessed data within retention policies",
-          },
-        ],
-      },
-      prediction: {
-        agent_name: "Prediction Agent",
-        agent_type: "prediction",
-        current_confidence: 0.73,
-        status: "complete",
-        reasoning_summary:
-          "Nova Act mitigation planner evaluating 3 rollout paths. Titan embeddings show 73% cascade probability if left unresolved for 15 minutes. Predicting impact on 25,000 concurrent users.",
-        reasoning_factors: [
-          "Nova Act mitigation planner evaluating 3 rollout paths",
-          "Titan embeddings similarity: 73% cascade risk within 15 minutes",
-          "Projected user impact: 25,000 concurrent users",
-          "Revenue at risk: $168,000 based on historical downtime costs",
-        ],
-        evidence_sources: [
-          "Historical Incident Database",
-          "User Session Analytics",
-          "Revenue Impact Models",
-          "Cascade Simulation",
-        ],
-        uncertainty_factors: [
-          "Pending customer impact projection",
-          "External service dependencies not fully modeled",
-          "Traffic patterns may vary from historical baseline",
-        ],
-        risk_assessment:
-          "Moderate uncertainty - prediction based on historical patterns but current traffic differs from baseline",
-        confidence_components: {
-          data_quality: 0.82,
-          pattern_match: 0.73,
-          historical_accuracy: 0.78,
-          cross_validation: 0.61,
+          rag_sources: [
+            {
+              type: "incident",
+              id: "INC-2147",
+              title: "Cascade Failure Prevention",
+              similarity: 0.86,
+              summary:
+                "Circuit breakers prevented cascade. Lesson: Act within 15-minute window",
+              resolution_time: 3.2,
+              success_rate: 1.0,
+            },
+          ],
+          aws_services_used: [
+            "Nova Act",
+            "Amazon Titan Embeddings",
+            "Amazon Forecast",
+          ],
+          guardrail_checks: [
+            {
+              name: "Prediction Bounds",
+              status: "passed",
+              details: "Predictions within validated confidence intervals",
+            },
+          ],
         },
-        rag_sources: [
-          {
-            type: "incident",
-            id: "INC-2147",
-            title: "Cascade Failure Prevention",
-            similarity: 0.86,
-            summary: "Circuit breakers prevented cascade. Lesson: Act within 15-minute window",
-            resolution_time: 3.2,
-            success_rate: 1.0,
+        resolution: {
+          agent_name: "Resolution Agent",
+          agent_type: "resolution",
+          current_confidence: 0.95,
+          status: "complete",
+          reasoning_summary:
+            "Autonomous remediation plan validated with 5-step rollback capability. Circuit breaker thresholds validated. Canary rollback progressing within guardrails.",
+          reasoning_factors: [
+            "Circuit breaker thresholds validated",
+            "Canary rollback progressing within guardrails",
+            "5-step remediation plan with full rollback capability",
+            "Similar actions successful in 12/12 historical incidents",
+          ],
+          evidence_sources: [
+            "Remediation Playbooks",
+            "Historical Success Rates",
+            "Infrastructure State",
+            "Safety Validations",
+          ],
+          uncertainty_factors: ["Awaiting full traffic restoration validation"],
+          risk_assessment:
+            "Very low - all safety checks passed, rollback plan verified",
+          confidence_components: {
+            data_quality: 0.97,
+            pattern_match: 0.95,
+            historical_accuracy: 1.0,
+            cross_validation: 0.92,
           },
-        ],
-        aws_services_used: ["Nova Act", "Amazon Titan Embeddings", "Amazon Forecast"],
-        guardrail_checks: [
-          {
-            name: "Prediction Bounds",
-            status: "passed",
-            details: "Predictions within validated confidence intervals",
-          },
-        ],
-      },
-      resolution: {
-        agent_name: "Resolution Agent",
-        agent_type: "resolution",
-        current_confidence: 0.95,
-        status: "complete",
-        reasoning_summary:
-          "Autonomous remediation plan validated with 5-step rollback capability. Circuit breaker thresholds validated. Canary rollback progressing within guardrails.",
-        reasoning_factors: [
-          "Circuit breaker thresholds validated",
-          "Canary rollback progressing within guardrails",
-          "5-step remediation plan with full rollback capability",
-          "Similar actions successful in 12/12 historical incidents",
-        ],
-        evidence_sources: [
-          "Remediation Playbooks",
-          "Historical Success Rates",
-          "Infrastructure State",
-          "Safety Validations",
-        ],
-        uncertainty_factors: ["Awaiting full traffic restoration validation"],
-        risk_assessment: "Very low - all safety checks passed, rollback plan verified",
-        confidence_components: {
-          data_quality: 0.97,
-          pattern_match: 0.95,
-          historical_accuracy: 1.0,
-          cross_validation: 0.92,
+          aws_services_used: [
+            "Strands SDK",
+            "AWS Systems Manager",
+            "Bedrock Guardrails",
+          ],
+          guardrail_checks: [
+            {
+              name: "Backup Verification",
+              status: "passed",
+              details: "Database backup confirmed before changes",
+            },
+            {
+              name: "Rollback Plan",
+              status: "passed",
+              details: "5-step rollback validated and ready",
+            },
+            {
+              name: "Impact Assessment",
+              status: "passed",
+              details: "Predicted impact within acceptable bounds",
+            },
+          ],
         },
-        aws_services_used: ["Strands SDK", "AWS Systems Manager", "Bedrock Guardrails"],
-        guardrail_checks: [
-          {
-            name: "Backup Verification",
-            status: "passed",
-            details: "Database backup confirmed before changes",
+        communication: {
+          agent_name: "Communication Agent",
+          agent_type: "communication",
+          current_confidence: 0.88,
+          status: "complete",
+          reasoning_summary:
+            "Stakeholder updates synchronized across Slack and email. Executive briefing drafted via Amazon Q. All notifications comply with communication policies.",
+          reasoning_factors: [
+            "Stakeholder updates synchronized across Slack and email",
+            "Executive briefing drafted via Amazon Q",
+            "Communication timeline aligned with incident phases",
+            "Notification recipients validated against on-call schedule",
+          ],
+          evidence_sources: [
+            "On-Call Schedule",
+            "Communication Templates",
+            "Notification History",
+            "Stakeholder Registry",
+          ],
+          uncertainty_factors: ["Pending executive acknowledgement"],
+          risk_assessment: "Low - standard communication protocols followed",
+          confidence_components: {
+            data_quality: 0.91,
+            pattern_match: 0.88,
+            historical_accuracy: 0.85,
+            cross_validation: 0.87,
           },
-          {
-            name: "Rollback Plan",
-            status: "passed",
-            details: "5-step rollback validated and ready",
-          },
-          {
-            name: "Impact Assessment",
-            status: "passed",
-            details: "Predicted impact within acceptable bounds",
-          },
-        ],
-      },
-      communication: {
-        agent_name: "Communication Agent",
-        agent_type: "communication",
-        current_confidence: 0.88,
-        status: "complete",
-        reasoning_summary:
-          "Stakeholder updates synchronized across Slack and email. Executive briefing drafted via Amazon Q. All notifications comply with communication policies.",
-        reasoning_factors: [
-          "Stakeholder updates synchronized across Slack and email",
-          "Executive briefing drafted via Amazon Q",
-          "Communication timeline aligned with incident phases",
-          "Notification recipients validated against on-call schedule",
-        ],
-        evidence_sources: [
-          "On-Call Schedule",
-          "Communication Templates",
-          "Notification History",
-          "Stakeholder Registry",
-        ],
-        uncertainty_factors: ["Pending executive acknowledgement"],
-        risk_assessment: "Low - standard communication protocols followed",
-        confidence_components: {
-          data_quality: 0.91,
-          pattern_match: 0.88,
-          historical_accuracy: 0.85,
-          cross_validation: 0.87,
+          aws_services_used: ["Amazon Q Business", "Amazon SNS", "Amazon SES"],
+          guardrail_checks: [
+            {
+              name: "PII Redaction",
+              status: "passed",
+              details: "All PII removed from notifications",
+            },
+            {
+              name: "Compliance Check",
+              status: "passed",
+              details: "Communications meet regulatory requirements",
+            },
+          ],
         },
-        aws_services_used: ["Amazon Q Business", "Amazon SNS", "Amazon SES"],
-        guardrail_checks: [
-          {
-            name: "PII Redaction",
-            status: "passed",
-            details: "All PII removed from notifications",
-          },
-          {
-            name: "Compliance Check",
-            status: "passed",
-            details: "Communications meet regulatory requirements",
-          },
-        ],
-      },
-    };
+      };
 
-    return agentDataMap[agentType] || agentDataMap.detection;
-  }, []);
+      return agentDataMap[agentType] || agentDataMap.detection;
+    },
+    []
+  );
 
   // Sample consensus data (replace with real WebSocket data)
   const sampleConsensus: ConsensusData = {
@@ -454,11 +497,14 @@ export function EnhancedOperationsDashboard() {
     timestamp: new Date(),
   };
 
-  const handleAgentClick = useCallback((agentType: string) => {
-    const agentData = getSampleAgentData(agentType);
-    setSelectedAgent(agentData);
-    setIsModalOpen(true);
-  }, [getSampleAgentData]);
+  const handleAgentClick = useCallback(
+    (agentType: string) => {
+      const agentData = getSampleAgentData(agentType);
+      setSelectedAgent(agentData);
+      setIsModalOpen(true);
+    },
+    [getSampleAgentData]
+  );
 
   return (
     <div className="space-y-6">
@@ -475,8 +521,16 @@ export function EnhancedOperationsDashboard() {
         <CardContent>
           <TrustIndicatorsGroup
             guardrails={[
-              { name: "Safety Verification", status: "passed", details: "All operations within safety bounds" },
-              { name: "Rate Limits", status: "passed", details: "API usage within limits" },
+              {
+                name: "Safety Verification",
+                status: "passed",
+                details: "All operations within safety bounds",
+              },
+              {
+                name: "Rate Limits",
+                status: "passed",
+                details: "API usage within limits",
+              },
             ]}
             pii={["IP addresses", "User IDs", "Email addresses"]}
             circuitBreaker={{ status: "closed" }}
@@ -487,13 +541,18 @@ export function EnhancedOperationsDashboard() {
       </Card>
 
       {/* Byzantine Consensus Visualization */}
-      <ByzantineConsensusVisualization consensusState={sampleConsensus} showDetails={true} />
+      <ByzantineConsensusVisualization
+        consensusState={sampleConsensus}
+        showDetails={true}
+      />
 
       {/* Enhanced Agent Cards (clickable) */}
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">AI Agent Confidence Levels</CardTitle>
-          <p className="text-sm text-muted-foreground">Click any agent to view detailed reasoning and evidence</p>
+          <p className="text-sm text-muted-foreground">
+            Click any agent to view detailed reasoning and evidence
+          </p>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
@@ -517,7 +576,11 @@ export function EnhancedOperationsDashboard() {
       <RefinedDashboard />
 
       {/* Agent Transparency Modal */}
-      <AgentTransparencyModal open={isModalOpen} onOpenChange={setIsModalOpen} agentData={selectedAgent} />
+      <AgentTransparencyModal
+        open={isModalOpen}
+        onOpenChange={setIsModalOpen}
+        agentData={selectedAgent}
+      />
     </div>
   );
 }

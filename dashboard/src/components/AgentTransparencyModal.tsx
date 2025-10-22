@@ -13,9 +13,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/shared";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/shared";
+import { Progress } from "@/components/shared";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
@@ -127,7 +127,7 @@ export function AgentTransparencyModal({
           <div className="flex items-center gap-4">
             <div>
               <p className="text-sm text-muted-foreground">Confidence</p>
-              <p className="text-3xl font-bold text-green-500">
+              <p className="text-3xl font-semibold text-green-500">
                 {Math.round(agentData.current_confidence * 100)}%
               </p>
             </div>
@@ -299,7 +299,7 @@ export function AgentTransparencyModal({
                       {agentData.rag_sources.map((source) => (
                         <div
                           key={source.id}
-                          className="p-4 border rounded-lg hover:border-blue-500/50 transition-colors"
+                          className="spacing-md border rounded-lg hover:border-blue-500/50 transition-colors"
                         >
                           <div className="flex items-start justify-between mb-2">
                             <div className="flex items-center gap-2">

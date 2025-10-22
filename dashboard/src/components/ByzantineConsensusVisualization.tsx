@@ -6,9 +6,9 @@
  */
 
 import React, { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/shared";
+import { Progress } from "@/components/shared";
+import { Badge } from "@/components/shared";
 import {
   Tooltip,
   TooltipContent,
@@ -69,10 +69,10 @@ export function ByzantineConsensusVisualization({
     const colors: Record<string, string> = {
       voting: "text-blue-500",
       agreed: "text-green-500",
-      abstained: "text-gray-500",
+      abstained: "text-slate-500",
       error: "text-red-500",
     };
-    return colors[status] || "text-gray-500";
+    return colors[status] || "text-slate-500";
   };
 
   const getStatusIcon = (status: string) => {
@@ -128,7 +128,7 @@ export function ByzantineConsensusVisualization({
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger className="w-full">
-                    <div className="flex items-center gap-3 p-3 border rounded-lg hover:border-blue-500/50 transition-all">
+                    <div className="flex items-center gap-3 p-3 border rounded-lg interactive-card hover:border-blue-500/50">
                       <span className="text-2xl">{getAgentIcon(agent.agent_type)}</span>
 
                       <div className="flex-1 text-left">
@@ -158,7 +158,7 @@ export function ByzantineConsensusVisualization({
                                   : "hsl(217 91% 80%)",
                             } as React.CSSProperties}
                           />
-                          <span className="text-sm font-bold min-w-[3ch] text-right">
+                          <span className="text-sm font-semibold min-w-[3ch] text-right">
                             {Math.round(agent.confidence * 100)}%
                           </span>
                         </div>
@@ -274,7 +274,7 @@ export function ByzantineConsensusVisualization({
         {/* Voting Details */}
         {showDetails && (
           <div className="pt-4 border-t">
-            <details className="cursor-pointer">
+            <details className="cursor-pointer interactive-element">
               <summary className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
                 View consensus calculation details
               </summary>

@@ -15,10 +15,10 @@
  */
 
 import React, { useState, useEffect, useCallback } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/shared";
+import { Badge } from "@/components/shared";
+import { Button } from "@/components/shared";
+import { Progress } from "@/components/shared";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 // Types
@@ -366,12 +366,12 @@ export const PowerDashboard: React.FC = () => {
         <div className="max-w-[1800px] mx-auto space-y-6">
           {/* HERO METRICS - Make Power Immediately Visible */}
           <Card className="bg-gradient-to-r from-blue-900/40 to-purple-900/40 border-blue-500/50">
-            <CardContent className="p-8">
+            <CardContent className="spacing-xl">
               <div className="text-center mb-6">
-                <h1 className="text-5xl font-bold mb-2 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                <h1 className="text-5xl font-semibold mb-2 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
                   {liveMetrics.incidentsResolved} Incidents Resolved Today
                 </h1>
-                <p className="text-xl text-gray-300">
+                <p className="text-xl text-slate-300">
                   Zero human interventions • {formatCurrency(liveMetrics.costAvoided)} saved • System uptime: 99.97%
                 </p>
                 <div className="mt-4 flex justify-center items-center gap-3">
@@ -403,7 +403,7 @@ export const PowerDashboard: React.FC = () => {
             {/* COLUMN 1: System Status & Live Savings */}
             <div className="space-y-6">
               {/* Live Savings Counter */}
-              <Card className="bg-slate-900/50 border-green-500/30">
+              <Card className="card-glass">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg flex items-center gap-2">
                     ⏱️ <span>LIVE SAVINGS TODAY</span>
@@ -411,25 +411,25 @@ export const PowerDashboard: React.FC = () => {
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div className="flex justify-between items-center border-b border-gray-700 pb-2">
-                    <span className="text-gray-400">Incidents Resolved:</span>
-                    <span className="text-2xl font-bold text-green-400">{liveMetrics.incidentsResolved}</span>
+                    <span className="text-slate-400">Incidents Resolved:</span>
+                    <span className="text-2xl font-semibold text-metric-positive">{liveMetrics.incidentsResolved}</span>
                   </div>
                   <div className="flex justify-between items-center border-b border-gray-700 pb-2">
-                    <span className="text-gray-400">Time Saved:</span>
-                    <span className="text-2xl font-bold text-blue-400">{liveMetrics.timeSaved}</span>
+                    <span className="text-slate-400">Time Saved:</span>
+                    <span className="text-2xl font-semibold text-blue-400">{liveMetrics.timeSaved}</span>
                   </div>
                   <div className="flex justify-between items-center border-b border-gray-700 pb-2">
-                    <span className="text-gray-400">Cost Avoided:</span>
-                    <span className="text-2xl font-bold text-purple-400">{formatCurrency(liveMetrics.costAvoided)}</span>
+                    <span className="text-slate-400">Cost Avoided:</span>
+                    <span className="text-2xl font-semibold text-purple-400">{formatCurrency(liveMetrics.costAvoided)}</span>
                   </div>
                   <div className="flex justify-between items-center border-b border-gray-700 pb-2">
-                    <span className="text-gray-400">Human Interventions:</span>
-                    <span className="text-2xl font-bold text-green-400">{liveMetrics.humanInterventions}</span>
+                    <span className="text-slate-400">Human Interventions:</span>
+                    <span className="text-2xl font-semibold text-green-400">{liveMetrics.humanInterventions}</span>
                   </div>
                   <div className="pt-2 border-t-2 border-green-500/50">
                     <div className="text-center">
-                      <p className="text-sm text-gray-400 mb-1">Current Streak</p>
-                      <p className="text-3xl font-bold text-green-400">🔥 {liveMetrics.zeroTouchStreak}</p>
+                      <p className="text-sm text-slate-400 mb-1">Current Streak</p>
+                      <p className="text-3xl font-semibold text-green-400">🔥 {liveMetrics.zeroTouchStreak}</p>
                       <p className="text-xs text-green-300">Zero-Touch Resolutions</p>
                     </div>
                   </div>
@@ -437,7 +437,7 @@ export const PowerDashboard: React.FC = () => {
               </Card>
 
               {/* Agent Status with Interactive Tooltips */}
-              <Card className="bg-slate-900/50 border-blue-500/30">
+              <Card className="card-glass">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg">🤖 Multi-Agent Status</CardTitle>
                 </CardHeader>
@@ -468,7 +468,7 @@ export const PowerDashboard: React.FC = () => {
                             <div className="flex items-center gap-2">
                               <Progress value={agent.confidence * 100} className="flex-1 h-2" />
                               <span className={`text-xs font-mono transition-all duration-300 ${
-                                agent.confidence > 0 ? "text-green-400" : "text-gray-600"
+                                agent.confidence > 0 ? "text-green-400" : "text-slate-600"
                               }`}>
                                 {(agent.confidence * 100).toFixed(0)}%
                               </span>
@@ -477,7 +477,7 @@ export const PowerDashboard: React.FC = () => {
                         </TooltipTrigger>
                         <TooltipContent className="max-w-xs bg-slate-800 border-blue-500/50">
                           <p className="font-semibold mb-1">{agent.name} Reasoning:</p>
-                          <p className="text-sm text-gray-300">{agent.reasoning}</p>
+                          <p className="text-sm text-slate-300">{agent.reasoning}</p>
                         </TooltipContent>
                       </Tooltip>
                     );
@@ -522,7 +522,7 @@ export const PowerDashboard: React.FC = () => {
             {/* COLUMN 2: Active Incident & Timeline */}
             <div className="space-y-6">
               {/* Before vs After Comparison */}
-              <Card className="bg-slate-900/50 border-purple-500/30">
+              <Card className="card-glass">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg">📊 IMPACT COMPARISON</CardTitle>
                 </CardHeader>
@@ -530,16 +530,16 @@ export const PowerDashboard: React.FC = () => {
                   <div className="space-y-2">
                     <div className="flex justify-between items-center p-3 bg-red-900/20 rounded-lg border border-red-500/30">
                       <div>
-                        <p className="text-sm text-gray-400">Manual Response</p>
-                        <p className="text-2xl font-bold text-red-400">{mttrManual}m</p>
+                        <p className="text-sm text-slate-400">Manual Response</p>
+                        <p className="text-2xl font-semibold text-red-400">{mttrManual}m</p>
                       </div>
                       <span className="text-4xl">😰</span>
                     </div>
 
                     <div className="flex justify-between items-center p-3 bg-green-900/20 rounded-lg border border-green-500/30">
                       <div>
-                        <p className="text-sm text-gray-400">AI Response</p>
-                        <p className="text-2xl font-bold text-green-400">{mttrCurrent}m</p>
+                        <p className="text-sm text-slate-400">AI Response</p>
+                        <p className="text-2xl font-semibold text-green-400">{mttrCurrent}m</p>
                       </div>
                       <span className="text-4xl">✓</span>
                     </div>
@@ -547,11 +547,11 @@ export const PowerDashboard: React.FC = () => {
 
                   <div className="border-t border-gray-700 pt-3 space-y-2">
                     <div className="flex justify-between">
-                      <span className="text-gray-400">Improvement:</span>
-                      <span className="text-xl font-bold text-green-400">91% faster</span>
+                      <span className="text-slate-400">Improvement:</span>
+                      <span className="text-xl font-semibold text-green-400">91% faster</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-400">Downtime Saved:</span>
+                      <span className="text-slate-400">Downtime Saved:</span>
                       <span className="text-lg font-semibold text-blue-400">
                         {(mttrManual - mttrCurrent).toFixed(1)} minutes
                       </span>
@@ -561,7 +561,7 @@ export const PowerDashboard: React.FC = () => {
               </Card>
 
               {/* Incident Timeline */}
-              <Card className="bg-slate-900/50 border-blue-500/30">
+              <Card className="card-glass">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg">⏰ INCIDENT TIMELINE</CardTitle>
                 </CardHeader>
@@ -578,20 +578,20 @@ export const PowerDashboard: React.FC = () => {
                         <div className="flex-1 pt-1">
                           <div className="flex justify-between items-start mb-1">
                             <span className="font-medium text-sm">{event.agent}</span>
-                            <span className="text-xs text-gray-500">{event.timestamp}</span>
+                            <span className="text-xs text-slate-500">{event.timestamp}</span>
                           </div>
-                          <p className="text-sm text-gray-400">{event.action}</p>
+                          <p className="text-sm text-slate-400">{event.action}</p>
                           <p className="text-xs text-green-400 mt-1">{event.duration}s</p>
                         </div>
                       </div>
                     ))}
                     <div className="border-t border-green-500/50 pt-3 mt-4">
                       <div className="text-center">
-                        <p className="text-sm text-gray-400">Total Resolution Time</p>
-                        <p className="text-3xl font-bold text-green-400">
+                        <p className="text-sm text-slate-400">Total Resolution Time</p>
+                        <p className="text-3xl font-semibold text-green-400">
                           {getTimelineEventsForStep(currentStep).reduce((sum, event) => sum + event.duration, 0)}s
                         </p>
-                        <p className="text-xs text-gray-500 mt-1">
+                        <p className="text-xs text-slate-500 mt-1">
                           vs 30+ minutes manual (98.6% faster)
                         </p>
                       </div>
@@ -604,35 +604,35 @@ export const PowerDashboard: React.FC = () => {
             {/* COLUMN 3: AI Reasoning & Decision Tree */}
             <div className="space-y-6">
               {/* Agent Coordination Visualization */}
-              <Card className="bg-slate-900/50 border-cyan-500/30">
+              <Card className="card-glass">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg">🔄 AGENT COORDINATION</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     {/* Flow Diagram */}
-                    <div className="relative p-4 bg-slate-800/50 rounded-lg">
+                    <div className="relative spacing-md bg-slate-800/50 rounded-lg">
                       <div className="space-y-3">
                         <div className="flex items-center gap-2">
                           <div className="px-3 py-1 bg-blue-600 rounded text-sm font-semibold">
                             Detection
                           </div>
                           <div className="flex-1 h-0.5 bg-blue-500/50"></div>
-                          <span className="text-xs text-gray-400">92%</span>
+                          <span className="text-xs text-slate-400">92%</span>
                         </div>
                         <div className="flex items-center gap-2 ml-4">
                           <div className="px-3 py-1 bg-purple-600 rounded text-sm font-semibold">
                             Diagnosis
                           </div>
                           <div className="flex-1 h-0.5 bg-purple-500/50"></div>
-                          <span className="text-xs text-gray-400">87%</span>
+                          <span className="text-xs text-slate-400">87%</span>
                         </div>
                         <div className="flex items-center gap-2 ml-8">
                           <div className="px-3 py-1 bg-pink-600 rounded text-sm font-semibold">
                             Prediction
                           </div>
                           <div className="flex-1 h-0.5 bg-pink-500/50"></div>
-                          <span className="text-xs text-gray-400">94%</span>
+                          <span className="text-xs text-slate-400">94%</span>
                         </div>
 
                         {/* Consensus */}
@@ -640,7 +640,7 @@ export const PowerDashboard: React.FC = () => {
                           <div className="flex-1 h-0.5 bg-gradient-to-r from-transparent to-green-500"></div>
                           <div className="px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 rounded-lg">
                             <p className="text-xs font-semibold">⚖️ Consensus Engine</p>
-                            <p className="text-lg font-bold text-center">{(consensusScore * 100).toFixed(0)}%</p>
+                            <p className="text-lg font-semibold text-center">{(consensusScore * 100).toFixed(0)}%</p>
                           </div>
                           <div className="flex-1 h-0.5 bg-gradient-to-l from-transparent to-green-500"></div>
                         </div>
@@ -658,8 +658,8 @@ export const PowerDashboard: React.FC = () => {
 
                     {/* Consensus Details */}
                     <div className="space-y-2">
-                      <p className="text-sm font-semibold text-gray-300">Why so confident?</p>
-                      <div className="space-y-1 text-xs text-gray-400">
+                      <p className="text-sm font-semibold text-slate-300">Why so confident?</p>
+                      <div className="space-y-1 text-xs text-slate-400">
                         <div className="flex items-start gap-2">
                           <span className="text-green-400">•</span>
                           <span>5/5 agents agree on root cause</span>
@@ -683,7 +683,7 @@ export const PowerDashboard: React.FC = () => {
               </Card>
 
               {/* Enhanced Transparency - Side by Side */}
-              <Card className="bg-slate-900/50 border-indigo-500/30">
+              <Card className="card-glass">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg">🧠 AI TRANSPARENCY</CardTitle>
                 </CardHeader>
@@ -691,32 +691,32 @@ export const PowerDashboard: React.FC = () => {
                   <div className="grid grid-cols-2 gap-4">
                     {/* Agent Reasoning Column */}
                     <div className="space-y-2">
-                      <p className="text-xs font-semibold text-gray-400 uppercase">Agent Reasoning</p>
+                      <p className="text-xs font-semibold text-slate-400 uppercase">Agent Reasoning</p>
                       <div className="space-y-2 text-xs">
                         <div className="p-2 bg-slate-800/50 rounded">
-                          <p className="font-semibold text-blue-400 mb-1">Detection:</p>
-                          <p className="text-gray-300">"CPU spike at 14:23, correlating with database queries"</p>
+                          <p className="font-semibold text-status-info mb-1">Detection:</p>
+                          <p className="text-slate-300">"CPU spike at 14:23, correlating with database queries"</p>
                         </div>
                         <div className="p-2 bg-slate-800/50 rounded">
                           <p className="font-semibold text-purple-400 mb-1">Diagnosis:</p>
-                          <p className="text-gray-300">"Connection pool exhaustion due to slow query at line 247"</p>
+                          <p className="text-slate-300">"Connection pool exhaustion due to slow query at line 247"</p>
                         </div>
                         <div className="p-2 bg-slate-800/50 rounded">
                           <p className="font-semibold text-pink-400 mb-1">Prediction:</p>
-                          <p className="text-gray-300">"96% probability of cascade within 3 min"</p>
+                          <p className="text-slate-300">"96% probability of cascade within 3 min"</p>
                         </div>
                       </div>
                     </div>
 
                     {/* Confidence Scores Column */}
                     <div className="space-y-2">
-                      <p className="text-xs font-semibold text-gray-400 uppercase">Confidence Scores</p>
+                      <p className="text-xs font-semibold text-slate-400 uppercase">Confidence Scores</p>
                       <div className="space-y-3">
                         {agents.slice(0, 3).map((agent) => (
                           <div key={agent.id} className="space-y-1">
                             <div className="flex justify-between text-xs">
-                              <span className="text-gray-400">{agent.name.split(" ")[0]}:</span>
-                              <span className="font-bold text-green-400">
+                              <span className="text-slate-400">{agent.name.split(" ")[0]}:</span>
+                              <span className="font-semibold text-green-400">
                                 {(agent.confidence * 100).toFixed(0)}%
                               </span>
                             </div>
@@ -725,7 +725,7 @@ export const PowerDashboard: React.FC = () => {
                         ))}
                         <div className="border-t border-gray-700 pt-2 mt-3">
                           <div className="flex justify-between text-xs font-bold">
-                            <span className="text-gray-300">CONSENSUS:</span>
+                            <span className="text-slate-300">CONSENSUS:</span>
                             <span className="text-green-400">{(consensusScore * 100).toFixed(0)}%</span>
                           </div>
                           <p className="text-xs text-green-400 mt-1">✓ Auto-approved</p>
@@ -743,39 +743,39 @@ export const PowerDashboard: React.FC = () => {
               <Card className="bg-gradient-to-br from-emerald-900/30 to-green-900/30 border-emerald-500/50">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg">💰 BUSINESS IMPACT</CardTitle>
-                  <p className="text-xs text-gray-400">This Incident</p>
+                  <p className="text-xs text-slate-400">This Incident</p>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
-                      <span className="text-gray-400">Severity:</span>
+                      <span className="text-slate-400">Severity:</span>
                       <Badge variant="destructive" className="bg-red-600">CRITICAL</Badge>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-400">Service:</span>
+                      <span className="text-slate-400">Service:</span>
                       <span className="font-semibold">Payment API</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-400">Cost per minute:</span>
+                      <span className="text-slate-400">Cost per minute:</span>
                       <span className="font-semibold text-red-400">{formatCurrency(10000)}</span>
                     </div>
                   </div>
 
                   <div className="border-t border-gray-700 pt-3 space-y-2">
                     <div className="flex justify-between items-center p-2 bg-red-900/20 rounded">
-                      <span className="text-gray-400 text-sm">If Manual ({mttrManual}m):</span>
-                      <span className="font-bold text-red-400">{formatCurrency(impact.manualCost)} loss</span>
+                      <span className="text-slate-400 text-sm">If Manual ({mttrManual}m):</span>
+                      <span className="font-semibold text-red-400">{formatCurrency(impact.manualCost)} loss</span>
                     </div>
                     <div className="flex justify-between items-center p-2 bg-blue-900/20 rounded">
-                      <span className="text-gray-400 text-sm">AI Response ({mttrCurrent}m):</span>
-                      <span className="font-bold text-blue-400">{formatCurrency(impact.aiCost)} loss</span>
+                      <span className="text-slate-400 text-sm">AI Response ({mttrCurrent}m):</span>
+                      <span className="font-semibold text-blue-400">{formatCurrency(impact.aiCost)} loss</span>
                     </div>
                   </div>
 
                   <div className="border-t-2 border-green-500/50 pt-3">
                     <div className="text-center">
-                      <p className="text-sm text-gray-400 mb-1">SAVED</p>
-                      <p className="text-3xl font-bold text-green-400">{formatCurrency(impact.saved)}</p>
+                      <p className="text-sm text-slate-400 mb-1">SAVED</p>
+                      <p className="text-3xl font-semibold text-green-400">{formatCurrency(impact.saved)}</p>
                       <p className="text-xs text-green-300 mt-1">{impact.improvement}% cost reduction</p>
                     </div>
                   </div>
@@ -783,10 +783,10 @@ export const PowerDashboard: React.FC = () => {
               </Card>
 
               {/* Predicted Incidents */}
-              <Card className="bg-slate-900/50 border-yellow-500/30">
+              <Card className="card-glass">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg">🔮 PREDICTED INCIDENTS</CardTitle>
-                  <p className="text-xs text-gray-400">Next 30 minutes</p>
+                  <p className="text-xs text-slate-400">Next 30 minutes</p>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {predictedIncidents.map((incident) => (
@@ -810,11 +810,11 @@ export const PowerDashboard: React.FC = () => {
                       <div className="space-y-1 text-xs">
                         <div className="flex items-start gap-2">
                           <span className="text-yellow-400 mt-0.5">⚡</span>
-                          <span className="text-gray-300">Action: {incident.action}</span>
+                          <span className="text-slate-300">Action: {incident.action}</span>
                         </div>
                         <div className="flex items-start gap-2">
                           <span className="text-green-400 mt-0.5">💰</span>
-                          <span className="text-gray-300">Impact: {incident.impact}</span>
+                          <span className="text-slate-300">Impact: {incident.impact}</span>
                         </div>
                         <div className="flex items-start gap-2 mt-2">
                           <Badge
@@ -837,16 +837,16 @@ export const PowerDashboard: React.FC = () => {
                 </CardHeader>
                 <CardContent className="space-y-2 text-xs">
                   <div className="p-2 bg-slate-800/50 rounded">
-                    <p className="font-semibold text-gray-300 mb-1">PagerDuty Advance:</p>
-                    <p className="text-gray-400">Still requires human approval</p>
+                    <p className="font-semibold text-slate-300 mb-1">PagerDuty Advance:</p>
+                    <p className="text-slate-400">Still requires human approval</p>
                   </div>
                   <div className="p-2 bg-slate-800/50 rounded">
-                    <p className="font-semibold text-gray-300 mb-1">ServiceNow:</p>
-                    <p className="text-gray-400">Rule-based only, no AI</p>
+                    <p className="font-semibold text-slate-300 mb-1">ServiceNow:</p>
+                    <p className="text-slate-400">Rule-based only, no AI</p>
                   </div>
                   <div className="p-2 bg-slate-800/50 rounded">
-                    <p className="font-semibold text-gray-300 mb-1">Splunk SOAR:</p>
-                    <p className="text-gray-400">No prediction capability</p>
+                    <p className="font-semibold text-slate-300 mb-1">Splunk SOAR:</p>
+                    <p className="text-slate-400">No prediction capability</p>
                   </div>
                   <div className="p-2 bg-green-900/30 border border-green-500/30 rounded mt-3">
                     <p className="font-semibold text-green-400 mb-1">✓ Incident Commander:</p>
@@ -858,12 +858,12 @@ export const PowerDashboard: React.FC = () => {
           </div>
 
           {/* Demo Controls */}
-          <Card className="bg-slate-900/50 border-blue-500/30">
+          <Card className="card-glass">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h3 className="text-lg font-semibold mb-1">🎬 Live Incident Demo</h3>
-                  <p className="text-sm text-gray-400">
+                  <p className="text-sm text-slate-400">
                     {currentStep === 0 && !isPlaying && "Ready to demonstrate incident resolution"}
                     {currentStep > 0 && currentStep < 6 && !isPlaying && `Paused at step ${currentStep} of 6`}
                     {isPlaying && `Step ${currentStep} of 6 - ${["Starting...", "Detection", "Diagnosis", "Prediction", "Consensus", "Resolution", "Validation"][currentStep]}`}
@@ -880,7 +880,7 @@ export const PowerDashboard: React.FC = () => {
               {/* Progress Bar */}
               <div className="mb-4">
                 <Progress value={(currentStep / 6) * 100} className="h-3" />
-                <div className="flex justify-between mt-2 text-xs text-gray-500">
+                <div className="flex justify-between mt-2 text-xs text-slate-500">
                   <span>Start</span>
                   <span className="text-blue-400 font-semibold">{currentStep === 6 ? "Complete" : `${currentStep}/6 Steps`}</span>
                   <span>Resolved</span>
@@ -893,7 +893,7 @@ export const PowerDashboard: React.FC = () => {
                   onClick={startIncidentDemo}
                   disabled={isPlaying || currentStep === 0}
                   variant="default"
-                  className="flex-1"
+                  className="flex-1 focus-ring-primary"
                 >
                   ⏮️ Restart Demo
                 </Button>
@@ -902,7 +902,7 @@ export const PowerDashboard: React.FC = () => {
                   <Button
                     onClick={resumeIncidentDemo}
                     variant="default"
-                    className="flex-1 bg-green-600 hover:bg-green-700"
+                    className="flex-1 bg-green-600 hover:bg-green-700 focus-ring-primary"
                   >
                     ▶️ Resume
                   </Button>
@@ -912,7 +912,7 @@ export const PowerDashboard: React.FC = () => {
                   <Button
                     onClick={startIncidentDemo}
                     variant="default"
-                    className="flex-1 bg-green-600 hover:bg-green-700"
+                    className="flex-1 bg-green-600 hover:bg-green-700 focus-ring-primary"
                   >
                     ▶️ Start Incident Demo
                   </Button>
@@ -922,7 +922,7 @@ export const PowerDashboard: React.FC = () => {
                   <Button
                     onClick={pauseIncidentDemo}
                     variant="default"
-                    className="flex-1 bg-yellow-600 hover:bg-yellow-700"
+                    className="flex-1 bg-yellow-600 hover:bg-yellow-700 focus-ring-primary"
                   >
                     ⏸️ Pause
                   </Button>
@@ -932,7 +932,7 @@ export const PowerDashboard: React.FC = () => {
                   onClick={skipToEnd}
                   disabled={currentStep === 6}
                   variant="outline"
-                  className="flex-1"
+                  className="flex-1 focus-ring-primary"
                 >
                   ⏭️ Skip to End
                 </Button>
@@ -949,7 +949,7 @@ export const PowerDashboard: React.FC = () => {
 
               {/* Step Description */}
               <div className="mt-4 p-3 bg-slate-800/50 rounded-lg">
-                <p className="text-sm text-gray-300">
+                <p className="text-sm text-slate-300">
                   {currentStep === 0 && "🎬 Ready to demonstrate live incident resolution from detection to validation"}
                   {currentStep === 1 && "🔍 Detection Agent analyzing CPU spike and database query patterns"}
                   {currentStep === 2 && "🧠 Diagnosis Agent identifying root cause: connection pool exhaustion"}
@@ -963,7 +963,7 @@ export const PowerDashboard: React.FC = () => {
           </Card>
 
           {/* Footer */}
-          <div className="text-center text-gray-500 text-sm py-4">
+          <div className="text-center text-slate-500 text-sm py-4">
             <p className="mb-1">
               🏆 AWS Hackathon 2024 - World's First Transparent Autonomous Incident Commander
             </p>

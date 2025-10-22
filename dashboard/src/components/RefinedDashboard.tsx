@@ -12,9 +12,9 @@ import React, {
   useMemo,
   useRef,
 } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/shared";
+import { Badge } from "@/components/shared";
+import { Button } from "@/components/shared";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Table,
@@ -25,7 +25,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Progress } from "@/components/ui/progress";
+import { Progress } from "@/components/shared";
 import {
   Select,
   SelectContent,
@@ -832,10 +832,10 @@ export const RefinedDashboard: React.FC = () => {
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">
+          <h1 className="text-4xl font-semibold text-gray-900 mb-2">
             🚀 Incident Commander
           </h1>
-          <p className="text-lg text-gray-600">
+          <p className="text-lg text-slate-600">
             AI-Powered Multi-Agent Incident Response System
           </p>
           <div className="flex flex-wrap items-center justify-center mt-4 gap-3">
@@ -845,7 +845,7 @@ export const RefinedDashboard: React.FC = () => {
             {simulationMode && (
               <Badge variant="secondary">Demo Data Stream</Badge>
             )}
-            <span className="text-sm text-gray-500">
+            <span className="text-sm text-slate-500">
               Last update: {lastUpdate.toLocaleTimeString()}
             </span>
           </div>
@@ -873,57 +873,57 @@ export const RefinedDashboard: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">
+              <CardTitle className="text-sm font-medium text-slate-600">
                 Active Incidents
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-red-600">
+              <div className="text-3xl font-semibold text-red-600">
                 {metrics.activeIncidents}
               </div>
-              <p className="text-sm text-gray-500">Currently active</p>
+              <p className="text-sm text-slate-500">Currently active</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">
+              <CardTitle className="text-sm font-medium text-slate-600">
                 MTTR
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-green-600">
+              <div className="text-3xl font-semibold text-green-600">
                 {metrics.averageResolutionTime}min
               </div>
-              <p className="text-sm text-gray-500">95.2% improvement</p>
+              <p className="text-sm text-slate-500">95.2% improvement</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">
+              <CardTitle className="text-sm font-medium text-slate-600">
                 Prevention Rate
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-blue-600">
+              <div className="text-3xl font-semibold text-blue-600">
                 {metrics.preventionRate}%
               </div>
-              <p className="text-sm text-gray-500">Incidents prevented</p>
+              <p className="text-sm text-slate-500">Incidents prevented</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">
+              <CardTitle className="text-sm font-medium text-slate-600">
                 System Uptime
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-purple-600">
+              <div className="text-3xl font-semibold text-purple-600">
                 {systemHealth.uptime}%
               </div>
-              <p className="text-sm text-gray-500">Availability</p>
+              <p className="text-sm text-slate-500">Availability</p>
             </CardContent>
           </Card>
         </div>
@@ -941,7 +941,7 @@ export const RefinedDashboard: React.FC = () => {
                 {Object.values(agentConfidence).map((agent) => (
                   <div
                     key={agent.agent_name}
-                    className="p-4 border rounded-lg bg-white shadow-sm"
+                    className="spacing-md border rounded-lg bg-white shadow-sm"
                   >
                     <div className="mb-3">
                       <div className="flex items-center justify-between mb-2">
@@ -968,7 +968,7 @@ export const RefinedDashboard: React.FC = () => {
 
                     {agent.reasoning_factors.length > 0 && (
                       <div className="mb-2">
-                        <p className="text-xs font-semibold text-gray-600 mb-1">
+                        <p className="text-xs font-semibold text-slate-600 mb-1">
                           Reasoning:
                         </p>
                         <ul className="text-xs text-gray-700 space-y-1">
@@ -985,7 +985,7 @@ export const RefinedDashboard: React.FC = () => {
 
                     {agent.uncertainty_factors.length > 0 && (
                       <div>
-                        <p className="text-xs font-semibold text-gray-600 mb-1">
+                        <p className="text-xs font-semibold text-slate-600 mb-1">
                           Uncertainties:
                         </p>
                         <ul className="text-xs text-gray-700 space-y-1">
@@ -1017,16 +1017,16 @@ export const RefinedDashboard: React.FC = () => {
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* MTTR Comparison */}
-                <div className="p-4 border rounded-lg bg-white">
+                <div className="spacing-md border rounded-lg bg-white">
                   <h3 className="font-semibold text-gray-900 mb-4">
                     Mean Time To Resolution (MTTR)
                   </h3>
                   <div className="space-y-3">
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">
+                      <span className="text-sm text-slate-600">
                         Traditional:
                       </span>
-                      <span className="font-bold text-red-600">
+                      <span className="font-semibold text-red-600">
                         {
                           performanceMetrics.mttr_comparison
                             .traditional_mttr_minutes
@@ -1035,8 +1035,8 @@ export const RefinedDashboard: React.FC = () => {
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Autonomous:</span>
-                      <span className="font-bold text-green-600">
+                      <span className="text-sm text-slate-600">Autonomous:</span>
+                      <span className="font-semibold text-green-600">
                         {
                           performanceMetrics.mttr_comparison
                             .autonomous_mttr_minutes
@@ -1056,7 +1056,7 @@ export const RefinedDashboard: React.FC = () => {
                           % faster
                         </Badge>
                       </div>
-                      <p className="text-xs text-gray-600">
+                      <p className="text-xs text-slate-600">
                         Saved{" "}
                         {performanceMetrics.mttr_comparison.time_saved_minutes}{" "}
                         minutes (
@@ -1070,26 +1070,26 @@ export const RefinedDashboard: React.FC = () => {
                 </div>
 
                 {/* Business Impact */}
-                <div className="p-4 border rounded-lg bg-white">
+                <div className="spacing-md border rounded-lg bg-white">
                   <h3 className="font-semibold text-gray-900 mb-4">
                     Business Impact
                   </h3>
                   <div className="space-y-3">
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">
+                      <span className="text-sm text-slate-600">
                         Traditional Cost:
                       </span>
-                      <span className="font-bold text-red-600">
+                      <span className="font-semibold text-red-600">
                         {formatCurrency(
                           performanceMetrics.business_impact.traditional_cost
                         )}
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">
+                      <span className="text-sm text-slate-600">
                         Autonomous Cost:
                       </span>
-                      <span className="font-bold text-green-600">
+                      <span className="font-semibold text-green-600">
                         {formatCurrency(
                           performanceMetrics.business_impact.autonomous_cost
                         )}
@@ -1106,7 +1106,7 @@ export const RefinedDashboard: React.FC = () => {
                           )}
                         </Badge>
                       </div>
-                      <p className="text-xs text-gray-600">
+                      <p className="text-xs text-slate-600">
                         {performanceMetrics.business_impact.cost_savings_percentage.toFixed(
                           1
                         )}
@@ -1135,7 +1135,7 @@ export const RefinedDashboard: React.FC = () => {
               <div className="flex flex-wrap items-center gap-3">
                 {/* Status Filter */}
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-600">Status:</span>
+                  <span className="text-sm text-slate-600">Status:</span>
                   <Select value={statusFilter} onValueChange={setStatusFilter}>
                     <SelectTrigger className="w-[130px]">
                       <SelectValue placeholder="All" />
@@ -1153,7 +1153,7 @@ export const RefinedDashboard: React.FC = () => {
 
                 {/* Severity Filter */}
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-600">Severity:</span>
+                  <span className="text-sm text-slate-600">Severity:</span>
                   <Select
                     value={severityFilter}
                     onValueChange={setSeverityFilter}
@@ -1173,7 +1173,7 @@ export const RefinedDashboard: React.FC = () => {
 
                 {/* Items Per Page */}
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-600">Show:</span>
+                  <span className="text-sm text-slate-600">Show:</span>
                   <Select
                     value={itemsPerPage.toString()}
                     onValueChange={(val) => setItemsPerPage(Number(val))}
@@ -1200,7 +1200,7 @@ export const RefinedDashboard: React.FC = () => {
 
           <CardContent>
             {sortedIncidents.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
+              <div className="text-center py-8 text-slate-500">
                 <p className="text-lg">No incidents found</p>
                 <p className="text-sm mt-2">
                   {statusFilter !== "all" || severityFilter !== "all"
@@ -1332,7 +1332,7 @@ export const RefinedDashboard: React.FC = () => {
                 {/* Pagination Controls */}
                 {totalPages > 1 && (
                   <div className="flex items-center justify-between mt-4 pt-4 border-t">
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm text-slate-600">
                       Showing {startItem} to {endItem} of {totalIncidents}{" "}
                       incidents
                     </div>
@@ -1395,7 +1395,7 @@ export const RefinedDashboard: React.FC = () => {
               {agents.map((agent) => (
                 <div
                   key={agent.id}
-                  className="p-4 border rounded-lg bg-white shadow-sm hover:shadow-md transition-shadow"
+                  className="spacing-md border rounded-lg bg-white shadow-sm hover:shadow-md transition-shadow"
                 >
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="font-semibold text-gray-900">
@@ -1409,13 +1409,13 @@ export const RefinedDashboard: React.FC = () => {
                   </div>
                   <div className="space-y-1">
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Confidence:</span>
+                      <span className="text-slate-600">Confidence:</span>
                       <span className="font-medium">
                         {Math.round(agent.confidence * 100)}%
                       </span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Status:</span>
+                      <span className="text-slate-600">Status:</span>
                       <Badge
                         variant={
                           agent.status === "active" ? "default" : "secondary"
@@ -1478,7 +1478,7 @@ export const RefinedDashboard: React.FC = () => {
         </Card>
 
         {/* Footer */}
-        <div className="text-center text-gray-500 text-sm mt-8">
+        <div className="text-center text-slate-500 text-sm mt-8">
           <p>🏆 AWS Hackathon 2024 - Autonomous Incident Commander</p>
           <p>Built with AWS Bedrock • Claude 3.5 Sonnet • Multi-Agent AI</p>
         </div>

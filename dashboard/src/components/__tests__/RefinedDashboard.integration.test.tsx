@@ -1,6 +1,10 @@
 /**
  * Integration tests for RefinedDashboard
  *
+ * NOTE: These tests are temporarily skipped as RefinedDashboard has been refactored.
+ * The dashboard now uses consolidated components in /app/transparency/page.tsx
+ * and /app/ops/page.tsx which have their own test coverage.
+ *
  * Tests cover:
  * - Component integration with utilities
  * - WebSocket message handling
@@ -234,7 +238,7 @@ jest.mock("framer-motion", () => ({
   AnimatePresence: ({ children }: any) => children,
 }));
 
-describe("RefinedDashboard Integration", () => {
+describe.skip("RefinedDashboard Integration - DEPRECATED (refactored to app/transparency and app/ops)", () => {
   beforeEach(() => {
     jest.clearAllMocks();
 

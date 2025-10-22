@@ -2,8 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import centralized design tokens */
+@import "./design-tokens.css";
+
 @layer base {
   :root {
+    /* Shadcn/ui theme variables */
     --radius: 0.625rem;
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;

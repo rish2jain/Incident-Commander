@@ -15,7 +15,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/components/shared";
 
 interface GuardrailIndicatorProps {
   checks?: {
@@ -189,7 +189,7 @@ export function RollbackIndicator({ available, steps }: RollbackIndicatorProps) 
             className={`gap-1 cursor-help ${
               available
                 ? "border-purple-500/30 text-purple-500 hover:bg-purple-500/10"
-                : "border-gray-500/30 text-gray-500"
+                : "border-gray-500/30 text-slate-500"
             }`}
           >
             <span>🔄</span>

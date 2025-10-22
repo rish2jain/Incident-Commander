@@ -28,8 +28,9 @@ CONSENSUS_CONFIG = {
         "diagnosis": 0.4,
         "prediction": 0.3,
         "resolution": 0.1
+        # Note: Communication agent (0.0 weight) is non-voting - not included in consensus
     },
-    "autonomous_confidence_threshold": 0.7,
+    "autonomous_confidence_threshold": 0.85,  # Byzantine consensus threshold
     "decision_timeout": 300  # 5 minutes
 }
 

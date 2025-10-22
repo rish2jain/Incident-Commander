@@ -16,6 +16,7 @@ from botocore.exceptions import ClientError
 from src.services.aws import AWSServiceFactory
 from src.utils.logging import get_logger
 from src.utils.exceptions import StepFunctionsExecutionError
+from src.utils.constants import CONSENSUS_CONFIG
 
 
 logger = get_logger("step_functions_consensus")
@@ -52,7 +53,7 @@ class StepFunctionsConsensusCoordinator:
                 "recommendations": [self._serialize_recommendation(r) for r in recommendations],
                 "timestamp": datetime.utcnow().isoformat(),
                 "consensus_config": {
-                    "confidence_threshold": 0.7,
+                    "confidence_threshold": CONSENSUS_CONFIG["autonomous_confidence_threshold"],
                     "byzantine_threshold": 0.33,
                     "min_agreement_threshold": 0.67,
                     "timeout_minutes": 5
@@ -262,7 +263,7 @@ class StepFunctionsConsensusCoordinator:
                             "And": [
                                 {
                                     "Variable": "$.consensus_calculation.Payload.final_confidence",
-                                    "NumericGreaterThanEquals": 0.7
+                                    "NumericGreaterThanEquals": CONSENSUS_CONFIG["autonomous_confidence_threshold"]
                                 },
                                 {
                                     "Variable": "$.consensus_calculation.Payload.agreement_ratio",

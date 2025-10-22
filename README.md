@@ -111,6 +111,58 @@ python run_comprehensive_tests.py
 python -m uvicorn src.main:app --reload --port 8000
 ```
 
+## 📁 Repository Structure
+
+The repository is organized for clarity and maintainability:
+
+```
+incident-commander/
+├── src/                          # Backend source code
+│   ├── api/                      # FastAPI routers and endpoints
+│   ├── services/                 # Core services (agents, WebSocket, AWS integration)
+│   ├── utils/                    # Utility functions
+│   └── main.py                   # Application entry point
+├── dashboard/                    # Frontend Next.js application
+│   ├── app/                      # Next.js pages and routing
+│   │   ├── demo/                 # Dashboard 1: Executive view
+│   │   ├── transparency/         # Dashboard 2: Engineering view
+│   │   └── ops/                  # Dashboard 3: Operations view
+│   └── src/components/           # React components
+├── docs/                         # Comprehensive documentation
+│   ├── architecture/             # System architecture and design
+│   │   ├── THREE_DASHBOARD_ARCHITECTURE.md
+│   │   ├── ARCHITECTURE_COMPARISON.md
+│   │   ├── WHY_THREE_DASHBOARDS.md
+│   │   └── IMPLEMENTATION_STATUS.md
+│   ├── deployment/               # Deployment guides
+│   │   ├── DEPLOYMENT_GUIDE.md
+│   │   └── ALL_PHASES_ACTION_PLAN.md
+│   ├── operations/               # Operations and runbooks
+│   │   └── OPERATIONAL_RUNBOOK.md
+│   ├── guides/                   # Implementation guides
+│   │   ├── HACKATHON_ENHANCEMENT_STRATEGY.md
+│   │   └── FINAL_IMPLEMENTATION_SUMMARY.md
+│   ├── demo/                     # Demo playbooks
+│   └── api/                      # API documentation
+├── infrastructure/               # Infrastructure as Code
+│   └── cdk/                      # AWS CDK deployment stack
+├── scripts/                      # Utility scripts
+├── archive/                      # Archived/superseded files
+│   ├── summaries/                # Development progress summaries
+│   ├── old-guides/               # Superseded documentation
+│   └── old-components/           # Deprecated component variants
+└── README.md                     # This file
+```
+
+### Key Documentation
+
+- **Getting Started**: You're reading it!
+- **Architecture**: See [docs/architecture/](docs/architecture/)
+- **Three Dashboard Design**: [docs/architecture/WHY_THREE_DASHBOARDS.md](docs/architecture/WHY_THREE_DASHBOARDS.md)
+- **Deployment**: [docs/deployment/DEPLOYMENT_GUIDE.md](docs/deployment/DEPLOYMENT_GUIDE.md)
+- **Operations**: [docs/operations/OPERATIONAL_RUNBOOK.md](docs/operations/OPERATIONAL_RUNBOOK.md)
+- **API Reference**: http://localhost:8000/docs (when running)
+
 ### **Shutdown Strategy**
 
 The system implements graceful shutdown with proper resource cleanup:

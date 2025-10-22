@@ -21,16 +21,34 @@ interface TooltipProps {
 
 export function Tooltip({ content, children, position = "top" }: TooltipProps) {
   const [isVisible, setIsVisible] = useState(false);
+  const tooltipId = `tooltip-${Math.random().toString(36).substr(2, 9)}`;
+
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      setIsVisible(!isVisible);
+    } else if (event.key === "Escape") {
+      setIsVisible(false);
+    }
+  };
 
   return (
     <div
       className="relative inline-block"
+      tabIndex={0}
       onMouseEnter={() => setIsVisible(true)}
       onMouseLeave={() => setIsVisible(false)}
+      onFocus={() => setIsVisible(true)}
+      onBlur={() => setIsVisible(false)}
+      onKeyDown={handleKeyDown}
+      aria-describedby={isVisible ? tooltipId : undefined}
     >
       {children}
       {isVisible && (
         <div
+          id={tooltipId}
+          role="tooltip"
+          aria-hidden={!isVisible}
           className={cn(
             "absolute z-50 px-3 py-2 text-sm text-white bg-slate-800 border border-slate-600 rounded-lg shadow-lg whitespace-nowrap",
             {
@@ -259,12 +277,12 @@ export function InteractiveMetricCard({
                 stroke="currentColor"
                 strokeWidth="2"
                 points={sparklineData
-                  .map(
-                    (value, index) =>
-                      `${(index / (sparklineData.length - 1)) * 100},${
-                        100 - value * 100
-                      }`
-                  )
+                  .map((value, index) => {
+                    const xDenom = sparklineData.length - 1;
+                    const x = xDenom === 0 ? 50 : (index / xDenom) * 100;
+                    const y = 100 - value * 100;
+                    return `${x},${y}`;
+                  })
                   .join(" ")}
               />
             </svg>
@@ -376,16 +394,21 @@ export function PerformanceTrends({
                         stroke="currentColor"
                         strokeWidth="1.5"
                         points={metric.trend
-                          .map(
-                            (value, idx) =>
-                              `${(idx / (metric.trend.length - 1)) * 100},${
-                                100 -
-                                ((value - Math.min(...metric.trend)) /
-                                  (Math.max(...metric.trend) -
-                                    Math.min(...metric.trend))) *
-                                  100
-                              }`
-                          )
+                          .map((value, idx) => {
+                            const min = Math.min(...metric.trend);
+                            const max = Math.max(...metric.trend);
+                            const denom = max - min;
+                            const xDenom = metric.trend.length - 1;
+
+                            // Handle division by zero cases
+                            const x = xDenom === 0 ? 50 : (idx / xDenom) * 100;
+                            const y =
+                              denom === 0
+                                ? 50
+                                : 100 - ((value - min) / denom) * 100;
+
+                            return `${x},${y}`;
+                          })
                           .join(" ")}
                       />
                     </svg>

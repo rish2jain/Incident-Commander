@@ -5,7 +5,7 @@
  * message categorization, timestamps, and user-friendly descriptions.
  */
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -354,13 +354,12 @@ export function CommunicationPanel({
     new Set(messages.map((m) => m.messageType))
   ).sort();
 
+  const messagesRef = useRef<HTMLDivElement | null>(null);
+
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
-    if (autoScroll) {
-      const container = document.getElementById("messages-container");
-      if (container) {
-        container.scrollTop = container.scrollHeight;
-      }
+    if (autoScroll && messagesRef.current) {
+      messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
     }
   }, [messages, autoScroll]);
 
@@ -467,7 +466,7 @@ export function CommunicationPanel({
           </div>
         ) : (
           <div
-            id="messages-container"
+            ref={messagesRef}
             className="space-y-3 max-h-96 overflow-y-auto pr-2"
           >
             {filteredMessages.map((message) => (

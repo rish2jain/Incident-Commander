@@ -5,7 +5,7 @@
  * and better visual hierarchy for agent reasoning processes.
  */
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -47,6 +47,7 @@ interface ReasoningStepComponentProps {
   stepNumber: number;
   isLast: boolean;
   onClick?: (step: ReasoningStep) => void;
+  expandAll?: boolean;
 }
 
 function ReasoningStepComponent({
@@ -54,8 +55,16 @@ function ReasoningStepComponent({
   stepNumber,
   isLast,
   onClick,
+  expandAll,
 }: ReasoningStepComponentProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+
+  // Sync with expandAll prop
+  useEffect(() => {
+    if (expandAll !== undefined) {
+      setIsExpanded(expandAll);
+    }
+  }, [expandAll]);
 
   const getAgentIcon = (agent: string) => {
     const icons: Record<string, string> = {
@@ -454,6 +463,7 @@ export function ReasoningPanel({
                 stepNumber={index + 1}
                 isLast={index === filteredSteps.length - 1}
                 onClick={onStepClick}
+                expandAll={expandAll}
               />
             ))}
           </div>

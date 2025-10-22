@@ -539,61 +539,6 @@ export default function TransparencyDashboardPage() {
       subtitle="Complete AI explainability for incident response - Deep technical demonstration"
       icon="🧠"
     >
-      {/* Enhanced Prize Service Showcase Section */}
-      <DashboardSection variant="glass" className="mb-4">
-        <div className="bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-lg p-6 mb-4">
-          <h3 className="text-lg font-semibold text-amber-900 mb-4 flex items-center">
-            <span className="mr-2">🏆</span>
-            $3K Prize Services Integration - Live Production System
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-white rounded-lg p-4 border border-amber-200">
-              <h4 className="font-semibold text-amber-800 mb-2">
-                Amazon Q Business ($3K)
-              </h4>
-              <p className="text-sm text-gray-700 mb-2">
-                Natural Language Analysis:
-              </p>
-              <div className="bg-amber-50 p-3 rounded text-sm font-mono">
-                &quot; &quot;Database connection pool exhausted due to N+1 query
-                pattern in user service causing cascade failure&quot;&quot;
-              </div>
-            </div>
-            <div className="bg-white rounded-lg p-4 border border-blue-200">
-              <h4 className="font-semibold text-blue-800 mb-2">
-                Nova Act ($3K)
-              </h4>
-              <p className="text-sm text-gray-700 mb-2">Action Plan:</p>
-              <div className="bg-blue-50 p-3 rounded text-sm">
-                <div>1. Verify connection pool status</div>
-                <div>2. Identify long-running queries</div>
-                <div>3. Initiate safe query termination</div>
-              </div>
-            </div>
-            <div className="bg-white rounded-lg p-4 border border-green-200">
-              <h4 className="font-semibold text-green-800 mb-2">
-                Strands SDK ($3K)
-              </h4>
-              <p className="text-sm text-gray-700 mb-2">Agent Lifecycle:</p>
-              <div className="bg-green-50 p-3 rounded text-sm">
-                <div>Detection: ✅ Evidence Analyzed</div>
-                <div>Diagnosis: 🔄 Building Consensus</div>
-                <div>Resolution: ⏳ Ready to Execute</div>
-              </div>
-            </div>
-          </div>
-          <div className="mt-4 text-center">
-            <Badge
-              variant="outline"
-              className="bg-amber-100 text-amber-800 border-amber-300"
-            >
-              Unique Differentiator: Only system with complete 8/8 AWS AI
-              service integration
-            </Badge>
-          </div>
-        </div>
-      </DashboardSection>
-
       {/* Status Bar */}
       <DashboardSection variant="glass" className="mb-4">
         <div className="flex items-center justify-between">
@@ -694,7 +639,9 @@ export default function TransparencyDashboardPage() {
           {/* Predictive Prevention Demo */}
           <PredictivePreventionDemo
             className="w-full"
-            onPreventionComplete={() => console.log("Prevention demo complete")}
+            onPreventionComplete={() => {
+              // Prevention demo completed - could track analytics here
+            }}
           />
 
           {/* Byzantine Fault Tolerance Demo */}
@@ -726,7 +673,9 @@ export default function TransparencyDashboardPage() {
         <TabsContent value="reasoning" data-testid="panel-reasoning">
           <ReasoningPanel
             reasoningSteps={agentReasonings}
-            onStepClick={(step) => console.log("Reasoning step clicked:", step)}
+            onStepClick={(step) => {
+              // Could track reasoning step interactions for analytics
+            }}
             className="w-full"
           />
         </TabsContent>
@@ -736,9 +685,9 @@ export default function TransparencyDashboardPage() {
           {decisionTree ? (
             <DecisionTreeVisualization
               rootNode={decisionTree.rootNode}
-              onNodeClick={(node) =>
-                console.log("Decision node clicked:", node)
-              }
+              onNodeClick={(node) => {
+                // Could track decision node interactions for analytics
+              }}
               className="w-full"
             />
           ) : (
@@ -792,9 +741,9 @@ export default function TransparencyDashboardPage() {
         <TabsContent value="communication" data-testid="panel-communication">
           <CommunicationPanel
             messages={agentCommunications}
-            onMessageClick={(message) =>
-              console.log("Communication clicked:", message)
-            }
+            onMessageClick={(message) => {
+              // Could track communication message interactions for analytics
+            }}
             className="w-full"
           />
         </TabsContent>

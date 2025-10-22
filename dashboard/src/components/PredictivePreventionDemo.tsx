@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Card,
   CardContent,
@@ -36,69 +36,118 @@ export const PredictivePreventionDemo: React.FC<
   const [timeRemaining, setTimeRemaining] = useState(0);
 
   useEffect(() => {
+    const progressIntervalRef = { current: null as NodeJS.Timeout | null };
+    const countdownIntervalRef = { current: null as NodeJS.Timeout | null };
+    const timeoutIds: NodeJS.Timeout[] = [];
+    let isMounted = true;
+
     const demoSequence = async () => {
       // Phase 1: Monitoring (3 seconds)
-      await new Promise((resolve) => setTimeout(resolve, 3000));
+      const timeout1 = setTimeout(() => {
+        if (!isMounted) return;
 
-      // Phase 2: Predictive Alert (4 seconds)
-      setPhase("alert");
-      setAlert({
-        id: "pred-001",
-        timestamp: new Date().toLocaleTimeString(),
-        severity: "warning",
-        message: "Log velocity suggests database failure in 15-30 minutes",
-        confidence: 0.87,
-        timeToImpact: 22,
-        preventionAction:
-          "Proactive connection pool scaling and query optimization",
-      });
-      setTimeRemaining(22);
-
-      await new Promise((resolve) => setTimeout(resolve, 4000));
-
-      // Phase 3: Prevention in progress (4 seconds)
-      setPhase("prevention");
-
-      // Simulate prevention progress
-      const progressInterval = setInterval(() => {
-        setPreventionProgress((prev) => {
-          if (prev >= 100) {
-            clearInterval(progressInterval);
-            return 100;
-          }
-          return prev + 25;
+        // Phase 2: Predictive Alert (4 seconds)
+        setPhase("alert");
+        setAlert({
+          id: "pred-001",
+          timestamp: new Date().toLocaleTimeString(),
+          severity: "warning",
+          message: "Log velocity suggests database failure in 15-30 minutes",
+          confidence: 0.87,
+          timeToImpact: 22,
+          preventionAction:
+            "Proactive connection pool scaling and query optimization",
         });
-      }, 1000);
+        setTimeRemaining(22);
 
-      // Countdown timer
-      const countdownInterval = setInterval(() => {
-        setTimeRemaining((prev) => {
-          if (prev <= 0) {
-            clearInterval(countdownInterval);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 200); // Faster countdown for demo
+        const timeout2 = setTimeout(() => {
+          if (!isMounted) return;
 
-      await new Promise((resolve) => setTimeout(resolve, 4000));
+          // Phase 3: Prevention in progress (4 seconds)
+          setPhase("prevention");
 
-      // Phase 4: Success (4 seconds)
-      setPhase("success");
-      clearInterval(progressInterval);
-      clearInterval(countdownInterval);
-      setPreventionProgress(100);
-      setTimeRemaining(0);
+          // Simulate prevention progress
+          progressIntervalRef.current = setInterval(() => {
+            if (!isMounted) return;
+            setPreventionProgress((prev) => {
+              if (prev >= 100) {
+                if (progressIntervalRef.current) {
+                  clearInterval(progressIntervalRef.current);
+                  progressIntervalRef.current = null;
+                }
+                return 100;
+              }
+              return prev + 25;
+            });
+          }, 1000);
 
-      await new Promise((resolve) => setTimeout(resolve, 4000));
+          // Countdown timer
+          countdownIntervalRef.current = setInterval(() => {
+            if (!isMounted) return;
+            setTimeRemaining((prev) => {
+              if (prev <= 0) {
+                if (countdownIntervalRef.current) {
+                  clearInterval(countdownIntervalRef.current);
+                  countdownIntervalRef.current = null;
+                }
+                return 0;
+              }
+              return prev - 1;
+            });
+          }, 200); // Faster countdown for demo
 
-      // Notify completion
-      if (onPreventionComplete) {
-        onPreventionComplete();
-      }
+          const timeout3 = setTimeout(() => {
+            if (!isMounted) return;
+
+            // Phase 4: Success (4 seconds)
+            setPhase("success");
+            if (progressIntervalRef.current) {
+              clearInterval(progressIntervalRef.current);
+              progressIntervalRef.current = null;
+            }
+            if (countdownIntervalRef.current) {
+              clearInterval(countdownIntervalRef.current);
+              countdownIntervalRef.current = null;
+            }
+            setPreventionProgress(100);
+            setTimeRemaining(0);
+
+            const timeout4 = setTimeout(() => {
+              if (!isMounted) return;
+
+              // Notify completion
+              if (onPreventionComplete) {
+                onPreventionComplete();
+              }
+            }, 4000);
+            timeoutIds.push(timeout4);
+          }, 4000);
+          timeoutIds.push(timeout3);
+        }, 4000);
+        timeoutIds.push(timeout2);
+      }, 3000);
+      timeoutIds.push(timeout1);
     };
 
     demoSequence();
+
+    // Cleanup function
+    return () => {
+      isMounted = false;
+
+      // Clear all intervals
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+        progressIntervalRef.current = null;
+      }
+      if (countdownIntervalRef.current) {
+        clearInterval(countdownIntervalRef.current);
+        countdownIntervalRef.current = null;
+      }
+
+      // Clear all timeouts
+      timeoutIds.forEach((id) => clearTimeout(id));
+    };
   }, [onPreventionComplete]);
 
   const getPhaseIcon = () => {

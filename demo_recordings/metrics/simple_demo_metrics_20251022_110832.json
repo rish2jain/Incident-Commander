@@ -1,0 +1,55 @@
+{
+  "session_id": "20251022_110832",
+  "timestamp": "2025-10-22T11:09:06.353729",
+  "screenshots_count": 8,
+  "screenshots": [
+    {
+      "timestamp": "110836",
+      "name": "ops_dashboard_overview",
+      "description": "Operations Dashboard with Professional Text Optimization",
+      "filepath": "../demo_recordings/screenshots/110836_ops_dashboard_overview.png"
+    },
+    {
+      "timestamp": "110839",
+      "name": "executive_summary",
+      "description": "Enhanced Executive Summary with Key Metrics",
+      "filepath": "../demo_recordings/screenshots/110839_executive_summary.png"
+    },
+    {
+      "timestamp": "110842",
+      "name": "business_impact",
+      "description": "Refined Business Impact Messaging",
+      "filepath": "../demo_recordings/screenshots/110842_business_impact.png"
+    },
+    {
+      "timestamp": "110845",
+      "name": "agent_intelligence",
+      "description": "Detailed Agent Summaries",
+      "filepath": "../demo_recordings/screenshots/110845_agent_intelligence.png"
+    },
+    {
+      "timestamp": "110848",
+      "name": "security_trust",
+      "description": "Professional Security Indicators",
+      "filepath": "../demo_recordings/screenshots/110848_security_trust.png"
+    },
+    {
+      "timestamp": "110851",
+      "name": "byzantine_consensus",
+      "description": "Comprehensive Consensus Display",
+      "filepath": "../demo_recordings/screenshots/110851_byzantine_consensus.png"
+    },
+    {
+      "timestamp": "110857",
+      "name": "transparency_dashboard",
+      "description": "AI Transparency with Enhanced Features",
+      "filepath": "../demo_recordings/screenshots/110857_transparency_dashboard.png"
+    },
+    {
+      "timestamp": "110903",
+      "name": "demo_dashboard",
+      "description": "Power Demo Dashboard",
+      "filepath": "../demo_recordings/screenshots/110903_demo_dashboard.png"
+    }
+  ]
+}

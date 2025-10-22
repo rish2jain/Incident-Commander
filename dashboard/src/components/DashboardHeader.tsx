@@ -2,6 +2,10 @@ import * as React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "next-themes";
 import {
+  useClientSideTimestamp,
+  formatTimeSafe,
+} from "@/hooks/useClientSideTimestamp";
+import {
   Bell,
   Search,
   Settings,

@@ -31,6 +31,10 @@ export {
   BusinessImpactCard,
 } from "./MetricCards";
 
+// Demo Components for Enhanced Showcase
+export { default as ByzantineConsensusDemo } from "../ByzantineConsensusDemo";
+export { default as PredictivePreventionDemo } from "../PredictivePreventionDemo";
+
 // Re-export commonly used UI components for convenience
 export { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 export { Badge } from "@/components/ui/badge";

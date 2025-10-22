@@ -1,13 +1,13 @@
 {
   "validation_timestamp": "2025-10-21T23:52:00Z",
-  "latest_session_id": "20251022_010547",
-  "latest_video_file": "8040e397c9b2ba50df917ec8eaba4408.webm",
-  "latest_duration_seconds": "155.8",
-  "latest_screenshot_count": 23,
+  "latest_session_id": "20251022_093751",
+  "latest_video_file": "dc34a876ad0dda52ecffcaeb3faf502e.webm",
+  "latest_duration_seconds": "132.4",
+  "latest_screenshot_count": 20,
   "file_validation": {
     "total_files_checked": 6,
-    "files_with_issues": 0,
-    "files_up_to_date": 6,
+    "files_with_issues": 3,
+    "files_up_to_date": 3,
     "details": {
       "hackathon/README.md": [
         "\u2705 All references up to date"
@@ -16,26 +16,28 @@
         "\u2705 All references up to date"
       ],
       "hackathon/LATEST_DEMO_RECORDING_SUMMARY.md": [
-        "\u2705 All references up to date"
+        "\u274c File not found"
       ],
       "hackathon/docs/PHASE4_DEMO_SCRIPT.md": [
-        "\u2705 All references up to date"
+        "References outdated duration 155.8s without latest 132.4s"
       ],
       "hackathon/docs/HACKATHON_INDEX.md": [
         "\u2705 All references up to date"
       ],
       "scripts/comprehensive_demo_recorder.py": [
-        "\u2705 All references up to date"
+        "\u274c File not found"
       ]
     }
   },
   "asset_validation": {
     "Latest Video": "\u2705 Found",
-    "Latest Screenshots": "\u2705 Found 23 files",
+    "Latest Screenshots": "\u2705 Found 20 files",
     "Latest Metrics": "\u2705 Found"
   },
-  "overall_status": "\u2705 SYNC COMPLETE",
+  "overall_status": "\u26a0\ufe0f 3 files need updates",
   "recommendations": [
-    "All demo files are synchronized with latest recording"
+    "Update hackathon/LATEST_DEMO_RECORDING_SUMMARY.md to reference latest session 20251022_093751",
+    "Update hackathon/docs/PHASE4_DEMO_SCRIPT.md to reference latest session 20251022_093751",
+    "Update scripts/comprehensive_demo_recorder.py to reference latest session 20251022_093751"
   ]
 }

@@ -14,10 +14,10 @@ class LatestDemoSyncValidator:
     """Validates that all demo files reference the latest recording session"""
     
     def __init__(self):
-        self.latest_session = "20251022_010547"
-        self.latest_video = "8040e397c9b2ba50df917ec8eaba4408.webm"
-        self.latest_duration = "155.8"
-        self.latest_screenshots = 23
+        self.latest_session = "20251022_093751"
+        self.latest_video = "dc34a876ad0dda52ecffcaeb3faf502e.webm"
+        self.latest_duration = "132.4"
+        self.latest_screenshots = 20
         self.validation_results = []
         
     def validate_file_references(self, file_path: str, content: str) -> List[str]:
@@ -48,16 +48,18 @@ class LatestDemoSyncValidator:
                 issues.append(f"References outdated video {video} without ARCHIVED note")
         
         # Check for outdated duration references
-        if "150.6" in content and "155.8" not in content:
-            issues.append("References outdated duration 150.6s without latest 155.8s")
-        if "154.2" in content and "155.8" not in content:
-            issues.append("References outdated duration 154.2s without latest 155.8s")
-        if "128.2" in content and "155.8" not in content:
-            issues.append("References outdated duration 128.2s without latest 155.8s")
+        if "150.6" in content and "132.4" not in content:
+            issues.append("References outdated duration 150.6s without latest 132.4s")
+        if "154.2" in content and "132.4" not in content:
+            issues.append("References outdated duration 154.2s without latest 132.4s")
+        if "155.8" in content and "132.4" not in content:
+            issues.append("References outdated duration 155.8s without latest 132.4s")
         
         # Check for outdated screenshot count
-        if "19 comprehensive" in content and "23 comprehensive" not in content:
-            issues.append("References outdated screenshot count (19) without latest (23)")
+        if "19 comprehensive" in content and "20 comprehensive" not in content:
+            issues.append("References outdated screenshot count (19) without latest (20)")
+        if "23 comprehensive" in content and "20 comprehensive" not in content:
+            issues.append("References outdated screenshot count (23) without latest (20)")
         
         return issues
     
@@ -100,13 +102,13 @@ class LatestDemoSyncValidator:
         # Check screenshots directory
         screenshots_dir = Path("demo_recordings/screenshots")
         if screenshots_dir.exists():
-            screenshot_files = list(screenshots_dir.glob("235*.png"))
-            assets["Latest Screenshots"] = f"✅ Found {len(screenshot_files)} files" if screenshot_files else "❌ No 235xxx series found"
+            screenshot_files = list(screenshots_dir.glob("093*.png"))
+            assets["Latest Screenshots"] = f"✅ Found {len(screenshot_files)} files" if screenshot_files else "❌ No 093xxx series found"
         else:
             assets["Latest Screenshots"] = "❌ Screenshots directory missing"
         
         # Check metrics file
-        metrics_path = f"demo_recordings/metrics/comprehensive_demo_metrics_{self.latest_session}.json"
+        metrics_path = f"demo_recordings/metrics/enhanced_demo_v2_metrics_{self.latest_session}.json"
         assets["Latest Metrics"] = "✅ Found" if os.path.exists(metrics_path) else "❌ Missing"
         
         return assets

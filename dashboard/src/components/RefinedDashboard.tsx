@@ -12,6 +12,11 @@ import React, {
   useMemo,
   useRef,
 } from "react";
+import {
+  useClientSideTimestamp,
+  formatTimestampSafe,
+  formatTimeSafe,
+} from "@/hooks/useClientSideTimestamp";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/shared";
 import { Badge } from "@/components/shared";
 import { Button } from "@/components/shared";
@@ -358,6 +363,7 @@ export const RefinedDashboard: React.FC = () => {
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [simulationMode, setSimulationMode] = useState(false);
   const simulationAutoActivatedRef = useRef(false);
+  const isClient = useClientSideTimestamp();
 
   const activateSimulationMode = useCallback((scenarioType?: string) => {
     const fallbackIncidents = buildSimulatedIncidents(scenarioType);
@@ -769,9 +775,9 @@ export const RefinedDashboard: React.FC = () => {
     return `${minutes}m ${remainingSeconds}s`;
   };
 
-  // Format timestamp
+  // Format timestamp (client-side only to prevent hydration mismatch)
   const formatTimestamp = (timestamp: string) => {
-    return new Date(timestamp).toLocaleString();
+    return formatTimestampSafe(timestamp, isClient);
   };
 
   // Format currency
@@ -846,7 +852,7 @@ export const RefinedDashboard: React.FC = () => {
               <Badge variant="secondary">Demo Data Stream</Badge>
             )}
             <span className="text-sm text-slate-500">
-              Last update: {lastUpdate.toLocaleTimeString()}
+              Last update: {formatTimeSafe(lastUpdate, isClient)}
             </span>
           </div>
         </div>
@@ -1035,7 +1041,9 @@ export const RefinedDashboard: React.FC = () => {
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-slate-600">Autonomous:</span>
+                      <span className="text-sm text-slate-600">
+                        Autonomous:
+                      </span>
                       <span className="font-semibold text-green-600">
                         {
                           performanceMetrics.mttr_comparison

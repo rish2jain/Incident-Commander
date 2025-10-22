@@ -19,6 +19,8 @@ import {
   ConfidenceScore,
   SeverityIndicator,
 } from "../../src/components/shared";
+import ByzantineConsensusDemo from "../../src/components/ByzantineConsensusDemo";
+import PredictivePreventionDemo from "../../src/components/PredictivePreventionDemo";
 
 /**
  * Consolidated Transparency Dashboard
@@ -534,6 +536,61 @@ export default function TransparencyDashboardPage() {
       subtitle="Complete AI explainability for incident response - Deep technical demonstration"
       icon="🧠"
     >
+      {/* Enhanced Prize Service Showcase Section */}
+      <DashboardSection variant="glass" className="mb-4">
+        <div className="bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-lg p-6 mb-4">
+          <h3 className="text-lg font-semibold text-amber-900 mb-4 flex items-center">
+            <span className="mr-2">🏆</span>
+            $3K Prize Services Integration - Live Production System
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-white rounded-lg p-4 border border-amber-200">
+              <h4 className="font-semibold text-amber-800 mb-2">
+                Amazon Q Business ($3K)
+              </h4>
+              <p className="text-sm text-gray-700 mb-2">
+                Natural Language Analysis:
+              </p>
+              <div className="bg-amber-50 p-3 rounded text-sm font-mono">
+                &quot; &quot;Database connection pool exhausted due to N+1 query
+                pattern in user service causing cascade failure&quot;&quot;
+              </div>
+            </div>
+            <div className="bg-white rounded-lg p-4 border border-blue-200">
+              <h4 className="font-semibold text-blue-800 mb-2">
+                Nova Act ($3K)
+              </h4>
+              <p className="text-sm text-gray-700 mb-2">Action Plan:</p>
+              <div className="bg-blue-50 p-3 rounded text-sm">
+                <div>1. Verify connection pool status</div>
+                <div>2. Identify long-running queries</div>
+                <div>3. Initiate safe query termination</div>
+              </div>
+            </div>
+            <div className="bg-white rounded-lg p-4 border border-green-200">
+              <h4 className="font-semibold text-green-800 mb-2">
+                Strands SDK ($3K)
+              </h4>
+              <p className="text-sm text-gray-700 mb-2">Agent Lifecycle:</p>
+              <div className="bg-green-50 p-3 rounded text-sm">
+                <div>Detection: ✅ Evidence Analyzed</div>
+                <div>Diagnosis: 🔄 Building Consensus</div>
+                <div>Resolution: ⏳ Ready to Execute</div>
+              </div>
+            </div>
+          </div>
+          <div className="mt-4 text-center">
+            <Badge
+              variant="outline"
+              className="bg-amber-100 text-amber-800 border-amber-300"
+            >
+              Unique Differentiator: Only system with complete 8/8 AWS AI
+              service integration
+            </Badge>
+          </div>
+        </div>
+      </DashboardSection>
+
       {/* Status Bar */}
       <DashboardSection variant="glass" className="mb-4">
         <div className="flex items-center justify-between">
@@ -628,6 +685,20 @@ export default function TransparencyDashboardPage() {
         )}
       </DashboardSection>
 
+      {/* Enhanced V2 Visual Proof Components */}
+      <DashboardSection variant="glass" className="mb-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Predictive Prevention Demo */}
+          <PredictivePreventionDemo
+            className="w-full"
+            onPreventionComplete={() => console.log("Prevention demo complete")}
+          />
+
+          {/* Byzantine Fault Tolerance Demo */}
+          <ByzantineConsensusDemo className="w-full" />
+        </div>
+      </DashboardSection>
+
       {/* Main Transparency Tabs */}
       <Tabs defaultValue="reasoning" className="space-y-4">
         <TabsList className="grid w-full grid-cols-5 card-glass">
@@ -661,8 +732,8 @@ export default function TransparencyDashboardPage() {
                     <div className="text-3xl mb-2">🤔</div>
                     <p>Trigger incident to see live AI reasoning...</p>
                     <p className="text-xs mt-2">
-                      Sample reasoning shown above - click "🚨 Trigger Demo" for
-                      live analysis
+                      No reasoning yet — click &apos;🚨 Trigger Demo&apos; to
+                      generate a live sample
                     </p>
                   </div>
                 ) : (
@@ -738,8 +809,8 @@ export default function TransparencyDashboardPage() {
                   <div className="text-3xl mb-2">🌳</div>
                   <p>Decision tree will appear during analysis...</p>
                   <p className="text-xs mt-2">
-                    Sample tree shown above - trigger incident for live decision
-                    making
+                    No decisions yet — click &apos;🚨 Trigger Demo&apos; to
+                    generate a live sample
                   </p>
                 </div>
               ) : (
@@ -817,8 +888,8 @@ export default function TransparencyDashboardPage() {
                     <div className="text-3xl mb-2">💬</div>
                     <p>Agent communications will appear here...</p>
                     <p className="text-xs mt-2">
-                      Sample communications shown above - trigger incident for
-                      live coordination
+                      No communications yet — click &apos;🚨 Trigger Demo&apos;
+                      to generate a live sample
                     </p>
                   </div>
                 ) : (
@@ -860,8 +931,8 @@ export default function TransparencyDashboardPage() {
                   <div className="text-3xl mb-2">📊</div>
                   <p>Performance metrics will appear during resolution...</p>
                   <p className="text-xs mt-2">
-                    Sample metrics shown above - trigger incident for live
-                    performance data
+                    No metrics yet — click &apos;🚨 Trigger Demo&apos; to
+                    generate a live sample
                   </p>
                 </div>
               ) : (

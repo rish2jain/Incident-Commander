@@ -56,7 +56,7 @@ import {
 } from "@/hooks/useClientSideTimestamp";
 import { useIncidentWebSocket } from "@/hooks/useIncidentWebSocket";
 
-// Connection Status Component
+// Connection Status Component with enhanced visual feedback
 function ConnectionStatus({
   connected,
   connecting,
@@ -70,70 +70,117 @@ function ConnectionStatus({
   latency: number | null;
   onReconnect: () => void;
 }) {
+  // Connection quality based on latency
+  const getConnectionQuality = () => {
+    if (!connected || latency === null) return null;
+    if (latency < 50) return { text: "Excellent", color: "text-green-400" };
+    if (latency < 100) return { text: "Good", color: "text-blue-400" };
+    if (latency < 200) return { text: "Fair", color: "text-yellow-400" };
+    return { text: "Poor", color: "text-orange-400" };
+  };
+
+  const quality = getConnectionQuality();
+
   return (
-    <Card className="mb-4 border-l-4 border-l-blue-500">
-      <CardContent className="py-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            {connected ? (
-              <>
-                <Wifi className="w-5 h-5 text-green-500" />
-                <div>
-                  <div className="font-semibold text-green-400">
-                    Connected to Live System
+    <motion.div
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      <Card className={`mb-4 border-l-4 ${connected ? "border-l-green-500" : connecting ? "border-l-yellow-500" : "border-l-red-500"} transition-all`}>
+        <CardContent className="py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              {connected ? (
+                <>
+                  <motion.div
+                    animate={{ scale: [1, 1.2, 1], opacity: [1, 0.8, 1] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  >
+                    <Wifi className="w-5 h-5 text-green-500" />
+                  </motion.div>
+                  <div>
+                    <div className="font-semibold text-green-400 flex items-center gap-2">
+                      Connected to Live System
+                      <motion.div
+                        className="w-2 h-2 bg-green-500 rounded-full"
+                        animate={{ opacity: [1, 0.3, 1] }}
+                        transition={{ duration: 1.5, repeat: Infinity }}
+                      />
+                    </div>
+                    <div className="text-xs text-slate-400 flex items-center gap-2">
+                      {latency !== null && (
+                        <>
+                          <span>Latency: <span className={quality?.color}>{latency.toFixed(0)}ms</span></span>
+                          {quality && (
+                            <span className="text-slate-500">•</span>
+                          )}
+                          {quality && (
+                            <span className={quality.color}>{quality.text}</span>
+                          )}
+                        </>
+                      )}
+                    </div>
                   </div>
-                  <div className="text-xs text-slate-400">
-                    {latency !== null
-                      ? `Latency: ${latency.toFixed(0)}ms`
-                      : "Monitoring..."}
+                </>
+              ) : connecting ? (
+                <>
+                  <RefreshCw className="w-5 h-5 text-yellow-500 animate-spin" />
+                  <div>
+                    <div className="font-semibold text-yellow-400">
+                      Connecting...
+                    </div>
+                    <div className="text-xs text-slate-400">
+                      Establishing WebSocket connection
+                    </div>
                   </div>
-                </div>
-              </>
-            ) : connecting ? (
-              <>
-                <RefreshCw className="w-5 h-5 text-yellow-500 animate-spin" />
-                <div>
-                  <div className="font-semibold text-yellow-400">
-                    Connecting...
+                </>
+              ) : (
+                <>
+                  <motion.div
+                    animate={{ opacity: [1, 0.5, 1] }}
+                    transition={{ duration: 1, repeat: Infinity }}
+                  >
+                    <WifiOff className="w-5 h-5 text-red-500" />
+                  </motion.div>
+                  <div>
+                    <div className="font-semibold text-red-400">Disconnected</div>
+                    <div className="text-xs text-slate-400">
+                      {error || "Connection lost"}
+                    </div>
                   </div>
-                  <div className="text-xs text-slate-400">
-                    Establishing WebSocket connection
-                  </div>
-                </div>
-              </>
-            ) : (
-              <>
-                <WifiOff className="w-5 h-5 text-red-500" />
-                <div>
-                  <div className="font-semibold text-red-400">Disconnected</div>
-                  <div className="text-xs text-slate-400">
-                    {error || "Connection lost"}
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
-          <div className="flex items-center gap-2">
-            {!connected && !connecting && (
-              <Button
-                size="sm"
-                onClick={onReconnect}
-                className="bg-blue-600 hover:bg-blue-700"
+                </>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              {!connected && !connecting && (
+                <motion.div
+                  initial={{ scale: 0.9 }}
+                  animate={{ scale: 1 }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Button
+                    size="sm"
+                    onClick={onReconnect}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    <RefreshCw className="w-4 h-4 mr-1" />
+                    Reconnect
+                  </Button>
+                </motion.div>
+              )}
+              <Badge
+                variant={connected ? "default" : "destructive"}
+                className={connected ? "bg-green-600" : ""}
               >
-                <RefreshCw className="w-4 h-4 mr-1" />
-                Reconnect
-              </Button>
-            )}
-            <Badge
-              variant={connected ? "default" : "destructive"}
-              className={connected ? "bg-green-600" : ""}
-            >
-              {connected ? "LIVE" : "OFFLINE"}
-            </Badge>
+                {connected ? "LIVE" : "OFFLINE"}
+              </Badge>
+            </div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 }
 
@@ -491,14 +538,20 @@ export function ImprovedOperationsDashboardWebSocket() {
             </Card>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {Object.values(agentStates).map((agent) => (
-                <LiveAgentCard
+              {Object.values(agentStates).map((agent, index) => (
+                <motion.div
                   key={agent.name}
-                  name={agent.name}
-                  state={agent.state}
-                  confidence={agent.confidence}
-                  metadata={agent.metadata}
-                />
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: index * 0.1 }}
+                >
+                  <LiveAgentCard
+                    name={agent.name}
+                    state={agent.state}
+                    confidence={agent.confidence}
+                    metadata={agent.metadata}
+                  />
+                </motion.div>
               ))}
             </div>
           )}

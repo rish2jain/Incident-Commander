@@ -292,6 +292,7 @@ export default function TransparencyDashboardPage() {
   const [selectedScenario, setSelectedScenario] = useState("database_cascade");
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [customScenario, setCustomScenario] = useState("");
+  const [showKeyboardHelp, setShowKeyboardHelp] = useState(false);
 
   // Helper function for alternatives
   const generateAlternatives = (step: string) => {
@@ -608,6 +609,50 @@ export default function TransparencyDashboardPage() {
     }
   }, [incidentActive, triggerIncident]);
 
+  // Keyboard shortcuts for better UX
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      // ? to toggle help
+      if (e.key === "?" && e.target === document.body) {
+        e.preventDefault();
+        setShowKeyboardHelp((prev) => !prev);
+        return;
+      }
+      // Escape to close help or reset
+      if (e.key === "Escape") {
+        if (showKeyboardHelp) {
+          setShowKeyboardHelp(false);
+          return;
+        }
+        if (incidentActive) {
+          setIncidentActive(false);
+          setCurrentPhase("idle");
+          return;
+        }
+      }
+      // Don't handle other shortcuts if help is shown
+      if (showKeyboardHelp) return;
+
+      // 1-5 for tab navigation
+      if (e.key >= "1" && e.key <= "5") {
+        const tabs = ["reasoning", "decisions", "confidence", "communication", "analytics"];
+        const tabIndex = parseInt(e.key) - 1;
+        const tabElement = document.querySelector(`[value="${tabs[tabIndex]}"]`) as HTMLElement;
+        if (tabElement) {
+          tabElement.click();
+        }
+      }
+      // Enter or Space to trigger demo
+      if ((e.key === "Enter" || e.key === " ") && !incidentActive && e.target === document.body) {
+        e.preventDefault();
+        triggerIncident();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyPress);
+    return () => window.removeEventListener("keydown", handleKeyPress);
+  }, [incidentActive, triggerIncident, showKeyboardHelp]);
+
   return (
     <DashboardLayout
       title="AI Transparency Dashboard"
@@ -627,6 +672,14 @@ export default function TransparencyDashboardPage() {
                 {formatTime(mttrSeconds)}
               </span>
             </div>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => setShowKeyboardHelp(true)}
+              className="text-xs text-slate-400 hover:text-white"
+            >
+              ⌨️ Shortcuts
+            </Button>
           </div>
           <div className="flex-1 mx-6">
             <Progress value={getPhaseProgress()} className="h-2" />
@@ -640,6 +693,77 @@ export default function TransparencyDashboardPage() {
           </Button>
         </div>
       </DashboardSection>
+
+      {/* Keyboard Shortcuts Help Modal */}
+      <AnimatePresence>
+        {showKeyboardHelp && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center"
+            onClick={() => setShowKeyboardHelp(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: "spring", duration: 0.3 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-slate-800 border-2 border-blue-500 rounded-lg p-6 max-w-md"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-bold text-blue-400">⌨️ Keyboard Shortcuts</h3>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setShowKeyboardHelp(false)}
+                  className="text-slate-400 hover:text-white"
+                >
+                  ✕
+                </Button>
+              </div>
+              <div className="space-y-2 text-sm">
+                <div className="flex items-center justify-between py-2 border-b border-slate-700">
+                  <span className="text-slate-400">Switch to Reasoning</span>
+                  <kbd className="px-2 py-1 bg-slate-700 rounded border border-slate-600 text-blue-400 font-mono">1</kbd>
+                </div>
+                <div className="flex items-center justify-between py-2 border-b border-slate-700">
+                  <span className="text-slate-400">Switch to Decisions</span>
+                  <kbd className="px-2 py-1 bg-slate-700 rounded border border-slate-600 text-blue-400 font-mono">2</kbd>
+                </div>
+                <div className="flex items-center justify-between py-2 border-b border-slate-700">
+                  <span className="text-slate-400">Switch to Confidence</span>
+                  <kbd className="px-2 py-1 bg-slate-700 rounded border border-slate-600 text-blue-400 font-mono">3</kbd>
+                </div>
+                <div className="flex items-center justify-between py-2 border-b border-slate-700">
+                  <span className="text-slate-400">Switch to Communication</span>
+                  <kbd className="px-2 py-1 bg-slate-700 rounded border border-slate-600 text-blue-400 font-mono">4</kbd>
+                </div>
+                <div className="flex items-center justify-between py-2 border-b border-slate-700">
+                  <span className="text-slate-400">Switch to Analytics</span>
+                  <kbd className="px-2 py-1 bg-slate-700 rounded border border-slate-600 text-blue-400 font-mono">5</kbd>
+                </div>
+                <div className="flex items-center justify-between py-2 border-b border-slate-700">
+                  <span className="text-slate-400">Trigger Demo</span>
+                  <kbd className="px-2 py-1 bg-slate-700 rounded border border-slate-600 text-green-400 font-mono">Enter</kbd>
+                </div>
+                <div className="flex items-center justify-between py-2 border-b border-slate-700">
+                  <span className="text-slate-400">Stop Demo</span>
+                  <kbd className="px-2 py-1 bg-slate-700 rounded border border-slate-600 text-red-400 font-mono">Esc</kbd>
+                </div>
+                <div className="flex items-center justify-between py-2">
+                  <span className="text-slate-400">Toggle This Help</span>
+                  <kbd className="px-2 py-1 bg-slate-700 rounded border border-slate-600 text-purple-400 font-mono">?</kbd>
+                </div>
+              </div>
+              <div className="mt-4 text-xs text-center text-slate-500">
+                Press <kbd className="px-1 py-0.5 bg-slate-700 rounded text-slate-400">Esc</kbd> to close
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* AWS Attribution Badge */}
       {scenarioMetadata && (
@@ -672,17 +796,22 @@ export default function TransparencyDashboardPage() {
         className="mb-4"
       >
         <DashboardGrid columns={4} className="mb-3">
-          {Object.entries(SCENARIOS).map(([key, scenario]) => (
-            <div
+          {Object.entries(SCENARIOS).map(([key, scenario], index) => (
+            <motion.div
               key={key}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: index * 0.05 }}
+              whileHover={{ scale: 1.03, y: -4 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => {
                 setSelectedScenario(key);
                 setShowCustomInput(false);
               }}
-              className={`interactive-card p-3 rounded-lg border-2 transition-all ${
+              className={`interactive-card p-3 rounded-lg border-2 cursor-pointer transition-all ${
                 selectedScenario === key && !showCustomInput
-                  ? "border-blue-500 bg-blue-500/10"
-                  : "border-slate-600 hover:border-blue-500/50"
+                  ? "border-blue-500 bg-blue-500/10 shadow-lg shadow-blue-500/20"
+                  : "border-slate-600 hover:border-blue-500/50 hover:shadow-md"
               }`}
             >
               <div className="flex justify-between items-start mb-1">
@@ -699,7 +828,7 @@ export default function TransparencyDashboardPage() {
               <div className="text-xs text-slate-400 mt-1">
                 MTTR: {scenario.mttr}s
               </div>
-            </div>
+            </motion.div>
           ))}
         </DashboardGrid>
 

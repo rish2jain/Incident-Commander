@@ -210,6 +210,9 @@ _Note: Previous demo recordings have been archived to `demo_recordings/archive/`
 **🏆 RECOMMENDED**: Use the ENHANCED V2 DEMO for hackathon submission! Features visual proof of every key differentiator including:
 
 - **Interactive Byzantine Fault Tolerance**: Live agent compromise simulation and recovery
+- **Enhanced Reasoning Panel**: Interactive step-by-step agent reasoning with collapsible sections
+- **Enhanced Communication Panel**: Advanced inter-agent communication with message categorization
+- **Enhanced Decision Tree Visualization**: Interactive decision tree exploration with node expansion
 - **Explicit $3K Prize Service Showcase**: Amazon Q, Nova Act, Strands SDK prominently featured
 - **Predictive Prevention Demonstration**: 85% incident prevention shown in action
 - **Complete Visual Proof**: All competitive advantages demonstrated, not just described

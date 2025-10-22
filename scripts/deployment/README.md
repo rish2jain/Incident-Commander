@@ -2,21 +2,36 @@
 
 AWS deployment and infrastructure management scripts for the Incident Commander system.
 
-## Scripts
+## Primary Deployment Script
 
-### Deployment
-- `deploy_complete_system.py` - Complete system deployment to AWS
-- `deploy_to_aws.py` - Standard AWS deployment
-- `deploy_ultimate_system.py` - Ultimate system deployment
+### ⭐ **deploy_to_aws.py** - Canonical Deployment Script
+The primary, production-ready deployment script using CloudFormation infrastructure as code.
 
-**Note:** These scripts may have overlapping functionality. Review and consolidate as needed.
+**Features:**
+- CloudFormation-based infrastructure management
+- Environment parameterization (demo, staging, production)
+- Versioned deployment artifacts in S3
+- Comprehensive error handling and rollback capability
+- Production-ready AWS best practices
+
+**When to Use:** This is the default script for all deployments.
+
+## Supporting Scripts
 
 ### Setup and Configuration
-- `setup_aws_credentials.py` - Configure AWS credentials
-- `harden_security.py` - Apply security hardening measures
+- `setup_aws_credentials.py` - Configure AWS credentials interactively
+- `harden_security.py` - Apply security hardening to deployed resources
 
 ### Fixes and Maintenance
-- `fix_dashboard_lambda.py` - Dashboard Lambda function fixes
+- `fix_dashboard_lambda.py` - Fix and update dashboard Lambda function
+
+## Archived Scripts
+
+The following scripts have been archived due to overlap with deploy_to_aws.py:
+- `scripts/archive/deploy_complete_system_ARCHIVED_OCT22.py` - S3 static hosting approach (superseded)
+- `scripts/archive/deploy_ultimate_system_ARCHIVED_OCT22.py` - AWS AI services deployment (superseded)
+
+**See:** [scripts/archive/README.md](../archive/README.md) for archival details and migration notes.
 
 ## Usage
 

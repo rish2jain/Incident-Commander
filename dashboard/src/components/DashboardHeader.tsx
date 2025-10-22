@@ -296,6 +296,7 @@ function IncidentCommanderHeader({
   onTriggerScenario,
 }: IncidentCommanderHeaderProps) {
   const [searchFocused, setSearchFocused] = React.useState(false);
+  const isClient = useClientSideTimestamp();
 
   return (
     <header className="relative w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -526,7 +527,7 @@ function IncidentCommanderHeader({
                 variant="outline"
                 className="bg-background/50 border-border/50 text-xs"
               >
-                Last update: {new Date().toLocaleTimeString()}
+                Last update: {formatTimeSafe(new Date(), isClient)}
               </Badge>
             </div>
           </div>

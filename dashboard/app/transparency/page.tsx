@@ -21,6 +21,9 @@ import {
 } from "../../src/components/shared";
 import ByzantineConsensusDemo from "../../src/components/ByzantineConsensusDemo";
 import PredictivePreventionDemo from "../../src/components/PredictivePreventionDemo";
+import { ReasoningPanel } from "../../src/components/enhanced/ReasoningPanel";
+import { CommunicationPanel } from "../../src/components/enhanced/CommunicationPanel";
+import { DecisionTreeVisualization } from "../../src/components/enhanced/DecisionTreeVisualization";
 
 /**
  * Consolidated Transparency Dashboard
@@ -719,134 +722,44 @@ export default function TransparencyDashboardPage() {
           </TabsTrigger>
         </TabsList>
 
-        {/* Reasoning Tab */}
+        {/* Reasoning Tab - Enhanced with new ReasoningPanel */}
         <TabsContent value="reasoning" data-testid="panel-reasoning">
-          <Card className="card-glass">
-            <CardHeader>
-              <CardTitle>🧠 Agent Reasoning Process</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3 max-h-80 overflow-y-auto">
-                {agentReasonings.length === 0 ? (
-                  <div className="text-center text-status-neutral py-8">
-                    <div className="text-3xl mb-2">🤔</div>
-                    <p>Trigger incident to see live AI reasoning...</p>
-                    <p className="text-xs mt-2">
-                      No reasoning yet — click &apos;🚨 Trigger Demo&apos; to
-                      generate a live sample
-                    </p>
-                  </div>
-                ) : (
-                  agentReasonings.map((reasoning) => (
-                    <div
-                      key={reasoning.id}
-                      className="border border-slate-600 rounded-lg p-3"
-                    >
-                      <div className="flex justify-between items-start mb-2">
-                        <Badge variant="outline">{reasoning.agent}</Badge>
-                        <Badge>
-                          {(reasoning.confidence * 100).toFixed(1)}%
-                        </Badge>
-                      </div>
-                      <h4 className="font-semibold mb-2">{reasoning.step}</h4>
-                      <p className="text-sm text-status-neutral mb-2">
-                        {reasoning.explanation}
-                      </p>
-                      {reasoning.evidence && (
-                        <div className="text-sm space-y-1">
-                          <p className="text-status-neutral">Evidence:</p>
-                          {reasoning.evidence.map((item, idx) => (
-                            <div key={idx} className="flex items-start gap-2">
-                              <span className="text-blue-400">•</span>
-                              <span>{item}</span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                      {reasoning.alternatives &&
-                        reasoning.alternatives.length > 0 && (
-                          <div className="mt-3 space-y-1">
-                            <p className="text-sm text-status-neutral">
-                              Alternatives:
-                            </p>
-                            {reasoning.alternatives.map((alt, idx) => (
-                              <div
-                                key={idx}
-                                className={`text-sm p-2 rounded ${
-                                  alt.chosen
-                                    ? "bg-green-500/20"
-                                    : "bg-slate-700/20 backdrop-blur-sm"
-                                }`}
-                              >
-                                <div className="flex justify-between">
-                                  <span>{alt.option}</span>
-                                  <span>
-                                    {(alt.probability * 100).toFixed(0)}%
-                                    {alt.chosen && " ✓"}
-                                  </span>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                    </div>
-                  ))
-                )}
-              </div>
-            </CardContent>
-          </Card>
+          <ReasoningPanel
+            reasoningSteps={agentReasonings}
+            onStepClick={(step) => console.log("Reasoning step clicked:", step)}
+            className="w-full"
+          />
         </TabsContent>
 
-        {/* Decision Trees Tab */}
+        {/* Decision Trees Tab - Enhanced with new DecisionTreeVisualization */}
         <TabsContent value="decisions" data-testid="panel-decisions">
-          <Card className="card-glass">
-            <CardHeader>
-              <CardTitle>🌳 Decision Tree Visualization</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {!decisionTree ? (
-                <div className="text-center text-status-neutral py-8">
-                  <div className="text-3xl mb-2">🌳</div>
-                  <p>Decision tree will appear during analysis...</p>
-                  <p className="text-xs mt-2">
-                    No decisions yet — click &apos;🚨 Trigger Demo&apos; to
-                    generate a live sample
+          {decisionTree ? (
+            <DecisionTreeVisualization
+              rootNode={decisionTree.rootNode}
+              onNodeClick={(node) =>
+                console.log("Decision node clicked:", node)
+              }
+              className="w-full"
+            />
+          ) : (
+            <Card className="card-glass">
+              <CardContent className="py-12">
+                <div className="text-center text-status-neutral">
+                  <div className="text-4xl mb-3">🌳</div>
+                  <h3 className="text-lg font-medium mb-2">
+                    No Decision Tree Yet
+                  </h3>
+                  <p className="text-sm">
+                    Decision tree will appear during analysis phase
+                  </p>
+                  <p className="text-xs mt-2 text-slate-500">
+                    Click '🚨 Trigger Demo&apos; to see interactive decision
+                    tree visualization
                   </p>
                 </div>
-              ) : (
-                <div className="space-y-4">
-                  <div className="text-center spacing-md bg-blue-500/20 rounded-lg">
-                    <h3 className="font-bold">{decisionTree.rootNode.label}</h3>
-                    <Progress
-                      value={decisionTree.rootNode.confidence * 100}
-                      className="mt-2"
-                    />
-                  </div>
-                  {decisionTree.rootNode.children?.map((child) => (
-                    <div
-                      key={child.id}
-                      className="ml-8 p-3 bg-slate-700/20 backdrop-blur-sm rounded-lg"
-                    >
-                      <h4 className="font-medium">{child.label}</h4>
-                      <Progress
-                        value={child.confidence * 100}
-                        className="mt-2"
-                      />
-                      {child.children?.map((grandchild) => (
-                        <div
-                          key={grandchild.id}
-                          className="ml-8 mt-2 text-sm text-status-neutral"
-                        >
-                          → {grandchild.label} (
-                          {(grandchild.confidence * 100).toFixed(0)}%)
-                        </div>
-                      ))}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
 
         {/* Confidence Tab */}
@@ -875,48 +788,15 @@ export default function TransparencyDashboardPage() {
           </Card>
         </TabsContent>
 
-        {/* Communication Tab */}
+        {/* Communication Tab - Enhanced with new CommunicationPanel */}
         <TabsContent value="communication" data-testid="panel-communication">
-          <Card className="card-glass">
-            <CardHeader>
-              <CardTitle>💬 Inter-Agent Communication</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3 max-h-96 overflow-y-auto">
-                {agentCommunications.length === 0 ? (
-                  <div className="text-center text-status-neutral py-8">
-                    <div className="text-3xl mb-2">💬</div>
-                    <p>Agent communications will appear here...</p>
-                    <p className="text-xs mt-2">
-                      No communications yet — click &apos;🚨 Trigger Demo&apos;
-                      to generate a live sample
-                    </p>
-                  </div>
-                ) : (
-                  agentCommunications.map((comm) => (
-                    <div
-                      key={comm.id}
-                      className="p-3 bg-slate-700/20 backdrop-blur-sm rounded-lg"
-                    >
-                      <div className="flex justify-between text-sm mb-1">
-                        <div>
-                          <Badge variant="outline" className="mr-2">
-                            {comm.from}
-                          </Badge>
-                          →
-                          <Badge variant="outline" className="ml-2">
-                            {comm.to}
-                          </Badge>
-                        </div>
-                        <Badge variant="secondary">{comm.messageType}</Badge>
-                      </div>
-                      <p className="text-sm">{comm.message}</p>
-                    </div>
-                  ))
-                )}
-              </div>
-            </CardContent>
-          </Card>
+          <CommunicationPanel
+            messages={agentCommunications}
+            onMessageClick={(message) =>
+              console.log("Communication clicked:", message)
+            }
+            className="w-full"
+          />
         </TabsContent>
 
         {/* Analytics Tab */}

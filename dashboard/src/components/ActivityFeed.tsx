@@ -1,6 +1,10 @@
 import * as React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
+  useClientSideTimestamp,
+  formatTimeSafe,
+} from "@/hooks/useClientSideTimestamp";
+import {
   Search,
   Stethoscope,
   Sparkles,
@@ -221,7 +225,7 @@ const ActivityItem = React.memo(function ActivityItem({
 
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <Clock className="w-3 h-3" />
-                  {new Date(action.timestamp).toLocaleTimeString()}
+                  {formatTimeSafe(action.timestamp, isClient)}
                 </div>
               </div>
 
@@ -294,6 +298,8 @@ export default function ActivityFeed({
   autoScrollEnabled = true,
   onActionClick,
 }: ActivityFeedProps) {
+  const isClient = useClientSideTimestamp();
+
   // Memoize display actions to prevent unnecessary re-renders
   const displayActions = React.useMemo(
     () => actions.slice(0, maxItems),
@@ -552,6 +558,7 @@ export default function ActivityFeed({
 
 // Demo component with sample data and auto-scroll functionality
 export function ActivityFeedDemo() {
+  const isClient = useClientSideTimestamp();
   const [actions, setActions] = React.useState<AgentAction[]>([
     {
       id: "1",
@@ -598,7 +605,7 @@ export function ActivityFeedDemo() {
           confidence: Math.random(),
           status: ["pending", "in_progress", "completed", "failed"][
             Math.floor(Math.random() * 4)
-          ] as any,
+          ] as unknown,
           duration: Math.floor(Math.random() * 5000) + 500,
           details: {
             severity: ["low", "medium", "high"][Math.floor(Math.random() * 3)],

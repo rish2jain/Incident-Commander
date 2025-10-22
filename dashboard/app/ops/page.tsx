@@ -1,6 +1,6 @@
 "use client";
 
-import { EnhancedOperationsDashboard } from "@/components/EnhancedOperationsDashboard";
+import { ImprovedOperationsDashboard } from "@/components/ImprovedOperationsDashboard";
 
 /**
  * Operations Dashboard Route
@@ -17,5 +17,5 @@ import { EnhancedOperationsDashboard } from "@/components/EnhancedOperationsDash
  * NOT for demos - use /demo or /transparency instead
  */
 export default function OpsPage() {
-  return <EnhancedOperationsDashboard />;
+  return <ImprovedOperationsDashboard />;
 }

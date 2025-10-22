@@ -14,9 +14,9 @@ class LatestDemoSyncValidator:
     """Validates that all demo files reference the latest recording session"""
     
     def __init__(self):
-        self.latest_session = "20251022_004834"
-        self.latest_video = "4d76376f8249437e5a422f3900f09892.webm"
-        self.latest_duration = "150.6"
+        self.latest_session = "20251022_010547"
+        self.latest_video = "8040e397c9b2ba50df917ec8eaba4408.webm"
+        self.latest_duration = "155.8"
         self.latest_screenshots = 23
         self.validation_results = []
         
@@ -26,7 +26,8 @@ class LatestDemoSyncValidator:
         
         # Check for outdated session references
         outdated_sessions = [
-            "20251021_235144",  # Previous session
+            "20251022_004834",  # Previous session
+            "20251021_235144",  # Earlier session
             "20251021_222000",  # Earlier session
             "20251021_164724",  # Earlier session
         ]
@@ -37,7 +38,8 @@ class LatestDemoSyncValidator:
         
         # Check for outdated video references
         outdated_videos = [
-            "00b6a99e232bc15389fff08c63a89189.webm",  # Previous video
+            "4d76376f8249437e5a422f3900f09892.webm",  # Previous video
+            "00b6a99e232bc15389fff08c63a89189.webm",  # Earlier video
             "61f6efd11e2551303ffff60940c897f7.webm",  # Earlier video
         ]
         
@@ -46,10 +48,12 @@ class LatestDemoSyncValidator:
                 issues.append(f"References outdated video {video} without ARCHIVED note")
         
         # Check for outdated duration references
-        if "154.2" in content and "150.6" not in content:
-            issues.append("References outdated duration 154.2s without latest 150.6s")
-        if "128.2" in content and "150.6" not in content:
-            issues.append("References outdated duration 128.2s without latest 150.6s")
+        if "150.6" in content and "155.8" not in content:
+            issues.append("References outdated duration 150.6s without latest 155.8s")
+        if "154.2" in content and "155.8" not in content:
+            issues.append("References outdated duration 154.2s without latest 155.8s")
+        if "128.2" in content and "155.8" not in content:
+            issues.append("References outdated duration 128.2s without latest 155.8s")
         
         # Check for outdated screenshot count
         if "19 comprehensive" in content and "23 comprehensive" not in content:

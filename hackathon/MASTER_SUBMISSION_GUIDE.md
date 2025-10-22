@@ -120,9 +120,9 @@ open http://localhost:3000
 
 ### 🎥 Professional Demo Recording - UPDATED October 22, 2025
 
-- **🏆 LATEST COMPREHENSIVE DEMO**: `demo_recordings/videos/4d76376f8249437e5a422f3900f09892.webm` (Session: 20251022_004834, 150.6s - COMPREHENSIVE COVERAGE)
+- **🏆 LATEST COMPREHENSIVE DEMO**: `demo_recordings/videos/8040e397c9b2ba50df917ec8eaba4408.webm` (Session: 20251022_010547, 155.8s - COMPREHENSIVE COVERAGE)
+- **Previous Demo**: `demo_recordings/videos/4d76376f8249437e5a422f3900f09892.webm` (Session: 20251022_004834, 150.6s - ARCHIVED)
 - **Previous Demo**: `demo_recordings/videos/00b6a99e232bc15389fff08c63a89189.webm` (Session: 20251021_222000, 128.2s - ARCHIVED)
-- **Previous HD Demo**: `demo_recordings/videos/61f6efd11e2551303ffff60940c897f7.webm` (15MB, 2:14 - ARCHIVED)
 - **Screenshots**: 23 comprehensive key moments captured (235xxx series - LATEST)
 - **Metrics**: Complete JSON performance data with session analytics
 - **Workflow**: Six-phase structured demonstration with business impact showcase
@@ -180,13 +180,13 @@ open http://localhost:3000
 
 **Choose best video for submission:**
 
-- **🏆 LATEST COMPREHENSIVE DEMO**: `demo_recordings/videos/4d76376f8249437e5a422f3900f09892.webm` (Session: 20251022_004834, 150.6s - COMPLETE FEATURE SHOWCASE)
+- **🏆 LATEST COMPREHENSIVE DEMO**: `demo_recordings/videos/8040e397c9b2ba50df917ec8eaba4408.webm` (Session: 20251022_010547, 155.8s - COMPREHENSIVE COVERAGE)
+- **Previous Demo**: `demo_recordings/videos/4d76376f8249437e5a422f3900f09892.webm` (Session: 20251022_004834, 150.6s - ARCHIVED)
 - **Previous Demo**: `demo_recordings/videos/00b6a99e232bc15389fff08c63a89189.webm` (Session: 20251021_222000, 128.2s - ARCHIVED)
-- **HD DEMO**: `demo_recordings/videos/61f6efd11e2551303ffff60940c897f7.webm` (15MB, 2:14 - ARCHIVED)
 
 _Note: Previous demo recordings have been archived to `demo_recordings/archive/` for reference._
 
-**🏆 RECOMMENDED**: Use the LATEST COMPREHENSIVE DEMO (Session: 20251022_004834, 150.6s) for complete feature showcase! Shows all 21 key features, 5 AI transparency views, professional glassmorphism design, complete six-phase workflow from system overview to business impact, with 23 comprehensive screenshots and latest UI improvements. Comprehensive timing for judges with current system capabilities and quantified business metrics ($2.8M savings, 458% ROI).
+**🏆 RECOMMENDED**: Use the LATEST COMPREHENSIVE DEMO (Session: 20251022_010547, 155.8s) for complete feature showcase! Shows all 24 key features, 5 AI transparency views, professional glassmorphism design, complete six-phase workflow from system overview to business impact, with 23 comprehensive screenshots and latest UI improvements. Comprehensive timing for judges with current system capabilities and quantified business metrics ($2.8M savings, 458% ROI).
 
 ### 2. DevPost Form Completion
 

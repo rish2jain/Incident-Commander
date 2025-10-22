@@ -141,7 +141,7 @@ class CompleteSystemValidator:
             ("dashboard/src/components/shared/DashboardLayout.tsx", "Shared dashboard layout"),
             ("dashboard/src/styles/design-tokens.css", "Design tokens system"),
             ("scripts/comprehensive_demo_recorder.py", "Demo recording system"),
-            ("demo_recordings/videos/4d76376f8249437e5a422f3900f09892.webm", "Latest demo video")
+            ("demo_recordings/videos/8040e397c9b2ba50df917ec8eaba4408.webm", "Latest demo video")
         ]
         
         for file_path, description in critical_files:

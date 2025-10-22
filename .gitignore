@@ -168,6 +168,7 @@ REAL_WORLD_*
 
 # Demo and presentation files
 demo_*
+!demo_recordings/
 record_demo_*
 master_demo_*
 start_demo*

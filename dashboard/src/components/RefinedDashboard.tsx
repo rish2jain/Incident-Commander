@@ -392,62 +392,6 @@ export const RefinedDashboard: React.FC = () => {
   const [sortField, setSortField] = useState<SortField>("detected_at");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
 
-  // WebSocket connection for real-time updates
-  useEffect(() => {
-    const connectWebSocket = () => {
-      try {
-        // Build WebSocket URL from environment or current location
-        const wsUrl =
-          process.env.NEXT_PUBLIC_WS_URL ||
-          (() => {
-            const protocol =
-              window.location.protocol === "https:" ? "wss:" : "ws:";
-            const host = window.location.host || "localhost:8000";
-            return `${protocol}//${host}/dashboard/ws`;
-          })();
-
-        const ws = new WebSocket(wsUrl);
-
-        ws.onopen = () => {
-          setIsConnected(true);
-          console.log("Dashboard WebSocket connected");
-        };
-
-        ws.onmessage = (event) => {
-          const data = JSON.parse(event.data);
-          handleWebSocketMessage(data);
-          setLastUpdate(new Date());
-        };
-
-        ws.onclose = () => {
-          setIsConnected(false);
-          console.log("Dashboard WebSocket disconnected");
-          // Attempt to reconnect after 3 seconds
-          setTimeout(connectWebSocket, 3000);
-        };
-
-        ws.onerror = (error) => {
-          console.error("WebSocket error:", error);
-          setIsConnected(false);
-        };
-
-        return ws;
-      } catch (error) {
-        console.error("Failed to connect WebSocket:", error);
-        setIsConnected(false);
-        return null;
-      }
-    };
-
-    const ws = connectWebSocket();
-
-    return () => {
-      if (ws) {
-        ws.close();
-      }
-    };
-  }, [handleWebSocketMessage]);
-
   // Fetch incidents from backend (updated with filters and pagination)
   const fetchIncidents = useCallback(async () => {
     if (simulationMode) {
@@ -660,6 +604,62 @@ export const RefinedDashboard: React.FC = () => {
       currentSessionId,
     ]
   );
+
+  // WebSocket connection for real-time updates
+  useEffect(() => {
+    const connectWebSocket = () => {
+      try {
+        // Build WebSocket URL from environment or current location
+        const wsUrl =
+          process.env.NEXT_PUBLIC_WS_URL ||
+          (() => {
+            const protocol =
+              window.location.protocol === "https:" ? "wss:" : "ws:";
+            const host = window.location.host || "localhost:8000";
+            return `${protocol}//${host}/dashboard/ws`;
+          })();
+
+        const ws = new WebSocket(wsUrl);
+
+        ws.onopen = () => {
+          setIsConnected(true);
+          console.log("Dashboard WebSocket connected");
+        };
+
+        ws.onmessage = (event) => {
+          const data = JSON.parse(event.data);
+          handleWebSocketMessage(data);
+          setLastUpdate(new Date());
+        };
+
+        ws.onclose = () => {
+          setIsConnected(false);
+          console.log("Dashboard WebSocket disconnected");
+          // Attempt to reconnect after 3 seconds
+          setTimeout(connectWebSocket, 3000);
+        };
+
+        ws.onerror = (error) => {
+          console.error("WebSocket error:", error);
+          setIsConnected(false);
+        };
+
+        return ws;
+      } catch (error) {
+        console.error("Failed to connect WebSocket:", error);
+        setIsConnected(false);
+        return null;
+      }
+    };
+
+    const ws = connectWebSocket();
+
+    return () => {
+      if (ws) {
+        ws.close();
+      }
+    };
+  }, [handleWebSocketMessage]);
 
   // Initialize default agents if none are loaded
   useEffect(() => {

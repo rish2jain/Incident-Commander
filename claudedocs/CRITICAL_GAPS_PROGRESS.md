@@ -75,26 +75,37 @@
 ## 🔴 PENDING - HIGH PRIORITY
 
 ### Recommendation 1: Re-edit Video to Follow 6-Phase Structure
-**Status**: NOT STARTED
+**Status**: ✅ SCRIPT READY - Awaiting Recording
 **Issue**: Video narrative doesn't match script structure
 
-**Current Video Problems**:
+**Original Video Problems**:
 - Skips Phase 1 (main dashboard with $2.8M savings)
 - Skips Phase 2 (incident trigger)
 - Shows phases out of order (4 → 5 → 3 instead of 1 → 2 → 3 → 4 → 5 → 6)
 - Missing Phase 6 (final results and MTTR)
+- Never clicked agent card to show RAG sources
 
-**Required Actions**:
-1. ⏳ Create video re-recording checklist
-2. ⏳ Script out 6-phase narrative sequence:
+**Script Completed** ✅ (Commit `3bd8e167`):
+1. ✅ Created comprehensive [VIDEO_RERECORDING_CHECKLIST.md](../VIDEO_RERECORDING_CHECKLIST.md)
+2. ✅ Complete 6-phase narrative with exact timing (total: 3-3.5 min):
    - **Phase 1** (15s): Main dashboard showing $2.8M savings
    - **Phase 2** (10s): "Database cascade" incident trigger
    - **Phase 3** (20s): Multi-agent coordination view
-   - **Phase 4** (15s): Byzantine consensus visualization
-   - **Phase 5** (20s): Transparency view with RAG sources
+   - **Phase 4** (18s): Byzantine consensus with CORRECTED weights
+   - **Phase 5** (25s): Transparency modal + RAG sources (DETAILED - 7s on Evidence tab)
    - **Phase 6** (10s): Return to dashboard with resolution and MTTR
-3. ⏳ Record new demo video following script exactly
-4. ⏳ Verify all promises in script are visible in video
+3. ⏳ Record new demo video following enhanced script
+4. ⏳ Verify all features demonstrated using post-recording checklist
+
+**Script Enhancements**:
+- **Critical Changes Section**: Upfront summary of all 5 fixes
+- **Phase 4**: Step-by-step weight demonstration (Resolution: 10%, Communication: 0%)
+- **Phase 5**: DETAILED RAG demonstration (17-item checklist, 7+ seconds on Evidence)
+- **Previously Missing Features**: Dedicated verification section for all 5 issues
+- **Mouse Movement Notes**: "Slow and deliberate - this is the money shot"
+- **Enhanced Narration**: Explicitly mentions all key values (94%, 89%, 86%, 85%, 10%, 0%)
+
+**Ready to Record**: All features verified working, no code changes needed
 
 ### Recommendation 4: Implement RAG Visualization
 **Status**: ✅ ALREADY IMPLEMENTED - Video Issue Only
@@ -182,13 +193,19 @@
 
 | Recommendation | Status | Completion | Notes |
 |----------------|--------|------------|-------|
-| #1: Re-edit video | ⏳ Pending | 0% | Needs 6-phase re-recording |
+| #1: Re-edit video | ✅ Script Ready | 80% | Detailed script complete, awaiting recording |
 | #2: Correct agent weights | ✅ Complete | 100% | Fixed in commit `843ce5bf` |
 | #3: Standardize threshold | ✅ Complete | 100% | All refs verified at 85% |
-| #4: Implement RAG viz | ✅ Already Done | 100% | Exists, needs video demo |
-| #5: Fix error display | ⏳ Pending | 0% | Source unknown |
+| #4: Implement RAG viz | ✅ Already Done | 100% | Exists, script includes demo |
+| #5: Fix error display | ⏳ Pending | 0% | Investigation needed |
 
-**Overall Progress**: 60% (3/5 recommendations complete, 2 need video work)
+**Overall Progress**: 76% (3 complete + 1 script ready, 1 pending investigation)
+
+**Breakdown**:
+- Code/Documentation Fixes: 100% complete (3/3)
+- Video Script: 100% complete (1/1)
+- Video Recording: 0% complete (0/1)
+- Error Investigation: 0% complete (0/1)
 
 ---
 

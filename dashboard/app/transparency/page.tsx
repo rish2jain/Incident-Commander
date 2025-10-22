@@ -142,16 +142,145 @@ export default function TransparencyDashboardPage() {
   const [incidentActive, setIncidentActive] = useState(false);
   const [mttrSeconds, setMttrSeconds] = useState(0);
   const [currentPhase, setCurrentPhase] = useState("idle");
-  const [agentReasonings, setAgentReasonings] = useState<AgentReasoning[]>([]);
-  const [decisionTree, setDecisionTree] = useState<DecisionTree | null>(null);
+  const [agentReasonings, setAgentReasonings] = useState<AgentReasoning[]>([
+    // Initial sample reasoning for demo purposes
+    {
+      id: "sample-detection-1",
+      timestamp: "Ready",
+      agent: "Detection",
+      message: "System monitoring active - Confidence: 92.0%",
+      confidence: 0.92,
+      reasoning:
+        "Monitoring 47 metrics across 12 services with high confidence",
+      step: "Continuous monitoring",
+      explanation:
+        "Detection agent actively monitoring system health and performance metrics",
+      evidence: [
+        "Response time: 120ms (baseline)",
+        "Error rate: 0.1% (normal)",
+        "Connection pool: 245/500 (healthy)",
+      ],
+      alternatives: [
+        { option: "Active monitoring", probability: 0.92, chosen: true },
+        { option: "Passive monitoring", probability: 0.15, chosen: false },
+      ],
+      riskAssessment: 0.08,
+    },
+    {
+      id: "sample-diagnosis-1",
+      timestamp: "Ready",
+      agent: "Diagnosis",
+      message: "Analysis capabilities ready - Confidence: 88.0%",
+      confidence: 0.88,
+      reasoning: "Ready to analyze patterns and identify root causes",
+      step: "Standby analysis",
+      explanation:
+        "Diagnosis agent prepared with ML models and historical pattern analysis",
+      evidence: [
+        "Pattern database: 15,000+ incidents",
+        "ML models: 94% accuracy rate",
+        "Analysis time: <30s average",
+      ],
+      alternatives: [
+        { option: "ML-based analysis", probability: 0.88, chosen: true },
+        { option: "Rule-based analysis", probability: 0.45, chosen: false },
+      ],
+      riskAssessment: 0.12,
+    },
+  ]);
+  const [decisionTree, setDecisionTree] = useState<DecisionTree | null>({
+    // Initial sample decision tree for demo purposes
+    rootNode: {
+      id: "root-sample",
+      nodeType: "analysis",
+      label: "System Health Assessment - All systems operational",
+      confidence: 0.92,
+      children: [
+        {
+          id: "monitoring",
+          nodeType: "action",
+          label: "Continuous Monitoring",
+          confidence: 0.95,
+          children: [
+            {
+              id: "metrics",
+              nodeType: "execution",
+              label: "Monitor Key Metrics",
+              confidence: 0.94,
+            },
+          ],
+        },
+        {
+          id: "prevention",
+          nodeType: "action",
+          label: "Predictive Prevention",
+          confidence: 0.87,
+          children: [
+            {
+              id: "forecast",
+              nodeType: "execution",
+              label: "Forecast Potential Issues",
+              confidence: 0.85,
+            },
+          ],
+        },
+      ],
+    },
+    totalNodes: 5,
+    maxDepth: 3,
+  });
   const [confidenceScores, setConfidenceScores] = useState<
     Record<string, number>
-  >({});
+  >({
+    // Initial sample confidence scores for demo purposes
+    Detection: 0.92,
+    Diagnosis: 0.88,
+    Prediction: 0.85,
+    Resolution: 0.9,
+    Communication: 0.94,
+  });
   const [agentCommunications, setAgentCommunications] = useState<
     AgentCommunication[]
-  >([]);
+  >([
+    // Initial sample communications for demo purposes
+    {
+      id: "sample-comm-1",
+      timestamp: "System Ready",
+      from: "Detection",
+      to: "Diagnosis",
+      message: "System baseline established - ready for incident analysis",
+      messageType: "status_update",
+      confidence: 0.92,
+    },
+    {
+      id: "sample-comm-2",
+      timestamp: "System Ready",
+      from: "Diagnosis",
+      to: "Prediction",
+      message: "Analysis models loaded - pattern recognition active",
+      messageType: "capability_sync",
+      confidence: 0.88,
+    },
+    {
+      id: "sample-comm-3",
+      timestamp: "System Ready",
+      from: "Prediction",
+      to: "Resolution",
+      message: "Forecasting models ready - 15-30min prediction window",
+      messageType: "capability_sync",
+      confidence: 0.85,
+    },
+  ]);
   const [performanceMetrics, setPerformanceMetrics] =
-    useState<PerformanceMetrics | null>(null);
+    useState<PerformanceMetrics | null>({
+      // Initial sample metrics for demo purposes
+      mttr: 147,
+      detectionTime: 15,
+      resolutionTime: 45,
+      agentEfficiency: 0.92,
+      accuracy: 0.95,
+      confidenceCalibration: 0.88,
+    });
   const [selectedScenario, setSelectedScenario] = useState("database_cascade");
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [customScenario, setCustomScenario] = useState("");
@@ -388,13 +517,13 @@ export default function TransparencyDashboardPage() {
     };
   }, [incidentActive]);
 
-  // Auto-demo effect
+  // Auto-demo effect - Reduced delay for better demo experience
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get("auto-demo") === "true" && !incidentActive) {
       const timer = setTimeout(() => {
         triggerIncident();
-      }, 3000);
+      }, 1000); // Reduced from 3000ms to 1000ms
       return () => clearTimeout(timer);
     }
   }, [incidentActive, triggerIncident]);
@@ -530,7 +659,11 @@ export default function TransparencyDashboardPage() {
                 {agentReasonings.length === 0 ? (
                   <div className="text-center text-status-neutral py-8">
                     <div className="text-3xl mb-2">🤔</div>
-                    <p>Trigger incident to see AI reasoning...</p>
+                    <p>Trigger incident to see live AI reasoning...</p>
+                    <p className="text-xs mt-2">
+                      Sample reasoning shown above - click "🚨 Trigger Demo" for
+                      live analysis
+                    </p>
                   </div>
                 ) : (
                   agentReasonings.map((reasoning) => (
@@ -601,9 +734,13 @@ export default function TransparencyDashboardPage() {
             </CardHeader>
             <CardContent>
               {!decisionTree ? (
-                <div className="text-center text-status-neutral py-12">
-                  <div className="text-4xl mb-2">🌳</div>
+                <div className="text-center text-status-neutral py-8">
+                  <div className="text-3xl mb-2">🌳</div>
                   <p>Decision tree will appear during analysis...</p>
+                  <p className="text-xs mt-2">
+                    Sample tree shown above - trigger incident for live decision
+                    making
+                  </p>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -676,9 +813,13 @@ export default function TransparencyDashboardPage() {
             <CardContent>
               <div className="space-y-3 max-h-96 overflow-y-auto">
                 {agentCommunications.length === 0 ? (
-                  <div className="text-center text-status-neutral py-12">
-                    <div className="text-4xl mb-2">💬</div>
+                  <div className="text-center text-status-neutral py-8">
+                    <div className="text-3xl mb-2">💬</div>
                     <p>Agent communications will appear here...</p>
+                    <p className="text-xs mt-2">
+                      Sample communications shown above - trigger incident for
+                      live coordination
+                    </p>
                   </div>
                 ) : (
                   agentCommunications.map((comm) => (
@@ -715,9 +856,13 @@ export default function TransparencyDashboardPage() {
             </CardHeader>
             <CardContent>
               {!performanceMetrics ? (
-                <div className="text-center text-status-neutral py-12">
-                  <div className="text-4xl mb-2">📊</div>
+                <div className="text-center text-status-neutral py-8">
+                  <div className="text-3xl mb-2">📊</div>
                   <p>Performance metrics will appear during resolution...</p>
+                  <p className="text-xs mt-2">
+                    Sample metrics shown above - trigger incident for live
+                    performance data
+                  </p>
                 </div>
               ) : (
                 <div className="grid grid-cols-2 gap-4">

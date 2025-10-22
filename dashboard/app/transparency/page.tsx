@@ -104,6 +104,7 @@ interface Scenario {
   mttr: number;
 }
 
+// Scenario metadata loaded from cached AWS-generated scenarios
 const SCENARIOS: Record<string, Scenario> = {
   database_cascade: {
     name: "Database Cascade Failure",
@@ -147,6 +148,8 @@ export default function TransparencyDashboardPage() {
   const [incidentActive, setIncidentActive] = useState(false);
   const [mttrSeconds, setMttrSeconds] = useState(0);
   const [currentPhase, setCurrentPhase] = useState("idle");
+  const [cachedScenario, setCachedScenario] = useState<any>(null);
+  const [scenarioMetadata, setScenarioMetadata] = useState<any>(null);
   const [agentReasonings, setAgentReasonings] = useState<AgentReasoning[]>([
     // Initial sample reasoning for demo purposes
     {
@@ -381,6 +384,28 @@ export default function TransparencyDashboardPage() {
     []
   );
 
+  // Load cached AWS-generated scenario
+  const loadCachedScenario = useCallback(async (scenarioType: string) => {
+    try {
+      const response = await fetch(`/scenarios/${scenarioType}.json`);
+      if (response.ok) {
+        const data = await response.json();
+        setCachedScenario(data);
+        setScenarioMetadata(data.metadata);
+
+        // Load AWS-generated agent reasonings if available
+        if (data.agent_reasonings && data.agent_reasonings.length > 0) {
+          console.log("✓ Loaded AWS-generated reasonings from cache");
+        }
+
+        return data;
+      }
+    } catch (error) {
+      console.warn("Failed to load cached scenario, using simulated data:", error);
+    }
+    return null;
+  }, []);
+
   // Main incident trigger function
   const triggerIncident = useCallback(async () => {
     if (incidentActive) return;
@@ -392,6 +417,49 @@ export default function TransparencyDashboardPage() {
     setAgentCommunications([]);
     setConfidenceScores({});
 
+    // Check if we have cached AWS-generated scenario data
+    const useAwsData = cachedScenario && cachedScenario.agent_reasonings;
+
+    if (useAwsData) {
+      console.log("✓ Using AWS-generated scenario data from cache");
+
+      // Load AWS-generated agent reasonings progressively
+      const reasonings = cachedScenario.agent_reasonings;
+      for (let i = 0; i < reasonings.length; i++) {
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        setAgentReasonings((prev) => [reasonings[i], ...prev]);
+
+        // Update confidence scores
+        setConfidenceScores((prev) => ({
+          ...prev,
+          [reasonings[i].agent]: reasonings[i].confidence,
+        }));
+      }
+
+      // Load AWS-generated decision tree
+      if (cachedScenario.decision_tree) {
+        setDecisionTree(cachedScenario.decision_tree);
+      }
+
+      // Load AWS-generated communications
+      if (cachedScenario.agent_communications) {
+        setAgentCommunications(cachedScenario.agent_communications);
+      }
+
+      // Load AWS-generated metrics
+      if (cachedScenario.performance_metrics) {
+        setPerformanceMetrics(cachedScenario.performance_metrics);
+      }
+
+      setTimeout(() => {
+        setCurrentPhase("complete");
+        setIncidentActive(false);
+      }, reasonings.length * 2000 + 1000);
+
+      return;
+    }
+
+    // Fallback to simulated data if no AWS data available
     // Phase 1: Detection
     simulateAgentReasoning(
       "Detection",
@@ -507,7 +575,7 @@ export default function TransparencyDashboardPage() {
       setCurrentPhase("complete");
       setIncidentActive(false);
     }, 9000);
-  }, [incidentActive, simulateAgentReasoning]);
+  }, [incidentActive, simulateAgentReasoning, cachedScenario]);
 
   // MTTR timer
   useEffect(() => {
@@ -521,6 +589,13 @@ export default function TransparencyDashboardPage() {
       if (interval) clearInterval(interval);
     };
   }, [incidentActive]);
+
+  // Load cached scenario when selection changes
+  useEffect(() => {
+    if (!showCustomInput && selectedScenario) {
+      loadCachedScenario(selectedScenario);
+    }
+  }, [selectedScenario, showCustomInput, loadCachedScenario]);
 
   // Auto-demo effect - Reduced delay for better demo experience
   useEffect(() => {
@@ -565,6 +640,30 @@ export default function TransparencyDashboardPage() {
           </Button>
         </div>
       </DashboardSection>
+
+      {/* AWS Attribution Badge */}
+      {scenarioMetadata && (
+        <DashboardSection variant="glass" className="mb-4">
+          <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center gap-3">
+              <Badge variant="outline" className="bg-orange-500/20 text-orange-200 border-orange-500/50">
+                🧠 AWS-Generated Scenario
+              </Badge>
+              <span className="text-slate-400">
+                Generated: {new Date(scenarioMetadata.generated_at).toLocaleDateString()}
+              </span>
+              {scenarioMetadata.aws_services_used && scenarioMetadata.aws_services_used.length > 0 && (
+                <span className="text-slate-400">
+                  Services: {scenarioMetadata.aws_services_used.join(", ") || "Cached Demo Data"}
+                </span>
+              )}
+            </div>
+            <Badge variant="default" className="bg-purple-500/20 text-purple-200 border-purple-500/50">
+              Phase 0: Hybrid Approach
+            </Badge>
+          </div>
+        </DashboardSection>
+      )}
 
       {/* Scenario Selection */}
       <DashboardSection

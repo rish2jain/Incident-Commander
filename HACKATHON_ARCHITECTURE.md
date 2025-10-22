@@ -196,7 +196,13 @@ class AWSAIOrchestrator:
 #### Byzantine Fault Tolerance
 
 - Handles up to 1/3 compromised agents
-- Weighted consensus (Diagnosis: 0.4, Prediction: 0.3, Detection: 0.2, Resolution: 0.1)
+- Weighted consensus voting (4 voting agents, weights sum to 1.0):
+  - Diagnosis: 0.4 (40% weight - highest for root cause analysis)
+  - Prediction: 0.3 (30% weight - forecasting impact)
+  - Detection: 0.2 (20% weight - anomaly identification)
+  - Resolution: 0.1 (10% weight - execution validation)
+  - Communication: 0.0 (non-voting - informational only)
+- Consensus threshold: 85% weighted agreement required for autonomous action
 - Circuit breaker pattern with 5 failure threshold
 
 ### 🚀 Deployment Architecture

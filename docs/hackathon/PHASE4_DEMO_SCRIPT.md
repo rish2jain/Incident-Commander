@@ -1,13 +1,16 @@
 # Phase 4 Enhanced Demo Script - Judge-Friendly Version
-**Last Updated**: October 21, 2025
+
+**Last Updated**: October 21, 2025 - LATEST DEMO RECORDING UPDATE
 **Includes**: Enhanced Dashboard UX (Byzantine Consensus Viz, Trust Indicators, Agent Transparency)
+**Latest Recording**: Session 20251021_235144 (154.2s comprehensive coverage)
 
 ## Demo Overview
 
-**Duration**: 2-5 minutes (configurable presets)
+**Duration**: 2.5 minutes (latest comprehensive recording) or configurable presets
 **Audience**: Hackathon judges and technical evaluators
 **Key Message**: Production-ready AI incident management with proven business value
 **New Features**: Interactive dashboard with visible Byzantine consensus and RAG sources
+**Latest Assets**: 23 screenshots, 154.2s HD recording with complete feature coverage
 
 ## Pre-Demo Setup (30 seconds)
 
@@ -28,48 +31,55 @@ make demo-interactive
 
 ## Demo Preset Options
 
-### Option 1: Quick Demo (2 minutes) - Recommended for Initial Judging
+### Option 1: Latest Comprehensive Demo (2.5 minutes) - RECOMMENDED FOR SUBMISSION
 
+**Video**: `demo_recordings/videos/4d76376f8249437e5a422f3900f09892.webm` (Session 20251021_235144)
 **Narrative**: "Let me show you the world's first production-ready AI incident commander with proven $2.8M annual savings."
 
 **Sequence**:
 
-1. **System Overview** (15 seconds) ⭐ UPDATED
+1. **System Overview & Professional Introduction** (20s) ⭐ UPDATED
 
-   - Navigate to `/ops` dashboard with enhanced UX
-   - 5 AI agents visible with clickable cards
-   - Live business impact: $2.8M savings, 95% MTTR improvement
-   - **NEW**: Byzantine consensus visualization showing weighted voting
+   - Operations dashboard with enterprise-grade interface
+   - Live business metrics: $2.8M savings, 458% ROI
+   - AI Agent status panel (5 specialized agents)
+   - Incident scenario selection interface
 
-2. **Incident Simulation** (45 seconds) ⭐ UPDATED
+2. **Incident Trigger & Multi-Agent Activation** (15s) ⭐ UPDATED
 
-   - Trigger high-severity API gateway failure
-   - Watch agents coordinate in real-time
-   - **NEW**: Click any agent card to see:
-     - Real-time reasoning and confidence breakdown
-     - Amazon Titan Embeddings RAG sources (94%, 89%, 86% similarity)
-     - AWS Bedrock Guardrails status
-   - Byzantine consensus updates live (Detection: 0.2, Diagnosis: 0.4, etc.)
-   - Sub-3 minute resolution with cost tracking
+   - Database cascade incident simulation
+   - Multi-agent system activation demonstration
+   - Real-time agent coordination visualization
+   - Initial analysis phase progression
 
-3. **Enhanced UX Features** (20 seconds) ⭐ NEW
+3. **AI Transparency & Explainability Showcase** (45s) ⭐ UPDATED
 
-   - **Trust Indicators**: Hover over security badges
-     - Guardrails ✅, PII Redaction ✅, Circuit Breaker ✅
-   - **Transparency Modal**: Full agent reasoning visible without navigation
-   - **Consensus Visualization**: Weighted voting proves Byzantine fault tolerance
+   - AI Transparency dashboard navigation
+   - Agent Reasoning tab - How AI thinks and analyzes evidence
+   - Confidence tab - Confidence scores and uncertainty quantification
+   - Complete explainability system demonstration
+   - Professional scenario selection interface
 
-4. **Business Value** (30 seconds)
+4. **Byzantine Consensus & Autonomous Resolution** (25s) ⭐ UPDATED
 
-   - ROI calculation: 458% first-year return
-   - Cost per incident: $47 vs $5,600 traditional
-   - Predictive prevention: 85% incidents avoided
-   - **NEW**: Transparent AI decision-making builds trust
+   - Byzantine fault-tolerant consensus demonstration
+   - Agent agreement visualization (94% confidence)
+   - Autonomous resolution execution
+   - Real-time system recovery monitoring
 
-5. **Judge Interaction** (20 seconds)
-   - Click different agent cards to explore
-   - Interactive consensus visualization
-   - Custom incident creation available
+5. **Operations Dashboard & Enterprise Features** (15s) ⭐ NEW
+
+   - Enterprise-grade operations interface
+   - Phase 2 UI features: Advanced filtering with status/severity dropdowns
+   - Professional pagination with navigation controls
+   - Interactive column sorting with visual indicators
+
+6. **Business Impact & Competitive Advantages** (15s) ⭐ UPDATED
+
+   - Incident resolution success (sub-3 minute MTTR)
+   - Business impact metrics ($2.8M annual savings, 458% ROI)
+   - Competitive advantages showcase (8/8 AWS AI services)
+   - Unique differentiators presentation
 
 ### Option 2: Technical Deep Dive (5 minutes) - For Technical Judges
 
@@ -82,11 +92,14 @@ make demo-interactive
    - All 8 AWS AI services integrated
    - Multi-agent consensus with weighted voting
    - **NEW**: Byzantine consensus visualization makes algorithm visible
-     - Detection Agent: 20% weight
-     - Diagnosis Agent: 40% weight (highest)
-     - Prediction Agent: 30% weight
-     - Resolution Agent: 20% weight
-     - Communication Agent: 10% weight
+     - **Voting Agents** (weights sum to 1.0):
+       - Diagnosis Agent: 40% weight (highest - root cause analysis)
+       - Prediction Agent: 30% weight (impact forecasting)
+       - Detection Agent: 20% weight (anomaly identification)
+       - Resolution Agent: 10% weight (execution validation)
+     - **Non-Voting Agent**:
+       - Communication Agent: 0% weight (informational only)
+     - **Consensus Threshold**: 85% weighted agreement for autonomous action
    - Real-time observability and tracing
 
 2. **Security & Compliance** (60 seconds) ⭐ UPDATED

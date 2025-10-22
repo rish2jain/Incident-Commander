@@ -58,7 +58,7 @@ interface ConsensusData {
     agent_name: string;
     confidence: number;
     weight: number;
-    status: "voting" | "agreed" | "abstained" | "error";
+    status: "voting" | "agreed" | "abstained" | "error" | "informational";
     reasoning_summary?: string;
   }>;
   weighted_consensus: number;
@@ -434,7 +434,7 @@ export function EnhancedOperationsDashboard() {
         agent_type: "resolution",
         agent_name: "Resolution Agent",
         confidence: 0.95,
-        weight: 0.2,
+        weight: 0.1,
         status: "agreed",
         reasoning_summary: "Remediation plan validated",
       },
@@ -442,12 +442,12 @@ export function EnhancedOperationsDashboard() {
         agent_type: "communication",
         agent_name: "Communication Agent",
         confidence: 0.88,
-        weight: 0.1,
-        status: "agreed",
-        reasoning_summary: "Stakeholder notifications ready",
+        weight: 0,
+        status: "informational",
+        reasoning_summary: "Stakeholder notifications ready (non-voting)",
       },
     ],
-    weighted_consensus: 0.882,
+    weighted_consensus: 0.888,
     consensus_threshold: 0.85,
     consensus_reached: true,
     decision: "approved",

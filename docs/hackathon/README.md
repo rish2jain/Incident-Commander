@@ -8,6 +8,7 @@
 - **Observability:** ✅ OpenTelemetry tracing, Prometheus metrics, real-time monitoring, and performance dashboards.
 - **FinOps Integration:** ✅ Cost-aware orchestration, budget enforcement, adaptive model routing, and ROI tracking.
 - **Demo Experience:** ✅ Judge-friendly presets, interactive controls, fallback mechanisms, and automated setup.
+- **Enhanced Dashboard:** ✅ Byzantine consensus visualization, agent transparency modals, RAG sources display, trust indicators.
 - **Validation:** ✅ Comprehensive test suite, LocalStack integration, performance testing, and health monitoring.
 
 ## Submission Asset Checklist - Phase 4 Enhanced
@@ -84,8 +85,41 @@ make demo-reset      # Reset to initial state
 make cleanup-demo    # Full cleanup
 ```
 
+## Enhanced Dashboard (October 2025) ⭐ NEW
+
+The `/ops` dashboard has been significantly enhanced to make technical claims visible to judges:
+
+### Key Features
+- **Clickable Agent Cards**: Click any agent to see detailed transparency modal (no need to navigate to /transparency)
+- **Byzantine Consensus Visualization**: Real-time weighted voting display showing each agent's contribution
+- **Trust Indicators**: Visual badges for Guardrails, PII redaction, Circuit Breaker, Rollback, and RAG integration
+- **RAG Sources Display**: Shows Amazon Titan Embeddings evidence with similarity scores (94%, 89%, 86%)
+- **Agent Transparency**: 4-tab modal showing Reasoning, Confidence breakdown, Evidence sources, and Guardrails
+
+### Components Added
+- `EnhancedOperationsDashboard.tsx` - Main integration component
+- `AgentTransparencyModal.tsx` - Detailed agent transparency
+- `ByzantineConsensusVisualization.tsx` - Weighted voting display
+- `TrustIndicators.tsx` - Security feature badges
+
+### Demo Value
+- **Before**: Had to explain Byzantine consensus verbally
+- **After**: Judges see weighted voting in real-time (Detection: 0.2, Diagnosis: 0.4, Prediction: 0.3, etc.)
+- **Impact**: Proves technical claims are real, not just slides
+
+### Quick Start
+```bash
+# Start backend and dashboard
+cd dashboard && npm run dev
+# Open browser to http://localhost:3000/ops
+# Click any agent card to see transparency modal
+```
+
+**Documentation**: See `DASHBOARD_UPDATE_SUMMARY.md` for complete details
+
 ## Reference Documents
 
+- `DASHBOARD_UPDATE_SUMMARY.md` – enhanced dashboard architecture and features
 - `docs/gap_analysis.md` – authoritative list of incomplete capabilities
 - `DEPLOYMENT_CHECKLIST_AND_ROLLBACK_PLAN.md` – production deployment procedures
 - `ENTERPRISE_DEPLOYMENT_GUIDE.md` – environment-specific configuration

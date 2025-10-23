@@ -11,7 +11,7 @@ export function PowerDashboard() {
   // Demo state management
   const [demoStep, setDemoStep] = useState(6); // Start completed
   const [isPlaying, setIsPlaying] = useState(false);
-  const [animationSpeed, setAnimationSpeed] = useState(2000); // 2x speed
+  const [animationSpeed, setAnimationSpeed] = useState(2000); // 1x speed
   const [liveMetrics, setLiveMetrics] = useState({
     incidentsResolved: 47,
     timeSaved: "18h 23m",
@@ -102,7 +102,7 @@ export function PowerDashboard() {
       return `Step ${demoStep} of 6 - ${steps[demoStep]}`;
     }
     if (demoStep === 6)
-      return "Incident resolved - Database Cascade Failure (completed in 32s)";
+      return "Incident resolved - Database Cascade Failure (completed in 32s) (mock)";
     return `Paused at step ${demoStep} of 6`;
   };
 
@@ -146,13 +146,13 @@ export function PowerDashboard() {
           </p>
           <div className="flex items-center justify-center gap-3 mt-4">
             <span className="px-3 py-1 bg-green-600 rounded text-sm">
-              ✅ {liveMetrics.incidentsResolved} Incidents Resolved Today
+              ✅ {liveMetrics.incidentsResolved} Incidents Resolved Today (mock)
             </span>
             <span className="px-3 py-1 bg-blue-600 rounded text-sm">
-              ⚡ 2.5min Average Resolution
+              ⚡ 2.5min Average Resolution (mock)
             </span>
             <span className="px-3 py-1 bg-purple-600 rounded text-sm">
-              🔥 Zero-Touch Streak: 47
+              🔥 Zero-Touch Streak: 47 (mock)
             </span>
           </div>
         </div>
@@ -163,29 +163,33 @@ export function PowerDashboard() {
           <div className="space-y-6">
             <div className="bg-slate-800/50 border border-blue-500/30 rounded-lg p-6">
               <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                ⏱️ LIVE SAVINGS TODAY
+                ⏱️ LIVE SAVINGS TODAY (MOCK)
               </h3>
               <div className="space-y-3">
                 <div className="flex justify-between">
-                  <span className="text-slate-400">Incidents Resolved:</span>
+                  <span className="text-slate-400">
+                    Incidents Resolved (mock):
+                  </span>
                   <span className="text-2xl font-bold text-green-400">
                     {liveMetrics.incidentsResolved}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400">Time Saved:</span>
+                  <span className="text-slate-400">Time Saved (mock):</span>
                   <span className="text-2xl font-bold text-blue-400">
                     {liveMetrics.timeSaved}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400">Cost Avoided:</span>
+                  <span className="text-slate-400">Cost Avoided (mock):</span>
                   <span className="text-2xl font-bold text-purple-400">
                     ${Math.floor(liveMetrics.costAvoided / 1000)}K
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400">Human Interventions:</span>
+                  <span className="text-slate-400">
+                    Human Interventions (mock):
+                  </span>
                   <span className="text-2xl font-bold text-green-400">0</span>
                 </div>
               </div>
@@ -193,7 +197,7 @@ export function PowerDashboard() {
 
             <div className="bg-slate-800/50 border border-green-500/30 rounded-lg p-6">
               <h3 className="text-lg font-semibold mb-4">
-                🤖 Multi-Agent Status
+                🤖 Multi-Agent Status (Mock)
               </h3>
               <div className="space-y-2">
                 {Array.from({ length: 5 }, (_, i) => getAgentStatus(i)).map(
@@ -256,7 +260,9 @@ export function PowerDashboard() {
             </div>
 
             <div className="bg-gradient-to-br from-amber-900/30 to-orange-900/30 border border-amber-500/50 rounded-lg p-6">
-              <h3 className="text-lg font-semibold mb-4">🏆 INDUSTRY FIRSTS</h3>
+              <h3 className="text-lg font-semibold mb-4">
+                🏆 INDUSTRY FIRSTS (Mock)
+              </h3>
               <div className="space-y-2 text-sm">
                 {[
                   "Byzantine fault-tolerant consensus",
@@ -279,13 +285,15 @@ export function PowerDashboard() {
           <div className="space-y-6">
             <div className="bg-slate-800/50 border border-purple-500/30 rounded-lg p-6">
               <h3 className="text-lg font-semibold mb-4">
-                📊 IMPACT COMPARISON
+                📊 IMPACT COMPARISON (Mock)
               </h3>
               <div className="space-y-4">
                 <div className="p-3 bg-red-900/20 border border-red-500/30 rounded-lg">
                   <div className="flex justify-between items-center">
                     <div>
-                      <p className="text-sm text-slate-400">Manual Response</p>
+                      <p className="text-sm text-slate-400">
+                        Manual Response (mock)
+                      </p>
                       <p className="text-2xl font-bold text-red-400">30.2m</p>
                     </div>
                     <span className="text-4xl">😰</span>
@@ -294,7 +302,9 @@ export function PowerDashboard() {
                 <div className="p-3 bg-green-900/20 border border-green-500/30 rounded-lg">
                   <div className="flex justify-between items-center">
                     <div>
-                      <p className="text-sm text-slate-400">AI Response</p>
+                      <p className="text-sm text-slate-400">
+                        AI Response (mock)
+                      </p>
                       <p className="text-2xl font-bold text-green-400">2.5m</p>
                     </div>
                     <span className="text-4xl">✓</span>
@@ -304,7 +314,7 @@ export function PowerDashboard() {
                   <div className="flex justify-between">
                     <span className="text-slate-400">Improvement:</span>
                     <span className="text-xl font-bold text-green-400">
-                      91.8% faster
+                      91.8% faster (mock)
                     </span>
                   </div>
                 </div>
@@ -313,7 +323,7 @@ export function PowerDashboard() {
 
             <div className="bg-slate-800/50 border border-blue-500/30 rounded-lg p-6">
               <h3 className="text-lg font-semibold mb-4">
-                ⏰ INCIDENT TIMELINE
+                ⏰ INCIDENT TIMELINE (Mock)
               </h3>
               <div className="space-y-3">
                 {[
@@ -385,11 +395,13 @@ export function PowerDashboard() {
                 ))}
                 <div className="border-t border-green-500/50 pt-3 mt-4 text-center">
                   <p className="text-sm text-slate-400">
-                    Total Resolution Time
+                    Total Resolution Time (Mock)
                   </p>
-                  <p className="text-3xl font-bold text-green-400">32s</p>
+                  <p className="text-3xl font-bold text-green-400">
+                    32s (mock)
+                  </p>
                   <p className="text-xs text-slate-500 mt-1">
-                    vs 30+ minutes manual (98.2% faster)
+                    vs 30+ minutes manual (98.2% faster) (mock)
                   </p>
                 </div>
               </div>
@@ -400,7 +412,7 @@ export function PowerDashboard() {
           <div className="space-y-6">
             <div className="bg-slate-800/50 border border-green-500/30 rounded-lg p-6">
               <h3 className="text-lg font-semibold mb-4">
-                🔄 AGENT COORDINATION
+                🔄 AGENT COORDINATION (Mock)
               </h3>
               <div className="space-y-4">
                 <div className="p-4 bg-slate-700/50 rounded-lg">
@@ -449,7 +461,9 @@ export function PowerDashboard() {
             </div>
 
             <div className="bg-slate-800/50 border border-purple-500/30 rounded-lg p-6">
-              <h3 className="text-lg font-semibold mb-4">🧠 AI TRANSPARENCY</h3>
+              <h3 className="text-lg font-semibold mb-4">
+                🧠 AI TRANSPARENCY (Mock)
+              </h3>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <p className="text-xs font-semibold text-slate-400 uppercase">
@@ -518,7 +532,9 @@ export function PowerDashboard() {
           {/* Column 4: Business Impact & Predictions */}
           <div className="space-y-6">
             <div className="bg-gradient-to-br from-emerald-900/30 to-green-900/30 border border-emerald-500/50 rounded-lg p-6">
-              <h3 className="text-lg font-semibold mb-4">💰 BUSINESS IMPACT</h3>
+              <h3 className="text-lg font-semibold mb-4">
+                💰 BUSINESS IMPACT (MOCK)
+              </h3>
               <p className="text-xs text-slate-400 mb-4">This Incident</p>
               <div className="space-y-3">
                 <div className="space-y-2 text-sm">
@@ -540,7 +556,7 @@ export function PowerDashboard() {
                 <div className="border-t border-gray-700 pt-3 space-y-2">
                   <div className="flex justify-between items-center p-2 bg-red-900/20 rounded">
                     <span className="text-slate-400 text-sm">
-                      If Manual (30.2m):
+                      If Manual (30.2m) (mock):
                     </span>
                     <span className="font-semibold text-red-400">
                       $302K loss
@@ -548,7 +564,7 @@ export function PowerDashboard() {
                   </div>
                   <div className="flex justify-between items-center p-2 bg-blue-900/20 rounded">
                     <span className="text-slate-400 text-sm">
-                      AI Response (2.5m):
+                      AI Response (2.5m) (mock):
                     </span>
                     <span className="font-semibold text-blue-400">
                       $25K loss
@@ -557,9 +573,11 @@ export function PowerDashboard() {
                 </div>
                 <div className="border-t-2 border-green-500/50 pt-3 text-center">
                   <p className="text-sm text-slate-400 mb-1">SAVED</p>
-                  <p className="text-3xl font-bold text-green-400">$277K</p>
+                  <p className="text-3xl font-bold text-green-400">
+                    $277K (mock)
+                  </p>
                   <p className="text-xs text-green-300 mt-1">
-                    91.8% cost reduction
+                    91.8% cost reduction (mock)
                   </p>
                 </div>
               </div>
@@ -567,7 +585,7 @@ export function PowerDashboard() {
 
             <div className="bg-slate-800/50 border border-orange-500/30 rounded-lg p-6">
               <h3 className="text-lg font-semibold mb-4">
-                🔮 PREDICTED INCIDENTS
+                🔮 PREDICTED INCIDENTS (MOCK)
               </h3>
               <p className="text-xs text-slate-400 mb-4">Next 30 minutes</p>
               <div className="space-y-3">
@@ -576,7 +594,7 @@ export function PowerDashboard() {
                     title: "Memory leak in User Service",
                     confidence: 87,
                     action: "Preemptive restart at 15:00",
-                    impact: "Prevented $45K downtime",
+                    impact: "Prevented $45K downtime (mock)",
                     status: "preventive_action",
                   },
                   {
@@ -621,7 +639,9 @@ export function PowerDashboard() {
             </div>
 
             <div className="bg-gradient-to-br from-violet-900/30 to-purple-900/30 border border-violet-500/50 rounded-lg p-6">
-              <h3 className="text-lg font-semibold mb-4">⚔️ VS. COMPETITORS</h3>
+              <h3 className="text-lg font-semibold mb-4">
+                ⚔️ VS. COMPETITORS (Mock)
+              </h3>
               <div className="space-y-2 text-xs">
                 <div className="p-2 bg-slate-800/50 rounded">
                   <p className="font-semibold text-slate-300 mb-1">

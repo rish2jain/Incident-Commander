@@ -39,18 +39,20 @@ export const formatTimeSafe = (timestamp: string | Date, isClient: boolean) => {
     if (typeof timestamp === "string") {
       return timestamp;
     }
-    // Ensure timestamp is a valid Date object
-    if (timestamp instanceof Date && !isNaN(timestamp.getTime())) {
+    // Ensure timestamp is a Date object before calling toISOString
+    if (
+      timestamp &&
+      typeof timestamp === "object" &&
+      "toISOString" in timestamp
+    ) {
       return timestamp.toISOString();
     }
-    // Fallback for invalid dates
-    return new Date().toISOString();
+    return new Date().toISOString(); // Fallback
   }
 
   const date = typeof timestamp === "string" ? new Date(timestamp) : timestamp;
-  // Check if date is valid
-  if (isNaN(date.getTime())) {
-    return "Invalid Date";
+  if (!date || isNaN(date.getTime())) {
+    return new Date().toLocaleTimeString(); // Fallback for invalid dates
   }
   return date.toLocaleTimeString();
 };

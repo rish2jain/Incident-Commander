@@ -87,7 +87,15 @@ function ConnectionStatus({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <Card className={`mb-4 border-l-4 ${connected ? "border-l-green-500" : connecting ? "border-l-yellow-500" : "border-l-red-500"} transition-all`}>
+      <Card
+        className={`mb-4 border-l-4 ${
+          connected
+            ? "border-l-green-500"
+            : connecting
+            ? "border-l-yellow-500"
+            : "border-l-red-500"
+        } transition-all`}
+      >
         <CardContent className="py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -111,12 +119,17 @@ function ConnectionStatus({
                     <div className="text-xs text-slate-400 flex items-center gap-2">
                       {latency !== null && (
                         <>
-                          <span>Latency: <span className={quality?.color}>{latency.toFixed(0)}ms</span></span>
+                          <span>
+                            Latency:{" "}
+                            <span className={quality?.color}>
+                              {latency.toFixed(0)}ms
+                            </span>
+                          </span>
+                          {quality && <span className="text-slate-500">•</span>}
                           {quality && (
-                            <span className="text-slate-500">•</span>
-                          )}
-                          {quality && (
-                            <span className={quality.color}>{quality.text}</span>
+                            <span className={quality.color}>
+                              {quality.text}
+                            </span>
                           )}
                         </>
                       )}
@@ -144,7 +157,9 @@ function ConnectionStatus({
                     <WifiOff className="w-5 h-5 text-red-500" />
                   </motion.div>
                   <div>
-                    <div className="font-semibold text-red-400">Disconnected</div>
+                    <div className="font-semibold text-red-400">
+                      Disconnected
+                    </div>
                     <div className="text-xs text-slate-400">
                       {error || "Connection lost"}
                     </div>
@@ -253,7 +268,10 @@ function LiveAgentCard({
       transition={{ duration: 0.2 }}
     >
       <Card
-        className={`transition-all duration-200 hover:shadow-lg ${getStatusColor(state, confidence)}`}
+        className={`transition-all duration-200 hover:shadow-lg ${getStatusColor(
+          state,
+          confidence
+        )}`}
       >
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
@@ -292,8 +310,8 @@ function LiveAgentCard({
                   confidence >= 0.9
                     ? "text-green-400"
                     : confidence >= 0.7
-                      ? "text-blue-400"
-                      : "text-orange-400"
+                    ? "text-blue-400"
+                    : "text-orange-400"
                 }`}
               >
                 {(confidence * 100).toFixed(1)}%
@@ -349,7 +367,8 @@ function BusinessMetricsCard({
           <div className="space-y-1">
             <div className="text-xs text-slate-400">MTTR</div>
             <div className="text-2xl font-bold text-green-400">
-              {Math.floor(metrics.mttr_seconds / 60)}m {metrics.mttr_seconds % 60}s
+              {Math.floor(metrics.mttr_seconds / 60)}m{" "}
+              {metrics.mttr_seconds % 60}s
             </div>
           </div>
           <div className="space-y-1">
@@ -432,7 +451,7 @@ function IncidentCard({ incident }: { incident: any }) {
 
 // Main Dashboard Component
 export function ImprovedOperationsDashboardWebSocket() {
-  const timestamp = useClientSideTimestamp();
+  const isClient = useClientSideTimestamp();
 
   // WebSocket integration
   const {
@@ -454,17 +473,24 @@ export function ImprovedOperationsDashboardWebSocket() {
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-blue-400">
-              🚀 Operations Dashboard
-            </h1>
-            <p className="text-slate-400 mt-1">
-              Production Incident Response System - Live Monitoring
-            </p>
+          <div className="flex items-center gap-4">
+            <img
+              src="/swarm-ai-logo.png"
+              alt="SwarmAI"
+              className="w-10 h-10 object-contain"
+            />
+            <div>
+              <h1 className="text-3xl font-bold text-blue-400">
+                SwarmAI Operations
+              </h1>
+              <p className="text-slate-400 mt-1">
+                Production Incident Response System - Live Monitoring
+              </p>
+            </div>
           </div>
           <div className="text-right">
             <div className="text-sm text-slate-400">
-              {formatTimeSafe(timestamp)}
+              {isClient ? formatTimeSafe(new Date(), isClient) : "Loading..."}
             </div>
           </div>
         </div>
@@ -598,30 +624,52 @@ export function ImprovedOperationsDashboardWebSocket() {
                 <div className="space-y-1">
                   <div className="text-xs text-slate-400">CPU Usage</div>
                   <div className="text-xl font-bold">
-                    {systemHealth.cpu_percent.toFixed(1)}%
+                    {typeof systemHealth.cpu_percent === "number"
+                      ? `${systemHealth.cpu_percent.toFixed(1)}%`
+                      : "N/A"}
                   </div>
-                  <Progress value={systemHealth.cpu_percent} className="h-1" />
+                  {typeof systemHealth.cpu_percent === "number" && (
+                    <Progress
+                      value={systemHealth.cpu_percent}
+                      className="h-1"
+                    />
+                  )}
                 </div>
                 <div className="space-y-1">
                   <div className="text-xs text-slate-400">Memory</div>
                   <div className="text-xl font-bold">
-                    {systemHealth.memory_percent.toFixed(1)}%
+                    {typeof systemHealth.memory_percent === "number"
+                      ? `${systemHealth.memory_percent.toFixed(1)}%`
+                      : "N/A"}
                   </div>
-                  <Progress
-                    value={systemHealth.memory_percent}
-                    className="h-1"
-                  />
+                  {typeof systemHealth.memory_percent === "number" && (
+                    <Progress
+                      value={systemHealth.memory_percent}
+                      className="h-1"
+                    />
+                  )}
                 </div>
                 <div className="space-y-1">
-                  <div className="text-xs text-slate-400">Active Agents</div>
+                  <div className="text-xs text-slate-400">
+                    {systemHealth.active_agents !== undefined
+                      ? "Active Agents"
+                      : "WebSocket Connections"}
+                  </div>
                   <div className="text-xl font-bold text-blue-400">
-                    {systemHealth.active_agents}
+                    {systemHealth.active_agents ??
+                      systemHealth.websocket_connections ??
+                      "N/A"}
                   </div>
                 </div>
                 <div className="space-y-1">
                   <div className="text-xs text-slate-400">Avg Latency</div>
                   <div className="text-xl font-bold text-green-400">
-                    {systemHealth.avg_latency_ms.toFixed(0)}ms
+                    {(() => {
+                      const latency = systemHealth.avg_latency_ms;
+                      return typeof latency === "number"
+                        ? `${latency.toFixed(0)}ms`
+                        : "N/A";
+                    })()}
                   </div>
                 </div>
               </div>
@@ -632,8 +680,7 @@ export function ImprovedOperationsDashboardWebSocket() {
         {/* Footer */}
         <div className="text-center text-xs text-slate-500 pt-6 border-t border-slate-800">
           <p>
-            Dashboard 3: Production Operations • Real-time WebSocket
-            Integration
+            Dashboard 3: Production Operations • Real-time WebSocket Integration
           </p>
           <p className="mt-1">
             {connected ? (

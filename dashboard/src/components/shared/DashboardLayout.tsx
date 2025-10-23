@@ -7,6 +7,7 @@
 
 import React from "react";
 import { cn } from "@/lib/utils";
+import { SwarmAILogo } from "./SwarmAILogo";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -15,6 +16,8 @@ interface DashboardLayoutProps {
   icon?: string;
   className?: string;
   headerActions?: React.ReactNode;
+  showLogo?: boolean;
+  logoVariant?: "logo-only" | "logo-with-name";
 }
 
 export function DashboardLayout({
@@ -24,18 +27,31 @@ export function DashboardLayout({
   icon,
   className,
   headerActions,
+  showLogo = true,
+  logoVariant = "logo-with-name",
 }: DashboardLayoutProps) {
   return (
     <div className={cn("dashboard-container", className)}>
       {/* Dashboard Header */}
       <div className="dashboard-header">
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="dashboard-title">
-              {icon && <span className="mr-2">{icon}</span>}
-              {title}
-            </h1>
-            {subtitle && <p className="dashboard-subtitle">{subtitle}</p>}
+          <div className="flex items-center gap-4">
+            {showLogo && (
+              <div className="flex items-center">
+                <SwarmAILogo
+                  variant={logoVariant}
+                  size={logoVariant === "logo-only" ? "md" : "xl"}
+                  priority
+                />
+              </div>
+            )}
+            <div>
+              <h1 className="dashboard-title">
+                {icon && <span className="mr-2">{icon}</span>}
+                {title}
+              </h1>
+              {subtitle && <p className="dashboard-subtitle">{subtitle}</p>}
+            </div>
           </div>
           {headerActions && (
             <div className="flex items-center gap-3">{headerActions}</div>

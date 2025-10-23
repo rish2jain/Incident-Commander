@@ -21,7 +21,7 @@ DASHBOARD_BASE = os.environ.get(
 )
 DASHBOARD_PAGE = os.environ.get(
     "HACKATHON_DASHBOARD_URL",
-    f"{DASHBOARD_BASE}/comprehensive_demo_dashboard.html"
+    f"{DASHBOARD_BASE}"
 )
 WEBSOCKET_URL = os.environ.get(
     "HACKATHON_WEBSOCKET_URL",
@@ -111,7 +111,10 @@ def main():
         print(f"📊 Dashboard: {DASHBOARD_PAGE}")
         print(f"🔌 API: {API_BASE}")
         print(f"📡 WebSocket: {WEBSOCKET_URL}")
-        print("\n💡 Try triggering a demo scenario from the dashboard!")
+        print("\n💡 Navigate to:")
+        print("  • /demo - PowerDashboard (Executive presentation)")
+        print("  • /transparency - AI explainability dashboard")
+        print("  • /ops - Operations monitoring dashboard")
         print("Press Ctrl+C to stop...")
         
         # Keep running

@@ -20,6 +20,7 @@ import {
   ConfidenceScore,
   SeverityIndicator,
 } from "../../src/components/shared";
+import { motion, AnimatePresence } from "framer-motion";
 import ByzantineConsensusDemo from "../../src/components/ByzantineConsensusDemo";
 import PredictivePreventionDemo from "../../src/components/PredictivePreventionDemo";
 import { ReasoningPanel } from "../../src/components/enhanced/ReasoningPanel";
@@ -396,9 +397,7 @@ export default function TransparencyDashboardPage() {
         setScenarioMetadata(data.metadata);
 
         // Load AWS-generated agent reasonings if available
-        if (data.agent_reasonings && data.agent_reasonings.length > 0) {
-          console.log("✓ Loaded AWS-generated reasonings from cache");
-        }
+        // Data loaded from cache successfully
 
         return data;
       }
@@ -426,7 +425,7 @@ export default function TransparencyDashboardPage() {
     const useAwsData = cachedScenario && cachedScenario.agent_reasonings;
 
     if (useAwsData) {
-      console.log("✓ Using AWS-generated scenario data from cache");
+      // Using AWS-generated scenario data from cache
 
       // Load AWS-generated agent reasonings progressively
       const reasonings = cachedScenario.agent_reasonings;
@@ -671,9 +670,10 @@ export default function TransparencyDashboardPage() {
 
   return (
     <DashboardLayout
-      title="AI Transparency Dashboard"
+      title="SwarmAI Transparency"
       subtitle="Complete AI explainability for incident response - Deep technical demonstration"
-      icon="🧠"
+      showLogo={true}
+      logoVariant="logo-only"
     >
       {/* Status Bar */}
       <DashboardSection variant="glass" className="mb-4">
@@ -950,7 +950,10 @@ export default function TransparencyDashboardPage() {
         {/* Reasoning Tab - Enhanced with new ReasoningPanel */}
         <TabsContent value="reasoning" data-testid="panel-reasoning">
           <ReasoningPanel
-            reasoningSteps={agentReasonings}
+            reasoningSteps={agentReasonings.map((reasoning) => ({
+              ...reasoning,
+              step: reasoning.step || "Processing",
+            }))}
             onStepClick={(step) => {
               // Could track reasoning step interactions for analytics
             }}
@@ -961,13 +964,24 @@ export default function TransparencyDashboardPage() {
         {/* Decision Trees Tab - Enhanced with new DecisionTreeVisualization */}
         <TabsContent value="decisions" data-testid="panel-decisions">
           {decisionTree ? (
-            <DecisionTreeVisualization
-              rootNode={decisionTree.rootNode}
-              onNodeClick={(node) => {
-                // Could track decision node interactions for analytics
-              }}
-              className="w-full"
-            />
+            <Card className="card-glass">
+              <CardHeader>
+                <CardTitle>🌳 Decision Tree Analysis</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center text-status-neutral">
+                  <div className="text-4xl mb-3">🌳</div>
+                  <h3 className="text-lg font-medium mb-2">
+                    Decision Tree Available
+                  </h3>
+                  <p className="text-sm">Root: {decisionTree.rootNode.label}</p>
+                  <p className="text-xs mt-2 text-slate-500">
+                    Confidence:{" "}
+                    {(decisionTree.rootNode.confidence * 100).toFixed(1)}%
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
           ) : (
             <Card className="card-glass">
               <CardContent className="py-12">

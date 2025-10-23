@@ -626,7 +626,6 @@ export default function EnhancedTransparencyDashboard() {
       icon="🧠"
       headerActions={<ExportButton onExport={handleExport} />}
     >
-
       {/* Enhanced Status Bar */}
       <DashboardSection variant="glass" className="mb-4">
         <div className="flex items-center justify-between">
@@ -765,7 +764,7 @@ export default function EnhancedTransparencyDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <PredictivePreventionDemo
             className="w-full"
-            onPreventionComplete={() => console.log("Prevention demo complete")}
+            onPreventionComplete={() => {}}
           />
           <ByzantineConsensusDemo className="w-full" />
         </div>
@@ -795,7 +794,7 @@ export default function EnhancedTransparencyDashboard() {
         <TabsContent value="reasoning" data-testid="panel-reasoning">
           <ReasoningPanel
             reasoningSteps={agentReasonings}
-            onStepClick={(step) => console.log("Reasoning step clicked:", step)}
+            onStepClick={() => {}}
           />
         </TabsContent>
 
@@ -819,9 +818,7 @@ export default function EnhancedTransparencyDashboard() {
           ) : (
             <DecisionTreeVisualization
               rootNode={decisionTree.rootNode}
-              onNodeClick={(node) =>
-                console.log("Decision node clicked:", node)
-              }
+              onNodeClick={() => {}}
             />
           )}
         </TabsContent>
@@ -874,9 +871,7 @@ export default function EnhancedTransparencyDashboard() {
         <TabsContent value="communication" data-testid="panel-communication">
           <CommunicationPanel
             messages={agentCommunications}
-            onMessageClick={(message) =>
-              console.log("Message clicked:", message)
-            }
+            onMessageClick={() => {}}
           />
         </TabsContent>
 
@@ -918,7 +913,7 @@ export default function EnhancedTransparencyDashboard() {
                     baseline: 85,
                     unit: "%",
                     trend: performanceMetrics.trends?.accuracy?.map(
-                      (v) => v * 100
+                      (v: number) => v * 100
                     ) || [85, 88, 91, 94, 95],
                     target: 95,
                   },

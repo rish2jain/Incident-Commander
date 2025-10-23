@@ -28,7 +28,9 @@ export function ThemeToggle() {
       applyTheme(savedTheme);
     } else {
       // Check system preference
-      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      const prefersDark = window.matchMedia(
+        "(prefers-color-scheme: dark)"
+      ).matches;
       const initialTheme = prefersDark ? "dark" : "light";
       setTheme(initialTheme);
       applyTheme(initialTheme);
@@ -69,6 +71,7 @@ export function ThemeToggle() {
       onClick={toggleTheme}
       className="w-9 h-9 p-0 hover:bg-slate-800"
       title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+      aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
     >
       {theme === "dark" ? (
         <Sun className="w-4 h-4 text-yellow-400" />

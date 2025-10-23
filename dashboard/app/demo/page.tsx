@@ -1,31 +1,35 @@
 "use client";
 
-import { ExecutiveDashboard } from "@/components/ExecutiveDashboard";
+import { PowerDashboard } from "../../src/components/PowerDashboard";
 
 /**
- * Executive Dashboard Route - BUSINESS/EXECUTIVE VIEW
+ * PowerDashboard Route - INTERACTIVE DEMO VIEW (Updated)
  *
- * Dashboard 1: High-level business metrics and ROI demonstration.
- * Designed for executives, investors, and business stakeholders.
+ * Dashboard 1: Interactive incident demonstration with live timeline.
+ * Designed for hackathon presentations and technical demonstrations.
  *
  * Features:
- * - ROI and cost savings highlights
- * - Real-time business metrics
- * - Byzantine consensus visualization
- * - AWS services integration showcase
- * - Learning and improvement tracking
- * - Simple, non-technical presentation
+ * - Interactive incident timeline with playback controls
+ * - Live agent coordination visualization
+ * - Before vs After comparison widgets
+ * - Real-time business impact calculator
+ * - Enhanced transparency with side-by-side views
+ * - Predicted incidents section
+ * - Industry firsts highlight panel
+ * - Competitor comparison
+ * - Interactive hotspots and tooltips
+ * - Pre-populated demo state for immediate impact
  *
  * Use this for:
- * - Executive presentations
- * - Investor demos
- * - Business value proposition
- * - Hackathon pitches (business track)
+ * - Hackathon presentations
+ * - Technical demonstrations
+ * - Interactive judge evaluations
+ * - Power user showcases
  *
- * For technical details use:
+ * For other views use:
  * - Dashboard 2: /transparency (engineering deep-dive)
  * - Dashboard 3: /ops (live operations monitoring)
  */
 export default function DemoPage() {
-  return <ExecutiveDashboard />;
+  return <PowerDashboard />;
 }

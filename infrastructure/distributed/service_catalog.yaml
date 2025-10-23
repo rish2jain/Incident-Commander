@@ -1,0 +1,42 @@
+version: 0
+services:
+  detection-service:
+    description: LangGraph detection node exposed as stateless microservice.
+    owner: sre-platform
+    api:
+      rest_endpoint: /api/v1/incidents/detection
+      timeout_seconds: 5
+    dependencies: []
+  diagnosis-service:
+    description: Root cause analysis worker consuming detection events.
+    owner: sre-platform
+    api:
+      rest_endpoint: /api/v1/incidents/diagnosis
+      timeout_seconds: 10
+    dependencies:
+      - detection-service
+  prediction-service:
+    description: Forecast engine for business impact projections.
+    owner: finops
+    api:
+      rest_endpoint: /api/v1/incidents/prediction
+      timeout_seconds: 8
+    dependencies:
+      - detection-service
+  resolution-service:
+    description: Executes remediation playbooks and orchestrates automation.
+    owner: sre-automation
+    api:
+      rest_endpoint: /api/v1/incidents/resolution
+      timeout_seconds: 30
+    dependencies:
+      - diagnosis-service
+      - prediction-service
+  communication-service:
+    description: Publishes stakeholder-facing notifications and dashboards.
+    owner: product-operations
+    api:
+      rest_endpoint: /api/v1/incidents/communication
+      timeout_seconds: 3
+    dependencies:
+      - resolution-service

@@ -28,7 +28,7 @@
         "--transport",
         "stdio"
       ],
-      "disabled": true,
+      "disabled": false,
       "autoApprove": [
         "list_doc_sources",
         "fetch_docs",

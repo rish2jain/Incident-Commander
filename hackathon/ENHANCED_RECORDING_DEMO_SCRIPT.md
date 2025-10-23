@@ -1,8 +1,8 @@
-# 🎬 Enhanced Recording Demo Script
+# 🎬 Segmented MP4 Recording Demo Script
 
 ## System Overview
 
-**The Enhanced Demo Recording System creates professional HD recordings with comprehensive documentation, business impact visualization, and complete AWS AI services showcase.**
+**The Segmented MP4 Recording System creates separate professional HD video files for each scenario, providing judges with maximum flexibility for targeted review and evaluation.**
 
 ## 🚀 Quick Start for Judges
 
@@ -18,19 +18,20 @@ python src/main.py
 
 ### Recording Options
 
-#### Option 1: Full Enhanced Recording (4 minutes)
+#### Option 1: Segmented MP4 Recording (3 minutes total)
 
 ```bash
-# Complete professional demonstration
+# Complete segmented professional demonstration
 python record_demo.py
 ```
 
 **Features:**
 
-- 5 comprehensive scenarios with business impact focus
-- Professional HD quality (1920x1080)
-- Comprehensive screenshot capture with metadata
-- Judge-ready summaries and documentation
+- 6 separate MP4 segments with clear timestamps
+- Professional HD quality (1920x1080) with H.264/AAC encoding
+- Automatic WebM to MP4 conversion and cleanup
+- Universal compatibility across all devices and platforms
+- Judge-ready summaries and comprehensive documentation
 
 #### Option 2: Quick Judge Recording (2 minutes)
 
@@ -60,37 +61,49 @@ python test_enhanced_recorder.py
 - Verifies business metrics and AWS services
 - Ensures recording quality standards
 
-## 📋 Recording Scenarios
+## 📋 Segmented Recording Scenarios
 
-### Scenario 1: Homepage Overview (20 seconds)
+### Segment 1: Homepage Overview (15 seconds)
 
+- **File**: `YYYYMMDD_HHMMSS_homepage_segment.mp4`
 - **Focus**: System architecture and strategic positioning
 - **Key Points**: Three specialized dashboards, professional design, strategic overview
 - **Business Impact**: System overview and competitive positioning
 
-### Scenario 2: PowerDashboard Demo (60 seconds)
+### Segment 2: PowerDashboard Demo (45 seconds)
 
+- **File**: `YYYYMMDD_HHMMSS_power_demo_segment.mp4`
 - **Focus**: Executive presentation with business metrics
 - **Key Points**: $2.8M annual savings, 458% ROI, 95.2% MTTR improvement
 - **Business Impact**: Real-time business impact calculation and cost savings visualization
 
-### Scenario 3: AI Transparency Dashboard (80 seconds)
+### Segment 3: AI Transparency Dashboard (60 seconds)
 
+- **File**: `YYYYMMDD_HHMMSS_transparency_segment.mp4`
 - **Focus**: Complete explainability system with 5-tab interface
 - **Key Points**: Agent reasoning, Byzantine consensus, decision transparency
 - **Business Impact**: AI explainability for regulatory compliance and trust
 
-### Scenario 4: Operations Dashboard (40 seconds)
+### Segment 4: Operations Dashboard (30 seconds)
 
+- **File**: `YYYYMMDD_HHMMSS_operations_segment.mp4`
 - **Focus**: Production monitoring and WebSocket integration
 - **Key Points**: Real-time monitoring, agent health, system performance
 - **Business Impact**: Production-ready operational capabilities
 
-### Scenario 5: AWS AI Services Showcase (30 seconds)
+### Segment 5: AWS AI Services Showcase (20 seconds)
 
+- **File**: `YYYYMMDD_HHMMSS_aws_ai_showcase_segment.mp4`
 - **Focus**: Complete 8/8 AWS AI services integration
 - **Key Points**: Bedrock AgentCore, Claude models, Q Business, Nova Act, Strands SDK
-- **Business Impact**: Complete AWS AI portfolio utilization demonstrating comprehensive integration
+- **Business Impact**: Complete AWS AI portfolio utilization
+
+### Segment 6: Final Overview (5 seconds)
+
+- **File**: `YYYYMMDD_HHMMSS_final_overview_segment.mp4`
+- **Focus**: Complete system summary
+- **Key Points**: Unified system demonstration
+- **Business Impact**: Comprehensive capability overview
 
 ## 📊 Business Metrics Highlighted
 
@@ -124,19 +137,24 @@ python test_enhanced_recorder.py
 7. **Strands SDK** - Enhanced agent lifecycle management
 8. **Bedrock Guardrails** - Safety and compliance controls
 
-## 📁 Output Structure
+## 📁 Segmented Output Structure
 
 ```
 demo_recordings/
-├── videos/                    # HD WebM recordings
-│   └── session_timestamp.webm
+├── videos/                    # HD MP4 segments
+│   ├── YYYYMMDD_HHMMSS_homepage_segment.mp4
+│   ├── YYYYMMDD_HHMMSS_power_demo_segment.mp4
+│   ├── YYYYMMDD_HHMMSS_transparency_segment.mp4
+│   ├── YYYYMMDD_HHMMSS_operations_segment.mp4
+│   ├── YYYYMMDD_HHMMSS_aws_ai_showcase_segment.mp4
+│   └── YYYYMMDD_HHMMSS_final_overview_segment.mp4
 ├── screenshots/               # Professional PNG captures
-│   ├── timestamp_scenario_action.png
-│   └── timestamp_scenario_action_metadata.json
+│   ├── HHMMSS_scenario_action.png
+│   └── HHMMSS_scenario_action_metadata.json
 ├── metrics/                   # Performance data
-│   └── comprehensive_demo_metrics_timestamp.json
-├── comprehensive_summary.json # Complete metadata
-└── RECORDING_SUMMARY.md      # Judge-friendly summary
+│   └── comprehensive_demo_metrics_YYYYMMDD_HHMMSS.json
+├── comprehensive_recording_summary_YYYYMMDD_HHMMSS.json
+└── RECORDING_SUMMARY_YYYYMMDD_HHMMSS.md
 ```
 
 ## 🏆 Judge Evaluation Materials
@@ -160,9 +178,10 @@ demo_recordings/
 ### Video Specifications
 
 - **Resolution**: 1920x1080 HD
-- **Format**: WebM for web compatibility
-- **Quality**: Professional presentation standards
-- **Duration**: Optimized for judge attention spans
+- **Format**: MP4 with H.264/AAC encoding for universal compatibility
+- **Quality**: Professional presentation standards with web optimization
+- **Duration**: 6 segments totaling 3 minutes, optimized for judge attention spans
+- **Segmentation**: Separate files for flexible review and evaluation
 
 ### Screenshot Standards
 

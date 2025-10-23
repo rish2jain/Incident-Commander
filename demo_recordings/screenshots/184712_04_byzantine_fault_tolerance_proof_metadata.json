@@ -1,0 +1,13 @@
+{
+  "filename": "184712_04_byzantine_fault_tolerance_proof.png",
+  "timestamp": "2025-10-23T18:47:12.637063",
+  "description": "Byzantine Fault Tolerance - Compromise detected and recovered",
+  "scenario": "04_byzantine_fault_tolerance_proof",
+  "business_focus": "First Byzantine fault-tolerant incident response system",
+  "url": "http://localhost:3000/transparency",
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "screenshot_number": 5
+}

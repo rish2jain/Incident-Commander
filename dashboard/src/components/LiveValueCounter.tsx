@@ -49,7 +49,7 @@ export function LiveValueCounter() {
           <div className="flex items-center justify-center gap-2 mb-4">
             <TrendingUp className="w-5 h-5 text-green-400" />
             <div className="text-sm font-semibold text-slate-300">
-              Value Generated This Session
+              Value Generated This Session (Mock Demo)
             </div>
           </div>
 
@@ -68,7 +68,7 @@ export function LiveValueCounter() {
               </div>
             </div>
             <div className="text-xs text-slate-400 mt-2">
-              Cost Savings Accumulated
+              Cost Savings Accumulated (Mock)
             </div>
           </motion.div>
 
@@ -77,7 +77,9 @@ export function LiveValueCounter() {
             <div>
               <div className="flex items-center justify-center gap-1 mb-1">
                 <Shield className="w-4 h-4 text-blue-400" />
-                <div className="text-xs text-slate-400">Incidents Prevented</div>
+                <div className="text-xs text-slate-400">
+                  Incidents Prevented
+                </div>
               </div>
               <div className="text-2xl font-bold text-blue-400 tabular-nums">
                 {incidentsPrevented.toFixed(4)}
@@ -94,7 +96,8 @@ export function LiveValueCounter() {
           {/* Footer Note */}
           <div className="mt-4 pt-4 border-t border-slate-700">
             <div className="text-xs text-slate-500">
-              Based on $250K per incident × 100 incidents/month prevention rate
+              Mock calculation: Based on $250K per incident × 100
+              incidents/month prevention rate
             </div>
           </div>
         </div>

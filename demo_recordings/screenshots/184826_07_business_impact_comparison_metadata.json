@@ -1,0 +1,13 @@
+{
+  "filename": "184826_07_business_impact_comparison.png",
+  "timestamp": "2025-10-23T18:48:26.413007",
+  "description": "Business Impact - AI vs Manual response time comparison",
+  "scenario": "07_business_impact_comparison",
+  "business_focus": "95.2% MTTR improvement with quantified ROI",
+  "url": "http://localhost:3000/demo",
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "screenshot_number": 8
+}

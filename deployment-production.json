@@ -1,0 +1,27 @@
+{
+  "environment": "production",
+  "region": "us-east-1",
+  "account_id": "294337990007",
+  "timestamp": 1761246511.139924,
+  "resources": {
+    "iam_roles": {
+      "incident-commander-lambda-role": "arn:aws:iam::294337990007:role/incident-commander-lambda-role-production",
+      "incident-commander-bedrock-role": "arn:aws:iam::294337990007:role/incident-commander-bedrock-role-production"
+    },
+    "dynamodb_tables": {
+      "incident-events": "incident-commander-incident-events-production",
+      "agent-state": "incident-commander-agent-state-production",
+      "consensus-decisions": "incident-commander-consensus-decisions-production"
+    },
+    "eventbridge_rules": {
+      "incident-detected": "incident-commander-incident-detected-production",
+      "agent-consensus": "incident-commander-agent-consensus-production",
+      "resolution-completed": "incident-commander-resolution-completed-production"
+    },
+    "amazon_q_app": "incident-commander-q-production",
+    "bedrock_agents": {},
+    "api_gateway": "https://m8njll43q4.execute-api.us-east-1.amazonaws.com",
+    "cloudwatch_dashboard": "IncidentCommander-production"
+  },
+  "tests_passed": true
+}

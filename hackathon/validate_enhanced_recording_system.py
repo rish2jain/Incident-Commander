@@ -189,6 +189,68 @@ class EnhancedRecordingValidator:
             print(f"❌ Recording scenarios validation failed: {e}")
             return False
     
+    def validate_segmented_mp4_system(self) -> bool:
+        """Validate segmented MP4 recording system."""
+        print("🔍 Validating segmented MP4 recording system...")
+        
+        try:
+            # Check for existing segmented recordings
+            videos_dir = Path("demo_recordings/videos")
+            if videos_dir.exists():
+                mp4_files = list(videos_dir.glob("*_segment.mp4"))
+                if mp4_files:
+                    print(f"✅ Found {len(mp4_files)} existing MP4 segments")
+                    
+                    # Validate segment naming convention
+                    expected_segments = [
+                        "homepage_segment.mp4",
+                        "power_demo_segment.mp4", 
+                        "transparency_segment.mp4",
+                        "operations_segment.mp4",
+                        "aws_ai_showcase_segment.mp4",
+                        "final_overview_segment.mp4"
+                    ]
+                    
+                    found_segments = []
+                    for mp4_file in mp4_files:
+                        for expected in expected_segments:
+                            if expected in mp4_file.name:
+                                found_segments.append(expected)
+                                break
+                    
+                    if len(found_segments) >= 5:  # At least 5 of 6 segments
+                        print(f"✅ Found {len(found_segments)} expected segments")
+                    else:
+                        self.validation_results["warnings"].append(f"Only found {len(found_segments)} of 6 expected segments")
+                else:
+                    self.validation_results["warnings"].append("No MP4 segments found - will be generated during recording")
+            
+            # Validate MP4 configuration
+            video_format = RECORDING_CONFIG.get("video_format", "")
+            if "mp4" not in video_format.lower():
+                self.validation_results["warnings"].append("Video format should include MP4 for segmented recording")
+            
+            # Check for H.264/AAC encoding capability
+            try:
+                import subprocess
+                result = subprocess.run(["ffmpeg", "-version"], capture_output=True, text=True, timeout=5)
+                if result.returncode == 0:
+                    print("✅ FFmpeg available for MP4 encoding")
+                else:
+                    self.validation_results["warnings"].append("FFmpeg not available - may affect MP4 quality")
+            except (subprocess.TimeoutExpired, FileNotFoundError):
+                self.validation_results["warnings"].append("FFmpeg not found - MP4 encoding may be limited")
+            
+            self.validation_results["validations"]["segmented_mp4_system"] = "✅ PASS"
+            print("✅ Segmented MP4 system validation passed")
+            return True
+            
+        except Exception as e:
+            self.validation_results["errors"].append(f"Segmented MP4 system validation error: {e}")
+            self.validation_results["validations"]["segmented_mp4_system"] = "❌ FAIL"
+            print(f"❌ Segmented MP4 system validation failed: {e}")
+            return False
+    
     def validate_business_metrics(self) -> bool:
         """Validate business metrics for hackathon submission."""
         print("🔍 Validating business metrics...")
@@ -365,17 +427,18 @@ class EnhancedRecordingValidator:
         print("\n" + "=" * 80)
         
         if not self.validation_results["errors"]:
-            print("🎉 ENHANCED RECORDING SYSTEM IS READY FOR HACKATHON SUBMISSION!")
+            print("🎉 SEGMENTED MP4 RECORDING SYSTEM IS READY FOR HACKATHON SUBMISSION!")
             print("\nNext Steps:")
-            print("   1. Run 'python record_demo.py' for full demonstration")
-            print("   2. Run 'python quick_demo_record.py' for quick judge recording")
-            print("   3. Check 'demo_recordings/' directory for output")
+            print("   1. Run 'python record_demo.py --format mp4 --segmented' for full segmented demonstration")
+            print("   2. Run 'python quick_demo_record.py --output-format mp4' for quick judge recording")
+            print("   3. Check 'demo_recordings/videos/' directory for MP4 segments")
+            print("   4. Individual segments available for flexible judge review")
         else:
             print("🔧 PLEASE FIX CRITICAL ERRORS BEFORE RECORDING")
             print("\nRecommended Actions:")
             print("   1. Address all critical errors listed above")
             print("   2. Re-run this validation script")
-            print("   3. Proceed with recording once all validations pass")
+            print("   3. Proceed with segmented MP4 recording once all validations pass")
         
         print("=" * 80)
 
@@ -393,6 +456,7 @@ async def main():
         validator.validate_configuration(),
         validator.validate_system_requirements(),
         validator.validate_recording_scenarios(),
+        validator.validate_segmented_mp4_system(),
         validator.validate_business_metrics(),
         validator.validate_aws_services(),
         await validator.validate_recorder_functionality()

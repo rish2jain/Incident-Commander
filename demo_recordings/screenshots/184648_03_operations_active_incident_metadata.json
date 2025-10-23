@@ -1,0 +1,13 @@
+{
+  "filename": "184648_03_operations_active_incident.png",
+  "timestamp": "2025-10-23T18:46:48.585983",
+  "description": "Active Incidents - Database Cascade incident triggered",
+  "scenario": "03_operations_active_incident",
+  "business_focus": "Real-time incident detection and monitoring",
+  "url": "http://localhost:3000/ops",
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "screenshot_number": 4
+}

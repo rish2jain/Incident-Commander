@@ -70,7 +70,7 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
             <div className="flex items-center gap-2">
               <span className="text-green-400">✅</span>
-              <span>Sub-3 minute MTTR with 95%+ improvement</span>
+              <span>Sub-3 minute MTTR with 95%+ improvement (mock)</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-green-400">✅</span>
@@ -82,7 +82,7 @@ export default function HomePage() {
             </div>
             <div className="flex items-center gap-2">
               <span className="text-green-400">✅</span>
-              <span>$2.8M annual cost savings (458% ROI)</span>
+              <span>$2.8M annual cost savings (458% ROI) (mock)</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-green-400">✅</span>

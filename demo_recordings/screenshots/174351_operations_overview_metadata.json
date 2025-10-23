@@ -1,0 +1,13 @@
+{
+  "filename": "174351_operations_overview.png",
+  "timestamp": "2025-10-23T17:43:51.087772",
+  "description": "Operations Dashboard - Production monitoring and WebSocket integration - Initial view",
+  "scenario": "operations",
+  "business_focus": "Real-time monitoring, agent health, system performance",
+  "url": "http://localhost:3000/ops",
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "screenshot_number": 12
+}

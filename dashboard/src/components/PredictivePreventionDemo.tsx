@@ -219,7 +219,7 @@ export const PredictivePreventionDemo: React.FC<
               <div className="text-center p-3 bg-green-500/20 rounded-lg">
                 <div className="text-2xl font-mono text-green-400">47</div>
                 <div className="text-xs text-status-neutral">
-                  Metrics Monitored
+                  Metrics Monitored (Mock)
                 </div>
               </div>
               <div className="text-center p-3 bg-blue-500/20 rounded-lg">
@@ -380,7 +380,7 @@ export const PredictivePreventionDemo: React.FC<
                 <p>• Proactive measures completed before any customer impact</p>
                 <p>• System performance maintained at optimal levels</p>
                 <p>• No reactive incident response required</p>
-                <p>• Cost savings: $5,600 (avoided incident cost)</p>
+                <p>• Cost savings: $5,600 (avoided incident cost) (mock)</p>
               </div>
             </div>
 

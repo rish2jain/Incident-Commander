@@ -1,0 +1,60 @@
+{
+  "environment": "production",
+  "region": "us-east-1",
+  "timestamp": "2025-10-23T19:08:31.217491",
+  "detailed_monitoring": true,
+  "log_groups": {
+    "api-gateway": "/aws/apigateway/incident-commander-production",
+    "detection-agent": "/aws/lambda/incident-commander-detection-production",
+    "diagnosis-agent": "/aws/lambda/incident-commander-diagnosis-production",
+    "prediction-agent": "/aws/lambda/incident-commander-prediction-production",
+    "resolution-agent": "/aws/lambda/incident-commander-resolution-production",
+    "communication-agent": "/aws/lambda/incident-commander-communication-production",
+    "orchestrator": "/incident-commander/production/orchestrator",
+    "consensus-engine": "/incident-commander/production/consensus",
+    "business-impact": "/incident-commander/production/business-impact",
+    "security-audit": "/incident-commander/production/security",
+    "performance": "/incident-commander/production/performance"
+  },
+  "custom_metrics": [
+    "IncidentDetectionTime",
+    "IncidentDiagnosisTime",
+    "IncidentResolutionTime",
+    "MeanTimeToResolution",
+    "IncidentCount",
+    "IncidentSeverityDistribution",
+    "AgentResponseTime",
+    "AgentAccuracy",
+    "ConsensusTime",
+    "ConflictResolutionTime",
+    "AgentAvailability",
+    "CostSavings",
+    "PreventedIncidents",
+    "BusinessImpactScore",
+    "CustomerImpactMinutes",
+    "RevenueProtected",
+    "SystemAvailability",
+    "APILatency",
+    "DatabasePerformance",
+    "ErrorRate",
+    "ThroughputRPS"
+  ],
+  "dashboards": {
+    "executive": "https://us-east-1.console.aws.amazon.com/cloudwatch/home?region=us-east-1#dashboards:name=IncidentCommander-Executive-production",
+    "operational": "https://us-east-1.console.aws.amazon.com/cloudwatch/home?region=us-east-1#dashboards:name=IncidentCommander-Operational-production",
+    "technical": "https://us-east-1.console.aws.amazon.com/cloudwatch/home?region=us-east-1#dashboards:name=IncidentCommander-Technical-production",
+    "security": "https://us-east-1.console.aws.amazon.com/cloudwatch/home?region=us-east-1#dashboards:name=IncidentCommander-Security-production"
+  },
+  "alarms": {
+    "high-mttr": "IncidentCommander-HighMTTR-production",
+    "low-availability": "IncidentCommander-LowAvailability-production",
+    "high-error-rate": "IncidentCommander-HighErrorRate-production",
+    "agent-consensus-failure": "IncidentCommander-ConsensusFailure-production"
+  },
+  "log_insights_queries": {
+    "incident-timeline": "IncidentCommander-IncidentTimeline-production",
+    "agent-performance": "IncidentCommander-AgentPerformance-production",
+    "consensus-analysis": "IncidentCommander-ConsensusAnalysis-production",
+    "error-analysis": "IncidentCommander-ErrorAnalysis-production"
+  }
+}

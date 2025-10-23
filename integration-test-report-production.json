@@ -1,0 +1,54 @@
+{
+  "environment": "production",
+  "region": "us-east-1",
+  "timestamp": "2025-10-23T15:08:45.066347",
+  "duration_seconds": 3.86,
+  "total_tests": 7,
+  "passed": 5,
+  "failed": 2,
+  "success_rate": 71.4,
+  "details": [
+    {
+      "test": "DynamoDB Connectivity",
+      "passed": true,
+      "details": "",
+      "timestamp": "2025-10-23T15:08:41.333481"
+    },
+    {
+      "test": "EventBridge Functionality",
+      "passed": true,
+      "details": "",
+      "timestamp": "2025-10-23T15:08:41.461815"
+    },
+    {
+      "test": "Bedrock Models",
+      "passed": false,
+      "details": "An error occurred (ResourceNotFoundException) when calling the InvokeModel operation: Model use case details have not been submitted for this account. Fill out the Anthropic use case details form before using the model. If you have already filled out the form, try again in 15 minutes.",
+      "timestamp": "2025-10-23T15:08:41.745855"
+    },
+    {
+      "test": "Bedrock Agents",
+      "passed": true,
+      "details": "",
+      "timestamp": "2025-10-23T15:08:42.575101"
+    },
+    {
+      "test": "API Health Endpoint",
+      "passed": false,
+      "details": "Health endpoint returned 404",
+      "timestamp": "2025-10-23T15:08:42.786605"
+    },
+    {
+      "test": "CloudWatch Monitoring",
+      "passed": true,
+      "details": "",
+      "timestamp": "2025-10-23T15:08:44.983162"
+    },
+    {
+      "test": "End-to-End Workflow",
+      "passed": true,
+      "details": "",
+      "timestamp": "2025-10-23T15:08:45.066339"
+    }
+  ]
+}

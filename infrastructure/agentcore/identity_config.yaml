@@ -1,0 +1,34 @@
+version: 1
+roles:
+  detection:
+    description: LangGraph detection node deployed in AgentCore Runtime.
+    policies:
+      - bedrock:InvokeModel
+      - logs:PutLogEvents
+      - dynamodb:PutItem
+  diagnosis:
+    description: Performs diagnostic analysis and reads metrics/telemetry.
+    policies:
+      - bedrock:InvokeModel
+      - logs:PutLogEvents
+      - dynamodb:GetItem
+      - dynamodb:Query
+  prediction:
+    description: Generates forecasts and business impact summaries.
+    policies:
+      - bedrock:InvokeModel
+      - logs:PutLogEvents
+      - dynamodb:Query
+  resolution:
+    description: Executes remediation runbooks and triggers automation.
+    policies:
+      - bedrock:InvokeModel
+      - logs:PutLogEvents
+      - ssm:SendCommand
+      - dynamodb:UpdateItem
+  communication:
+    description: Sends stakeholder notifications and updates dashboards.
+    policies:
+      - bedrock:InvokeModel
+      - logs:PutLogEvents
+      - sns:Publish

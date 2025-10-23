@@ -13,8 +13,21 @@
 
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Cloud, Database, Zap, Brain, Activity, TrendingDown } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle, Badge } from "@/components/shared";
+import {
+  Cloud,
+  Database,
+  Zap,
+  Brain,
+  Activity,
+  TrendingDown,
+} from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Badge,
+} from "@/components/shared";
 
 interface ServiceStats {
   total_queries?: number;
@@ -35,17 +48,17 @@ interface CostStats {
 
 export function AWSServicesMonitor() {
   const [qBusinessStats, setQBusinessStats] = useState<ServiceStats>({
-    total_queries: 1247,
-    avg_confidence: 85,
-    matches: 342,
+    total_queries: 1247, // Mock data
+    avg_confidence: 85, // Mock data
+    matches: 342, // Mock data
   });
 
   const [novaStats, setNovaStats] = useState<ServiceStats & CostStats>({
-    total_calls: 3891,
-    avg_latency_ms: 142,
-    savings: 2847.32,
-    traditional_cost: 3000,
-    nova_cost: 152.68,
+    total_calls: 3891, // Mock data
+    avg_latency_ms: 142, // Mock data
+    savings: 2847.32, // Mock data
+    traditional_cost: 3000, // Mock data
+    nova_cost: 152.68, // Mock data
   });
 
   const [memoryStats, setMemoryStats] = useState<ServiceStats>({
@@ -59,7 +72,8 @@ export function AWSServicesMonitor() {
     const interval = setInterval(() => {
       setQBusinessStats((prev) => ({
         ...prev,
-        total_queries: (prev.total_queries || 0) + Math.floor(Math.random() * 3),
+        total_queries:
+          (prev.total_queries || 0) + Math.floor(Math.random() * 3),
       }));
 
       setNovaStats((prev) => ({
@@ -71,19 +85,24 @@ export function AWSServicesMonitor() {
     return () => clearInterval(interval);
   }, []);
 
-  const costReduction = novaStats.traditional_cost && novaStats.nova_cost
-    ? ((novaStats.traditional_cost - novaStats.nova_cost) / novaStats.traditional_cost * 100).toFixed(0)
-    : 0;
+  const costReduction =
+    novaStats.traditional_cost && novaStats.nova_cost
+      ? (
+          ((novaStats.traditional_cost - novaStats.nova_cost) /
+            novaStats.traditional_cost) *
+          100
+        ).toFixed(0)
+      : 0;
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
           <Cloud className="w-5 h-5 text-blue-400" />
-          AI Services Performance
+          AI Services Performance (Mock Data)
         </CardTitle>
         <p className="text-xs text-slate-400 mt-1">
-          Real-time monitoring of AWS AI service integration
+          Demo simulation of AWS AI service integration
         </p>
       </CardHeader>
       <CardContent>
@@ -124,7 +143,10 @@ export function AWSServicesMonitor() {
                 </span>
               </div>
             </div>
-            <Badge variant="default" className="mt-3 text-xs bg-green-600 hover:bg-green-600">
+            <Badge
+              variant="default"
+              className="mt-3 text-xs bg-green-600 hover:bg-green-600"
+            >
               <Activity className="w-3 h-3 mr-1" />
               ACTIVE
             </Badge>
@@ -164,7 +186,10 @@ export function AWSServicesMonitor() {
                 </span>
               </div>
             </div>
-            <Badge variant="default" className="mt-3 text-xs bg-green-600 hover:bg-green-600">
+            <Badge
+              variant="default"
+              className="mt-3 text-xs bg-green-600 hover:bg-green-600"
+            >
               <Activity className="w-3 h-3 mr-1" />
               ACTIVE
             </Badge>
@@ -206,7 +231,10 @@ export function AWSServicesMonitor() {
                 </span>
               </div>
             </div>
-            <Badge variant="default" className="mt-3 text-xs bg-purple-600 hover:bg-purple-600">
+            <Badge
+              variant="default"
+              className="mt-3 text-xs bg-purple-600 hover:bg-purple-600"
+            >
               <Brain className="w-3 h-3 mr-1" />
               LEARNING
             </Badge>
@@ -225,7 +253,10 @@ export function AWSServicesMonitor() {
             <span>
               Cost efficiency: Nova multi-model routing saves{" "}
               <span className="text-green-400 font-semibold">
-                ${((novaStats.traditional_cost || 0) - (novaStats.nova_cost || 0)).toFixed(2)}
+                $
+                {(
+                  (novaStats.traditional_cost || 0) - (novaStats.nova_cost || 0)
+                ).toFixed(2)}
               </span>{" "}
               ({costReduction}% reduction vs single-model approach)
             </span>

@@ -1,0 +1,18 @@
+version: 1
+collections:
+  incidents:
+    description: >-
+      Historical incident context synchronized from LangGraph state into AgentCore
+      Memory for retrieval-augmented prompts.
+    retention_days: 30
+    vector_store:
+      provider: dynamodb
+      table_name: agentcore_incident_memory
+      embedding_model: titan-embed-text-v1
+  metrics:
+    description: Real-time KPI snapshots emitted from metrics collector.
+    retention_days: 14
+    vector_store:
+      provider: dynamodb
+      table_name: agentcore_metrics_memory
+      embedding_model: titan-embed-text-v1

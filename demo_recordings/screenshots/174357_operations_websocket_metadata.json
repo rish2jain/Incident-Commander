@@ -1,0 +1,13 @@
+{
+  "filename": "174357_operations_websocket.png",
+  "timestamp": "2025-10-23T17:43:57.154954",
+  "description": "Real-time WebSocket connectivity status",
+  "scenario": "operations",
+  "business_focus": "Real-time monitoring, agent health, system performance",
+  "url": "http://localhost:3000/ops",
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "screenshot_number": 13
+}

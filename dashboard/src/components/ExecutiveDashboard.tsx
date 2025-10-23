@@ -183,7 +183,7 @@ function ROIHighlight() {
           <div className="grid grid-cols-3 gap-6">
             <div className="text-center">
               <div className="text-sm text-slate-400 mb-2">
-                Traditional MTTR
+                Traditional MTTR (Mock)
               </div>
               <div className="text-4xl font-bold text-red-400">
                 <AnimatedCounter value={30} decimals={0} suffix=" min" />
@@ -198,14 +198,18 @@ function ROIHighlight() {
               </motion.div>
             </div>
             <div className="text-center">
-              <div className="text-sm text-slate-400 mb-2">With AI Agents</div>
+              <div className="text-sm text-slate-400 mb-2">
+                With AI Agents (Mock)
+              </div>
               <div className="text-4xl font-bold text-green-400">
                 <AnimatedCounter value={2.5} decimals={1} suffix=" min" />
               </div>
             </div>
           </div>
           <div className="mt-6 pt-6 border-t border-slate-700 text-center">
-            <div className="text-sm text-slate-400 mb-2">MTTR Reduction</div>
+            <div className="text-sm text-slate-400 mb-2">
+              MTTR Reduction (Mock)
+            </div>
             <div className="text-5xl font-bold text-green-400">
               <AnimatedCounter value={91.8} decimals={1} suffix="%" />
             </div>
@@ -345,16 +349,16 @@ export function ExecutiveDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <MetricCard
             icon={Clock}
-            title="Mean Time to Resolution"
+            title="Mean Time to Resolution (Mock)"
             value={<AnimatedCounter value={147} decimals={0} suffix="s" />}
-            change="↓ 91.8%"
+            change="↓ 91.8% (mock)"
             changeLabel="vs traditional"
             trend="up"
             color="green"
           />
           <MetricCard
             icon={DollarSign}
-            title="Cost Savings (Per Incident)"
+            title="Cost Savings (Per Incident) (Mock)"
             value={
               <>
                 $
@@ -368,7 +372,7 @@ export function ExecutiveDashboard() {
           />
           <MetricCard
             icon={BarChart3}
-            title="Incidents Prevented"
+            title="Incidents Prevented (Mock)"
             value={<AnimatedCounter value={89} decimals={0} />}
             change="↑ 22.5%"
             changeLabel="with learning"
@@ -377,7 +381,7 @@ export function ExecutiveDashboard() {
           />
           <MetricCard
             icon={Shield}
-            title="System Accuracy"
+            title="System Accuracy (Mock)"
             value={<AnimatedCounter value={95.3} decimals={1} suffix="%" />}
             change="40% failures"
             changeLabel="tolerated"
@@ -406,7 +410,7 @@ export function ExecutiveDashboard() {
             </div>
             <div className="mt-4 text-center text-sm text-slate-400">
               Distributed consensus ensures 95% accuracy even with 40% agent
-              failures
+              failures (mock data)
             </div>
           </CardContent>
         </Card>

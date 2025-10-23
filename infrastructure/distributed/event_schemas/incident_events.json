@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "IncidentCommanderEvent",
+  "type": "object",
+  "properties": {
+    "incident_id": {"type": "string"},
+    "phase": {"type": "string", "enum": ["detection", "diagnosis", "prediction", "resolution", "communication"]},
+    "severity": {"type": "string"},
+    "summary": {"type": "string"},
+    "timestamp": {"type": "string", "format": "date-time"},
+    "metrics": {"type": "object"}
+  },
+  "required": ["incident_id", "phase", "timestamp"],
+  "additionalProperties": true
+}
+

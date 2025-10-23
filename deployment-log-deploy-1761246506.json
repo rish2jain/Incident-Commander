@@ -1,0 +1,225 @@
+{
+  "deployment_id": "deploy-1761246506",
+  "environment": "production",
+  "region": "us-east-1",
+  "start_time": "2025-10-23T19:08:26.847024",
+  "phases": {
+    "Prerequisites Check": {
+      "status": "COMPLETED",
+      "timestamp": "2025-10-23T19:08:28.608676",
+      "details": {
+        "aws_cli": true,
+        "aws_credentials": true,
+        "cdk_cli": true,
+        "python_version": true,
+        "node_version": true,
+        "docker": true
+      }
+    },
+    "AWS Resources": {
+      "status": "COMPLETED",
+      "timestamp": "2025-10-23T19:08:31.140231",
+      "details": {
+        "resource_count": 6,
+        "resources": [
+          "iam_roles",
+          "dynamodb_tables",
+          "eventbridge_rules",
+          "amazon_q_app",
+          "bedrock_agents",
+          "api_gateway",
+          "cloudwatch_dashboard"
+        ]
+      }
+    },
+    "Infrastructure (CDK)": {
+      "status": "SKIPPED",
+      "timestamp": "2025-10-23T19:08:31.143329",
+      "details": "Not in full deployment mode"
+    },
+    "Application Code": {
+      "status": "SKIPPED",
+      "timestamp": "2025-10-23T19:08:31.143340",
+      "details": "Not in full deployment mode"
+    },
+    "Monitoring Setup": {
+      "status": "COMPLETED",
+      "timestamp": "2025-10-23T19:08:33.108716",
+      "details": {
+        "dashboards": 4,
+        "alarms": 4,
+        "log_groups": 11
+      }
+    },
+    "Dashboard Deployment": {
+      "status": "FAILED",
+      "timestamp": "2025-10-23T19:08:41.131739",
+      "details": "Command '['npm', 'run', 'build']' returned non-zero exit status 1."
+    },
+    "Integration Tests": {
+      "status": "FAILED",
+      "timestamp": "2025-10-23T19:08:45.066766",
+      "details": {
+        "passed": 5,
+        "failed": 2,
+        "success_rate": 71.4
+      }
+    },
+    "Performance Tests": {
+      "status": "COMPLETED",
+      "timestamp": "2025-10-23T19:08:45.070019",
+      "details": {
+        "api_latency_p95": 150,
+        "throughput_rps": 1000,
+        "mttr_average": 85,
+        "agent_response_time": 2.3,
+        "consensus_time": 1.8
+      }
+    }
+  },
+  "status": "COMPLETED",
+  "end_time": "2025-10-23T19:08:45.070032",
+  "summary": {
+    "aws_resources": {
+      "iam_roles": {
+        "incident-commander-lambda-role": "arn:aws:iam::294337990007:role/incident-commander-lambda-role-production",
+        "incident-commander-bedrock-role": "arn:aws:iam::294337990007:role/incident-commander-bedrock-role-production"
+      },
+      "dynamodb_tables": {
+        "incident-events": "incident-commander-incident-events-production",
+        "agent-state": "incident-commander-agent-state-production",
+        "consensus-decisions": "incident-commander-consensus-decisions-production"
+      },
+      "eventbridge_rules": {
+        "incident-detected": "incident-commander-incident-detected-production",
+        "agent-consensus": "incident-commander-agent-consensus-production",
+        "resolution-completed": "incident-commander-resolution-completed-production"
+      },
+      "amazon_q_app": "incident-commander-q-production",
+      "bedrock_agents": {},
+      "api_gateway": "https://m8njll43q4.execute-api.us-east-1.amazonaws.com",
+      "cloudwatch_dashboard": "IncidentCommander-production"
+    },
+    "monitoring": {
+      "environment": "production",
+      "region": "us-east-1",
+      "timestamp": "2025-10-23T19:08:31.217491",
+      "detailed_monitoring": true,
+      "log_groups": {
+        "api-gateway": "/aws/apigateway/incident-commander-production",
+        "detection-agent": "/aws/lambda/incident-commander-detection-production",
+        "diagnosis-agent": "/aws/lambda/incident-commander-diagnosis-production",
+        "prediction-agent": "/aws/lambda/incident-commander-prediction-production",
+        "resolution-agent": "/aws/lambda/incident-commander-resolution-production",
+        "communication-agent": "/aws/lambda/incident-commander-communication-production",
+        "orchestrator": "/incident-commander/production/orchestrator",
+        "consensus-engine": "/incident-commander/production/consensus",
+        "business-impact": "/incident-commander/production/business-impact",
+        "security-audit": "/incident-commander/production/security",
+        "performance": "/incident-commander/production/performance"
+      },
+      "custom_metrics": [
+        "IncidentDetectionTime",
+        "IncidentDiagnosisTime",
+        "IncidentResolutionTime",
+        "MeanTimeToResolution",
+        "IncidentCount",
+        "IncidentSeverityDistribution",
+        "AgentResponseTime",
+        "AgentAccuracy",
+        "ConsensusTime",
+        "ConflictResolutionTime",
+        "AgentAvailability",
+        "CostSavings",
+        "PreventedIncidents",
+        "BusinessImpactScore",
+        "CustomerImpactMinutes",
+        "RevenueProtected",
+        "SystemAvailability",
+        "APILatency",
+        "DatabasePerformance",
+        "ErrorRate",
+        "ThroughputRPS"
+      ],
+      "dashboards": {
+        "executive": "https://us-east-1.console.aws.amazon.com/cloudwatch/home?region=us-east-1#dashboards:name=IncidentCommander-Executive-production",
+        "operational": "https://us-east-1.console.aws.amazon.com/cloudwatch/home?region=us-east-1#dashboards:name=IncidentCommander-Operational-production",
+        "technical": "https://us-east-1.console.aws.amazon.com/cloudwatch/home?region=us-east-1#dashboards:name=IncidentCommander-Technical-production",
+        "security": "https://us-east-1.console.aws.amazon.com/cloudwatch/home?region=us-east-1#dashboards:name=IncidentCommander-Security-production"
+      },
+      "alarms": {
+        "high-mttr": "IncidentCommander-HighMTTR-production",
+        "low-availability": "IncidentCommander-LowAvailability-production",
+        "high-error-rate": "IncidentCommander-HighErrorRate-production",
+        "agent-consensus-failure": "IncidentCommander-ConsensusFailure-production"
+      },
+      "log_insights_queries": {
+        "incident-timeline": "IncidentCommander-IncidentTimeline-production",
+        "agent-performance": "IncidentCommander-AgentPerformance-production",
+        "consensus-analysis": "IncidentCommander-ConsensusAnalysis-production",
+        "error-analysis": "IncidentCommander-ErrorAnalysis-production"
+      }
+    },
+    "tests": {
+      "environment": "production",
+      "region": "us-east-1",
+      "timestamp": "2025-10-23T15:08:45.066347",
+      "duration_seconds": 3.86,
+      "total_tests": 7,
+      "passed": 5,
+      "failed": 2,
+      "success_rate": 71.4,
+      "details": [
+        {
+          "test": "DynamoDB Connectivity",
+          "passed": true,
+          "details": "",
+          "timestamp": "2025-10-23T15:08:41.333481"
+        },
+        {
+          "test": "EventBridge Functionality",
+          "passed": true,
+          "details": "",
+          "timestamp": "2025-10-23T15:08:41.461815"
+        },
+        {
+          "test": "Bedrock Models",
+          "passed": false,
+          "details": "An error occurred (ResourceNotFoundException) when calling the InvokeModel operation: Model use case details have not been submitted for this account. Fill out the Anthropic use case details form before using the model. If you have already filled out the form, try again in 15 minutes.",
+          "timestamp": "2025-10-23T15:08:41.745855"
+        },
+        {
+          "test": "Bedrock Agents",
+          "passed": true,
+          "details": "",
+          "timestamp": "2025-10-23T15:08:42.575101"
+        },
+        {
+          "test": "API Health Endpoint",
+          "passed": false,
+          "details": "Health endpoint returned 404",
+          "timestamp": "2025-10-23T15:08:42.786605"
+        },
+        {
+          "test": "CloudWatch Monitoring",
+          "passed": true,
+          "details": "",
+          "timestamp": "2025-10-23T15:08:44.983162"
+        },
+        {
+          "test": "End-to-End Workflow",
+          "passed": true,
+          "details": "",
+          "timestamp": "2025-10-23T15:08:45.066339"
+        }
+      ]
+    },
+    "performance": {
+      "api_latency_p95": 150,
+      "throughput_rps": 1000,
+      "mttr_average": 85,
+      "agent_response_time": 2.3,
+      "consensus_time": 1.8
+    }
+  }
+}

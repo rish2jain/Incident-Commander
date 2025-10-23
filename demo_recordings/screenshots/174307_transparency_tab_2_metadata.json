@@ -1,0 +1,13 @@
+{
+  "filename": "174307_transparency_tab_2.png",
+  "timestamp": "2025-10-23T17:43:07.426656",
+  "description": "Key tab: Decisions",
+  "scenario": "transparency",
+  "business_focus": "5-tab AI explainability, agent reasoning, decision transparency",
+  "url": "http://localhost:3000/transparency",
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "screenshot_number": 9
+}

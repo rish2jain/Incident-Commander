@@ -524,7 +524,7 @@ const ResolutionStatusBanner = ({
               className="text-right"
             >
               <div className="text-sm text-green-600 dark:text-green-400 font-medium mb-1">
-                Total Resolution Time
+                Total Resolution Time (Mock)
               </div>
               <div className="text-3xl font-bold text-green-700 dark:text-green-300 font-mono">
                 {formatDuration(resolutionTime)}
@@ -776,7 +776,7 @@ const IncidentStatusPanel = ({
 
   const metrics: Metric[] = [
     {
-      label: "Affected Users",
+      label: "Affected Users (Mock)",
       value: "2,847",
       change: -12,
       icon: <Users className="w-5 h-5" />,

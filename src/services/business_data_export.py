@@ -518,7 +518,20 @@ class BusinessDataExportService:
                             metrics.current_mttr_minutes) * 100
         analysis.mttr_improvement_percentage = actual_improvement
         
+        # Clean up the analysis from memory to prevent unbounded growth
+        self.cleanup_incident_analysis(incident_id)
+        
         return analysis
+    
+    def cleanup_incident_analysis(self, incident_id: str) -> None:
+        """
+        Clean up finalized incident analysis from memory to prevent unbounded growth.
+        
+        Args:
+            incident_id: The incident ID to remove from real_time_analyses
+        """
+        if incident_id in self.real_time_analyses:
+            del self.real_time_analyses[incident_id]
     
     async def _prepare_export_data(
         self,
@@ -742,14 +755,26 @@ async def export_business_data(
     return await export_service.export_business_impact_data(export_request)
 
 
+# Global instance for sharing state across utility functions
+_global_export_service: Optional[BusinessDataExportService] = None
+
+
+def _get_export_service() -> BusinessDataExportService:
+    """Get or create the global export service instance."""
+    global _global_export_service
+    if _global_export_service is None:
+        _global_export_service = BusinessDataExportService()
+    return _global_export_service
+
+
 async def start_incident_cost_tracking(
     incident_id: str,
     industry: IndustryType,
     company_size: CompanySize
 ) -> str:
     """Start real-time cost tracking for an incident."""
-    
-    export_service = BusinessDataExportService()
+
+    export_service = _get_export_service()
     return await export_service.start_real_time_cost_analysis(
         incident_id, industry, company_size
     )
@@ -757,8 +782,8 @@ async def start_incident_cost_tracking(
 
 async def get_incident_cost_savings(incident_id: str) -> Optional[Dict[str, Any]]:
     """Get current cost savings for an incident."""
-    
-    export_service = BusinessDataExportService()
+
+    export_service = _get_export_service()
     analysis = await export_service.get_real_time_cost_analysis(incident_id)
     
     if analysis:

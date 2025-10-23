@@ -42,14 +42,12 @@ class AWSAIServiceManager:
         self.region = region
         self.start_time = datetime.utcnow()
 
+        # Initialize client cache first
+        self._clients: Dict[str, Any] = {}
+
         # Service clients
         self.bedrock_service = BedrockAgentService(region)
-        self.bedrock_runtime = boto3.client('bedrock-runtime', region_name=region)
-        self.bedrock_agent = boto3.client('bedrock-agent', region_name=region)
-        self.bedrock_agent_runtime = boto3.client('bedrock-agent-runtime', region_name=region)
-        self.qbusiness = boto3.client('qbusiness', region_name=region)
-        self.comprehend = boto3.client('comprehend', region_name=region)
-        self.textract = boto3.client('textract', region_name=region)
+        self.bedrock_runtime = self._get_client("bedrock-runtime")  # Bedrock runtime client
 
         # Usage tracking
         self.service_metrics: Dict[str, Dict[str, Any]] = defaultdict(lambda: {
@@ -72,6 +70,11 @@ class AWSAIServiceManager:
         }
 
         logger.info("AWS AI Service Manager initialized")
+
+    def _get_client(self, service_name: str):
+        if service_name not in self._clients:
+            self._clients[service_name] = boto3.client(service_name, region_name=self.region)
+        return self._clients[service_name]
 
     async def _track_service_call(
         self,
@@ -185,7 +188,9 @@ class AWSAIServiceManager:
         start_time = time.time()
 
         try:
-            response = self.qbusiness.chat_sync(
+            qbusiness = self._get_client('qbusiness')
+            response = await asyncio.to_thread(
+                qbusiness.chat_sync,
                 applicationId=application_id,
                 userId=user_id,
                 userMessage=question
@@ -243,8 +248,10 @@ class AWSAIServiceManager:
                 }
             }
 
+            runtime = self._get_client('bedrock-runtime')
+
             def _invoke_and_read():
-                response = self.bedrock_runtime.invoke_model(
+                response = runtime.invoke_model(
                     modelId=model_id,
                     body=json.dumps(body)
                 )
@@ -312,20 +319,25 @@ class AWSAIServiceManager:
         start_time = time.time()
 
         try:
-            response = self.bedrock_agent_runtime.invoke_agent(
-                agentId=agent_id,
-                agentAliasId=agent_alias_id,
-                sessionId=session_id,
-                inputText=prompt
-            )
+            bedrock_agent_runtime = self._get_client('bedrock-agent-runtime')
 
-            # Process streaming response
-            result_text = ""
-            for event in response.get('completion', []):
-                if 'chunk' in event:
-                    chunk = event['chunk']
-                    if 'bytes' in chunk:
-                        result_text += chunk['bytes'].decode('utf-8')
+            def _invoke_and_collect():
+                response = bedrock_agent_runtime.invoke_agent(
+                    agentId=agent_id,
+                    agentAliasId=agent_alias_id,
+                    sessionId=session_id,
+                    inputText=prompt
+                )
+
+                result_text_local = ""
+                for event in response.get('completion', []):
+                    if 'chunk' in event:
+                        chunk = event['chunk']
+                        if 'bytes' in chunk:
+                            result_text_local += chunk['bytes'].decode('utf-8')
+                return result_text_local
+
+            result_text = await asyncio.to_thread(_invoke_and_collect)
 
             latency_ms = (time.time() - start_time) * 1000
 
@@ -366,7 +378,9 @@ class AWSAIServiceManager:
         start_time = time.time()
 
         try:
-            response = self.bedrock_runtime.apply_guardrail(
+            runtime = self._get_client('bedrock-runtime')
+            response = await asyncio.to_thread(
+                runtime.apply_guardrail,
                 guardrailIdentifier=guardrail_id,
                 guardrailVersion=guardrail_version,
                 source="INPUT",
@@ -428,7 +442,9 @@ class AWSAIServiceManager:
         start_time = time.time()
 
         try:
-            response = self.bedrock_agent_runtime.retrieve(
+            bedrock_agent_runtime = self._get_client('bedrock-agent-runtime')
+            response = await asyncio.to_thread(
+                bedrock_agent_runtime.retrieve,
                 knowledgeBaseId=knowledge_base_id,
                 retrievalQuery={"text": query},
                 retrievalConfiguration={
@@ -479,7 +495,9 @@ class AWSAIServiceManager:
         start_time = time.time()
 
         try:
-            response = self.textract.detect_document_text(
+            textract = self._get_client('textract')
+            response = await asyncio.to_thread(
+                textract.detect_document_text,
                 Document={'Bytes': document_bytes}
             )
 
@@ -517,7 +535,9 @@ class AWSAIServiceManager:
         start_time = time.time()
 
         try:
-            response = self.comprehend.detect_sentiment(
+            comprehend = self._get_client('comprehend')
+            response = await asyncio.to_thread(
+                comprehend.detect_sentiment,
                 Text=text,
                 LanguageCode='en'
             )

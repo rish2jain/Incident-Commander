@@ -69,14 +69,14 @@ class TestDetectionAgentMemoryPressure:
     async def test_should_drop_alerts_when_memory_pressure_high(self, detection_agent):
         """Test that alerts are dropped when memory pressure is high."""
         # Mock high memory pressure
-        with patch('src.services.shared_memory_monitor.get_shared_memory_monitor') as mock_get_monitor:
+        with patch('agents.detection.agent.get_shared_memory_monitor') as mock_get_monitor:
             mock_monitor = AsyncMock()
             mock_monitor.get_memory_pressure.return_value = 0.95  # 95% memory usage
             mock_get_monitor.return_value = mock_monitor
-            
+
             # Set threshold lower than current usage
             detection_agent.memory_threshold = 0.8
-            
+
             # Should drop alerts due to high memory pressure
             should_drop = await detection_agent.should_drop_alerts()
             assert should_drop is True
@@ -85,14 +85,14 @@ class TestDetectionAgentMemoryPressure:
     async def test_should_not_drop_alerts_when_memory_pressure_normal(self, detection_agent):
         """Test that alerts are not dropped when memory pressure is normal."""
         # Mock normal memory pressure
-        with patch('src.services.shared_memory_monitor.get_shared_memory_monitor') as mock_get_monitor:
+        with patch('agents.detection.agent.get_shared_memory_monitor') as mock_get_monitor:
             mock_monitor = AsyncMock()
             mock_monitor.get_memory_pressure.return_value = 0.5  # 50% memory usage
             mock_get_monitor.return_value = mock_monitor
-            
+
             # Set threshold higher than current usage
             detection_agent.memory_threshold = 0.8
-            
+
             # Should not drop alerts
             should_drop = await detection_agent.should_drop_alerts()
             assert should_drop is False
@@ -122,7 +122,7 @@ class TestDetectionAgentMemoryPressure:
     async def test_memory_pressure_error_raised_during_incident_processing(self, detection_agent, sample_incident):
         """Test that MemoryPressureError is raised during incident processing under high memory pressure."""
         # Mock high memory pressure
-        with patch('src.services.shared_memory_monitor.get_shared_memory_monitor') as mock_get_monitor:
+        with patch('agents.detection.agent.get_shared_memory_monitor') as mock_get_monitor:
             mock_monitor = AsyncMock()
             mock_monitor.get_memory_pressure.return_value = 0.95  # 95% memory usage
             mock_get_monitor.return_value = mock_monitor
@@ -137,7 +137,7 @@ class TestDetectionAgentMemoryPressure:
     async def test_alert_sampling_under_memory_pressure(self, detection_agent, sample_alerts):
         """Test alert sampling behavior under memory pressure."""
         # Mock high memory pressure
-        with patch('src.services.shared_memory_monitor.get_shared_memory_monitor') as mock_get_monitor:
+        with patch('agents.detection.agent.get_shared_memory_monitor') as mock_get_monitor:
             mock_monitor = AsyncMock()
             mock_monitor.get_memory_pressure.return_value = 0.9  # 90% memory usage
             mock_get_monitor.return_value = mock_monitor
@@ -164,7 +164,7 @@ class TestDetectionAgentMemoryPressure:
         }
         
         # Mock high memory pressure
-        with patch('src.services.shared_memory_monitor.get_shared_memory_monitor') as mock_get_monitor:
+        with patch('agents.detection.agent.get_shared_memory_monitor') as mock_get_monitor:
             mock_monitor = AsyncMock()
             mock_monitor.get_memory_pressure.return_value = 0.95  # 95% memory usage
             mock_get_monitor.return_value = mock_monitor
@@ -187,7 +187,7 @@ class TestDetectionAgentMemoryPressure:
         }
         
         # Mock high memory pressure
-        with patch('src.services.shared_memory_monitor.get_shared_memory_monitor') as mock_get_monitor:
+        with patch('agents.detection.agent.get_shared_memory_monitor') as mock_get_monitor:
             mock_monitor = AsyncMock()
             mock_monitor.get_memory_pressure.return_value = 0.95  # 95% memory usage
             mock_get_monitor.return_value = mock_monitor
@@ -200,7 +200,7 @@ class TestDetectionAgentMemoryPressure:
     async def test_memory_stats_include_cache_statistics(self, detection_agent):
         """Test that memory stats include cache statistics from shared monitor."""
         # Mock memory monitor with cache stats
-        with patch('src.services.shared_memory_monitor.get_shared_memory_monitor') as mock_get_monitor:
+        with patch('agents.detection.agent.get_shared_memory_monitor') as mock_get_monitor:
             mock_monitor = AsyncMock()
             mock_memory_stats = MemoryStats(
                 total_mb=8192.0,
@@ -231,7 +231,7 @@ class TestDetectionAgentMemoryPressure:
     async def test_health_check_fails_under_extreme_memory_pressure(self, detection_agent):
         """Test that health check fails under extreme memory pressure."""
         # Mock extreme memory pressure
-        with patch('src.services.shared_memory_monitor.get_shared_memory_monitor') as mock_get_monitor:
+        with patch('agents.detection.agent.get_shared_memory_monitor') as mock_get_monitor:
             mock_monitor = AsyncMock()
             mock_monitor.get_memory_pressure.return_value = 0.95  # 95% memory usage
             mock_get_monitor.return_value = mock_monitor
@@ -245,7 +245,7 @@ class TestDetectionAgentMemoryPressure:
     async def test_backpressure_guarantees_under_load(self, detection_agent, sample_alerts):
         """Test backpressure guarantees under high alert load."""
         # Mock memory pressure that triggers backpressure
-        with patch('src.services.shared_memory_monitor.get_shared_memory_monitor') as mock_get_monitor:
+        with patch('agents.detection.agent.get_shared_memory_monitor') as mock_get_monitor:
             mock_monitor = AsyncMock()
             # Simulate increasing memory pressure
             pressure_values = [0.7, 0.8, 0.85, 0.9, 0.95]
@@ -347,7 +347,7 @@ class TestAlertSamplerMemoryPressure:
         sample_rates = []
         
         for pressure in pressure_levels:
-            with patch('src.services.shared_memory_monitor.get_shared_memory_monitor') as mock_get_monitor:
+            with patch('agents.detection.agent.get_shared_memory_monitor') as mock_get_monitor:
                 mock_monitor = AsyncMock()
                 mock_monitor.get_memory_pressure.return_value = pressure
                 mock_get_monitor.return_value = mock_monitor
@@ -379,7 +379,7 @@ class TestAlertSamplerMemoryPressure:
         }
         
         # Mock high memory pressure to force drops
-        with patch('src.services.shared_memory_monitor.get_shared_memory_monitor') as mock_get_monitor:
+        with patch('agents.detection.agent.get_shared_memory_monitor') as mock_get_monitor:
             mock_monitor = AsyncMock()
             mock_monitor.get_memory_pressure.return_value = 0.95
             mock_get_monitor.return_value = mock_monitor

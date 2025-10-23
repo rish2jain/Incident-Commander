@@ -63,7 +63,10 @@ class TestOrchestratorLifecycle:
     async def test_orchestrator_singleton(self):
         """Test orchestrator singleton pattern."""
         mock_ws_manager = AsyncMock()
-        with patch('src.orchestrator.real_time_orchestrator.get_websocket_manager', return_value=mock_ws_manager):
+        # Make get_websocket_manager return the mock directly (non-async)
+        async def mock_get_ws():
+            return mock_ws_manager
+        with patch('src.orchestrator.real_time_orchestrator.get_websocket_manager', side_effect=mock_get_ws):
             orch1 = await get_real_time_orchestrator()
             orch2 = await get_real_time_orchestrator()
 

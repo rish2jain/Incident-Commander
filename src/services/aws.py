@@ -219,6 +219,39 @@ class AWSCredentialManager:
         return None
 
 
+class ManagedAWSClient:
+    """Wrap aioboto3 clients to ensure proper lifecycle management."""
+
+    def __init__(self, client_cm):
+        self._client_cm = client_cm
+        self._client = None
+        self._closed = False
+
+    async def open(self):
+        if self._client is None:
+            self._client = await self._client_cm.__aenter__()
+        return self
+
+    async def close(self):
+        if not self._closed:
+            self._closed = True
+            try:
+                await self._client_cm.__aexit__(None, None, None)
+            finally:
+                self._client = None
+
+    async def __aenter__(self):
+        return await self.open()
+
+    async def __aexit__(self, exc_type, exc, tb):
+        await self.close()
+
+    def __getattr__(self, item):
+        if self._client is None:
+            raise RuntimeError("AWS client accessed before being opened")
+        return getattr(self._client, item)
+
+
 class AWSServiceFactory:
     """Factory for creating AWS service clients with connection pooling and health monitoring."""
     
@@ -261,8 +294,13 @@ class AWSServiceFactory:
         pool_key = f"{service_name}_{hash(frozenset(kwargs.items()))}"
         
         async with self._lock:
-            if pool_key in self._client_pool and self._client_health.get(pool_key, False):
-                return self._client_pool[pool_key]
+            pooled_client = self._client_pool.get(pool_key)
+            if (
+                pooled_client
+                and self._client_health.get(pool_key, False)
+                and not getattr(pooled_client, "_closed", False)
+            ):
+                return pooled_client
         
         client_config = {
             'region_name': config.aws.region,
@@ -279,8 +317,9 @@ class AWSServiceFactory:
         async def _create_client():
             session = self._get_session()
             client_cm = session.client(service_name, **client_config)
-            client = await client_cm.__aenter__()
-            return client
+            managed_client = ManagedAWSClient(client_cm)
+            await managed_client.open()
+            return managed_client
 
         # Create client with retry logic
         client = await retry_with_backoff(
@@ -395,6 +434,8 @@ class AWSServiceFactory:
                 resources = list(self._active_resources)
                 self._active_clients.clear()
                 self._active_resources.clear()
+                self._client_pool.clear()
+                self._client_health.clear()
 
             for client in clients:
                 try:

@@ -79,10 +79,17 @@ security_config = get_security_config()
 app.add_middleware(AuthenticationMiddleware, security_config=security_config)
 
 # CORS middleware for dashboard
+allow_credentials = security_config.cors_origins != ["*"]
+if not allow_credentials and security_config.require_auth:
+    logger.warning(
+        "Disabling credentialed CORS requests because wildcard origins are in use; "
+        "set explicit CORS_ORIGINS to allow credentials."
+    )
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=security_config.cors_origins,
-    allow_credentials=True,
+    allow_credentials=allow_credentials,
     allow_methods=["GET", "POST", "PUT", "DELETE"],
     allow_headers=["*"],
 )

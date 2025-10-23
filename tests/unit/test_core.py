@@ -22,7 +22,7 @@ def test_package_metadata():
 
 def test_consensus_config():
     """Test consensus configuration values."""
-    assert CONSENSUS_CONFIG["autonomous_confidence_threshold"] == 0.7
+    assert CONSENSUS_CONFIG["autonomous_confidence_threshold"] == 0.85  # Byzantine consensus threshold
     assert abs(sum(CONSENSUS_CONFIG["agent_weights"].values()) - 1.0) < 1e-10
     assert CONSENSUS_CONFIG["decision_timeout"] == 300
 

@@ -396,17 +396,12 @@ export default function TransparencyDashboardPage() {
         setScenarioMetadata(data.metadata);
 
         // Load AWS-generated agent reasonings if available
-        if (data.agent_reasonings && data.agent_reasonings.length > 0) {
-          console.log("✓ Loaded AWS-generated reasonings from cache");
-        }
+        // Data loaded from cache successfully
 
         return data;
       }
     } catch (error) {
-      console.warn(
-        "Failed to load cached scenario, using simulated data:",
-        error
-      );
+      // Failed to load cached scenario, using simulated data
     }
     return null;
   }, []);
@@ -426,7 +421,7 @@ export default function TransparencyDashboardPage() {
     const useAwsData = cachedScenario && cachedScenario.agent_reasonings;
 
     if (useAwsData) {
-      console.log("✓ Using AWS-generated scenario data from cache");
+      // Using AWS-generated scenario data from cache
 
       // Load AWS-generated agent reasonings progressively
       const reasonings = cachedScenario.agent_reasonings;

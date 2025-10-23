@@ -1,0 +1,149 @@
+{
+  "timestamp": "2025-10-22T20:49:58.614409",
+  "dashboard_type": "PowerDashboard",
+  "url": "http://localhost:3000/demo",
+  "features_validated": {
+    "hero_section": {
+      "status": "PASS",
+      "elements_found": [
+        "title",
+        "subtitle",
+        "status_badges"
+      ],
+      "details": "Hero section with title, subtitle, and 3 status badges"
+    },
+    "layout": {
+      "status": "PASS",
+      "columns_found": 4,
+      "details": "4-column grid layout properly structured"
+    },
+    "live_savings": {
+      "status": "PASS",
+      "metrics_found": [
+        "incidents",
+        "time_saved",
+        "cost_avoided",
+        "human_interventions"
+      ],
+      "details": "Live savings counter with all key metrics"
+    },
+    "multi_agent_status": {
+      "status": "PASS",
+      "agents_found": [
+        "Detection Agent",
+        "Diagnosis Agent",
+        "Prediction Agent",
+        "Resolution Agent",
+        "Validation Agent"
+      ],
+      "total_agents": 5,
+      "expected": 5
+    },
+    "industry_firsts": {
+      "status": "PASS",
+      "firsts_found": [
+        "Byzantine fault-tolerant consensus",
+        "Predictive incident prevention",
+        "Zero-touch resolution",
+        "Self-improving via RAG memory",
+        "8/8 AWS AI services integrated",
+        "Complete decision transparency"
+      ],
+      "total_found": 6,
+      "expected": 6
+    },
+    "impact_comparison": {
+      "status": "PASS",
+      "elements_found": [
+        "manual_time",
+        "ai_time",
+        "improvement_percentage"
+      ],
+      "details": "Before vs after comparison with improvement metrics"
+    },
+    "incident_timeline": {
+      "status": "PASS",
+      "events_found": [
+        "Detection Agent",
+        "Diagnosis Agent",
+        "Prediction Agent",
+        "Consensus Engine",
+        "Resolution Agent",
+        "Validation Agent"
+      ],
+      "total_events": 6,
+      "has_total_time": true,
+      "expected": 6
+    },
+    "agent_coordination": {
+      "status": "PASS",
+      "elements_found": [
+        "coordination_flow",
+        "consensus_engine",
+        "percentage"
+      ],
+      "details": "Agent coordination with Byzantine consensus visualization"
+    },
+    "ai_transparency": {
+      "status": "PASS",
+      "elements_found": [
+        "reasoning",
+        "confidence_scores",
+        "consensus"
+      ],
+      "details": "AI transparency with side-by-side reasoning and scores"
+    },
+    "business_impact": {
+      "status": "PASS",
+      "elements_found": [
+        "severity",
+        "cost_per_minute",
+        "comparison",
+        "savings"
+      ],
+      "details": "Business impact calculator with real-time ROI"
+    },
+    "predicted_incidents": {
+      "status": "PASS",
+      "incidents_found": [
+        "memory_leak",
+        "database_spike"
+      ],
+      "details": "Predicted incidents with prevention actions"
+    },
+    "competitor_comparison": {
+      "status": "PASS",
+      "competitors_found": [
+        "pagerduty",
+        "servicenow",
+        "incident_commander"
+      ],
+      "details": "Competitor comparison with feature differentiation"
+    },
+    "demo_controls": {
+      "status": "PASS",
+      "controls_found": [
+        "restart",
+        "replay",
+        "speed"
+      ],
+      "details": "Interactive demo controls with playback options"
+    },
+    "aws_footer": {
+      "status": "PASS",
+      "elements_found": [
+        "aws_services",
+        "bedrock",
+        "claude"
+      ],
+      "details": "Footer with AWS AI services integration showcase"
+    }
+  },
+  "overall_score": 100.0,
+  "test_summary": {
+    "total_tests": 14,
+    "passed": 14,
+    "partial": 0,
+    "failed": 0
+  }
+}

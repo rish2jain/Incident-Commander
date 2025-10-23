@@ -764,7 +764,7 @@ export default function EnhancedTransparencyDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <PredictivePreventionDemo
             className="w-full"
-            onPreventionComplete={() => console.log("Prevention demo complete")}
+            onPreventionComplete={() => {}}
           />
           <ByzantineConsensusDemo className="w-full" />
         </div>
@@ -794,7 +794,7 @@ export default function EnhancedTransparencyDashboard() {
         <TabsContent value="reasoning" data-testid="panel-reasoning">
           <ReasoningPanel
             reasoningSteps={agentReasonings}
-            onStepClick={(step) => console.log("Reasoning step clicked:", step)}
+            onStepClick={() => {}}
           />
         </TabsContent>
 
@@ -818,9 +818,7 @@ export default function EnhancedTransparencyDashboard() {
           ) : (
             <DecisionTreeVisualization
               rootNode={decisionTree.rootNode}
-              onNodeClick={(node) =>
-                console.log("Decision node clicked:", node)
-              }
+              onNodeClick={() => {}}
             />
           )}
         </TabsContent>
@@ -873,9 +871,7 @@ export default function EnhancedTransparencyDashboard() {
         <TabsContent value="communication" data-testid="panel-communication">
           <CommunicationPanel
             messages={agentCommunications}
-            onMessageClick={(message) =>
-              console.log("Message clicked:", message)
-            }
+            onMessageClick={() => {}}
           />
         </TabsContent>
 

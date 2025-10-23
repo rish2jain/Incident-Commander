@@ -1,25 +1,48 @@
-# 🎬 Enhanced Demo Recording System - Professional Documentation
+# 🎬 Enhanced Demo Recording System - Consolidated Dashboard Narrative
 
 ## System Overview
 
-The Enhanced Demo Recording System creates professional-grade recordings that showcase all system capabilities and AWS AI services integration.
+The Enhanced Demo Recording System creates professional-grade recordings with a 6-phase consolidated dashboard narrative. All demonstration takes place on the unified SwarmAI Operations dashboard, proving $9K prize eligibility and core technical claims in 150 seconds.
 
 ## Key Features
 
 ### 🏆 Professional Quality
 
 - **Professional HD Recording**: 1920x1080 WebM format for high-quality demonstration
-- **Comprehensive Documentation**: Automatic generation of evaluation-ready summaries
+- **Consolidated Dashboard**: Single unified view demonstrating all capabilities
+- **6-Phase Narrative**: Structured 150-second demonstration (2.5 minutes)
+- **7 Strategic Screenshots**: Prize-winning proof captures
 - **Business Impact Focus**: Quantified metrics ($2.8M savings, 458% ROI)
-- **AWS AI Integration Showcase**: All 8 AWS AI services integration demonstrated
+- **Prize Eligibility Proof**: $9K in AWS AI services (Q Business, Nova Act, Strands SDK)
 
-### 📊 Enhanced Scenarios
+### 📊 6-Phase Consolidated Dashboard Narrative
 
-1. **Homepage Navigation** (20s) - Strategic architecture overview
-2. **PowerDashboard** (60s) - Executive presentation with business metrics
-3. **AI Transparency** (80s) - Complete 5-tab explainability system
-4. **Operations Dashboard** (40s) - Production monitoring and WebSocket integration
-5. **AWS AI Showcase** (30s) - Complete service portfolio demonstration
+1. **Phase 1 & 2: Baseline & Predictive Prevention** (30s)
+   - Business Impact module: $2.8M annual savings projection
+   - Predictive Prevention System: 85% prevention rate demonstration
+   - Screenshots: Consolidated Operations Hub, Predictive Prevention in Action
+
+2. **Phase 3: Incident Trigger** (10s)
+   - System Controls module interaction
+   - Demo incident activation
+   - Dashboard comes alive with new modules
+
+3. **Phase 4: Byzantine Fault Tolerance** (30s)
+   - Byzantine consensus visualization
+   - Agent compromise sequence: 90.5% → 65.8% → 72.8%
+   - Screenshot: Byzantine Fault Tolerance in Action
+
+4. **Phase 5: AI Transparency & Prize-Winning Proof** (60s)
+   - Amazon Q Business integration (Reasoning tab)
+   - Evidence & RAG Sources module
+   - Nova Act action planning (Decisions tab)
+   - Strands SDK lifecycle management
+   - Screenshots: RAG & AI Reasoning, AI Decision Making, Strands SDK Integration
+
+5. **Phase 6: The Payoff** (20s)
+   - Incident resolution demonstration
+   - Live business impact update
+   - Screenshot: Final Business Impact with live metrics
 
 ### 🎯 Technical Improvements
 
@@ -115,23 +138,27 @@ demo_recordings/
 
 ## System Status
 
-**✅ READY FOR IMMEDIATE SUBMISSION**
+**✅ UPDATED FOR CONSOLIDATED DASHBOARD NARRATIVE**
 
-- All technical requirements validated
+- 6-phase recording narrative implemented
+- Consolidated dashboard approach (single `/demo` route)
+- 7 strategic screenshots defined
+- $9K prize eligibility proof integrated
+- Technical requirements validated
 - Professional recording system operational
-- Comprehensive documentation generated
-- Judge evaluation materials prepared
-- Prize eligibility requirements met
 
 ## Next Steps
 
 1. **Run Enhanced Recording**: Execute `python record_demo.py`
-2. **Review Output**: Check `demo_recordings/` directory
-3. **Validate Quality**: Review generated video and screenshots
-4. **Submit Materials**: Use generated files for hackathon submission
+2. **Review Output**: Check `demo_recordings/` directory for 6-phase narrative
+3. **Validate Screenshots**: Ensure all 7 strategic screenshots captured
+4. **Verify Prize Proof**: Confirm Q Business, Nova Act, Strands SDK visible
+5. **Submit Materials**: Use generated files for hackathon submission
 
 ---
 
-**Status:** 🏆 Production Ready  
-**Optimized For:** AWS AI Agent Global Hackathon 2025  
-**Confidence Level:** Maximum - Ready for Immediate Submission
+**Status:** 🏆 Updated for Consolidated Dashboard
+**Optimized For:** AWS AI Agent Global Hackathon 2025
+**Demo Duration:** 150 seconds (2.5 minutes)
+**Prize Proof:** Amazon Q Business ($3K), Nova Act ($3K), Strands SDK ($3K)
+**Confidence Level:** Maximum - Ready for Recording

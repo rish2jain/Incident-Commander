@@ -2,15 +2,31 @@
 """
 Enhanced Demo Recording Script for Incident Commander - Hackathon 2025
 
-Creates professional HD video recording and comprehensive screenshots optimized for hackathon submission.
-Aligned with MASTER_SUBMISSION_GUIDE.md and COMPREHENSIVE_JUDGE_GUIDE.md requirements.
+Creates professional HD video recording with 6-phase consolidated dashboard narrative.
+Optimized for hackathon submission with new unified SwarmAI Operations dashboard.
+
+6-Phase Demo Narrative (150 seconds total):
+Phase 1 & 2: Baseline & Predictive Prevention (30s)
+Phase 3: Incident Trigger (10s)
+Phase 4: Byzantine Fault Tolerance (30s)
+Phase 5: AI Transparency & Prize-Winning Proof (60s)
+Phase 6: The Payoff (20s)
+
+7 Key Screenshots:
+1. Consolidated Operations Hub (All Systems Operational)
+2. Predictive Prevention in Action
+3. Byzantine Fault Tolerance in Action
+4. RAG & AI Reasoning (Amazon Q Business)
+5. AI Decision Making (Nova Act)
+6. Strands SDK Integration
+7. Final Business Impact (after resolution)
 
 Features:
 - Professional HD recording (1920x1080)
-- Comprehensive screenshot capture with descriptions
-- Hackathon-optimized demo flow
-- Business impact visualization
-- AWS AI services showcase
+- Single unified dashboard demonstration
+- $9K prize eligibility proof (Q Business, Nova Act, Strands SDK)
+- Byzantine consensus visualization
+- Business impact visualization ($2.8M savings, 458% ROI)
 - Judge-ready presentation format
 """
 
@@ -47,78 +63,95 @@ RECORDING_CONFIG = {
     "wait_for_animations": True,
 }
 
-# Enhanced demo scenarios optimized for hackathon submission
+# Enhanced demo scenarios - 6-phase consolidated dashboard narrative
 DEMO_SCENARIOS = [
     {
-        "name": "homepage",
-        "url": "/",
-        "duration": 20,
-        "description": "Homepage navigation with 3-dashboard architecture showcase",
-        "business_focus": "System overview and strategic positioning",
-        "actions": ["wait", "hover_cards", "highlight_navigation"],
+        "name": "phase_1_2_baseline_predictive",
+        "url": "/demo",  # Unified SwarmAI Operations dashboard
+        "duration": 30,
+        "description": "Phase 1 & 2: Baseline & Predictive Prevention on consolidated dashboard",
+        "business_focus": "$2.8M annual savings projection, 85% incident prevention capability",
+        "actions": ["wait", "pan_business_impact", "focus_predictive_prevention", "show_prevention_sequence"],
         "key_points": [
-            "Three specialized dashboards",
-            "Professional glassmorphism design",
-            "Strategic architecture overview"
+            "Consolidated SwarmAI Operations dashboard fully loaded",
+            "Business Impact (Projected) module: $2.8M annual savings",
+            "Predictive Prevention System: 85% prevention rate",
+            "Predictive alert → Time to impact → Incident Prevented sequence"
+        ],
+        "screenshots": [
+            {"name": "consolidated_operations_hub", "description": "Entire consolidated dashboard in 'All Systems Operational' state"},
+            {"name": "predictive_prevention_active", "description": "Predictive Prevention System module showing 'Predictive alert triggered' status"}
         ]
     },
     {
-        "name": "power_demo",
+        "name": "phase_3_incident_trigger",
         "url": "/demo",
-        "duration": 60,
-        "description": "PowerDashboard - Executive presentation with business metrics",
-        "business_focus": "$2.8M annual savings, 458% ROI, 95.2% MTTR improvement",
-        "actions": ["wait", "trigger_demo", "show_business_metrics", "demonstrate_roi"],
+        "duration": 10,
+        "description": "Phase 3: Incident Trigger via System Controls",
+        "business_focus": "Interactive demo capabilities showing real-time system response",
+        "actions": ["pan_to_system_controls", "trigger_demo_incident"],
         "key_points": [
-            "Real-time business impact calculation",
-            "Interactive demo controls",
-            "Executive-ready presentation",
-            "Quantified cost savings"
-        ]
+            "System Controls module navigation",
+            "Trigger Demo Incident button activation",
+            "Dashboard comes alive with new modules"
+        ],
+        "screenshots": []
     },
     {
-        "name": "transparency",
-        "url": "/transparency",
-        "duration": 80,
-        "description": "AI Transparency Dashboard - Complete explainability system",
-        "business_focus": "5-tab AI explainability, agent reasoning, decision transparency",
-        "actions": ["wait", "trigger_demo", "navigate_key_tabs", "show_reasoning", "demonstrate_consensus"],
-        "key_points": [
-            "5-tab explainability system",
-            "Agent reasoning visualization",
-            "Byzantine consensus demonstration",
-            "Decision tree analysis"
-        ]
-    },
-    {
-        "name": "operations",
-        "url": "/ops",
-        "duration": 40,
-        "description": "Operations Dashboard - Production monitoring and WebSocket integration",
-        "business_focus": "Real-time monitoring, agent health, system performance",
-        "actions": ["wait", "check_websocket", "monitor_agents"],
-        "key_points": [
-            "Real-time WebSocket connectivity",
-            "Agent health monitoring",
-            "Performance metrics",
-            "Production-ready interface"
-        ]
-    },
-    {
-        "name": "aws_ai_showcase",
+        "name": "phase_4_byzantine_fault_tolerance",
         "url": "/demo",
         "duration": 30,
-        "description": "AWS AI Services Integration Showcase",
-        "business_focus": "Complete 8/8 AWS AI services integration",
-        "actions": ["wait", "show_aws_services", "demonstrate_integration"],
+        "description": "Phase 4: Byzantine Fault Tolerance demonstration",
+        "business_focus": "Core technical differentiator - Byzantine consensus with agent compromise handling",
+        "actions": ["wait_for_incident_trigger", "focus_byzantine_module", "show_consensus_sequence"],
         "key_points": [
-            "Amazon Bedrock AgentCore",
-            "Claude 3.5 Sonnet & Haiku",
-            "Amazon Q Business",
-            "Nova Act integration",
-            "Strands SDK",
-            "Titan Embeddings",
-            "Bedrock Guardrails"
+            "Byzantine Fault Tolerance Status module appears",
+            "Agent compromise sequence visualization",
+            "Consensus score: 90.5% → 65.8% (compromise) → 72.8% (recovery)",
+            "Fault isolation and recovery demonstration"
+        ],
+        "screenshots": [
+            {"name": "byzantine_fault_tolerance_active", "description": "Byzantine Fault Tolerance Status module at moment of compromise (65.8%)"}
+        ]
+    },
+    {
+        "name": "phase_5_ai_transparency_prizes",
+        "url": "/demo",
+        "duration": 60,
+        "description": "Phase 5: AI Transparency & Prize-Winning Proof",
+        "business_focus": "Proving $9K prize eligibility: Amazon Q Business, Nova Act, Strands SDK integration",
+        "actions": ["pan_to_active_incidents", "expand_database_cascade", "show_reasoning_tab", "show_q_business_analysis",
+                    "show_rag_sources", "show_decisions_tab", "show_nova_act_plan", "show_strands_integration"],
+        "key_points": [
+            "Active Incidents module - Database Cascade incident expanded",
+            "Reasoning tab: Analysis by Amazon Q Business module",
+            "Evidence & RAG Sources module (past incident matches)",
+            "Decisions tab: Action Plan by Nova Act module",
+            "Agent lifecycle managed by AWS Strands SDK (footer text)",
+            "Complete prize eligibility demonstration"
+        ],
+        "screenshots": [
+            {"name": "rag_ai_reasoning", "description": "Reasoning tab showing both Amazon Q Business Analysis and Evidence & RAG Sources modules"},
+            {"name": "nova_act_decision_making", "description": "Decisions tab showing Action Plan by Nova Act module"},
+            {"name": "strands_sdk_integration", "description": "UI element explicitly mentioning Strands SDK integration"}
+        ]
+    },
+    {
+        "name": "phase_6_payoff",
+        "url": "/demo",
+        "duration": 20,
+        "description": "Phase 6: The Payoff - Resolution and Impact",
+        "business_focus": "95.2% MTTR improvement, quantified business impact from live demo",
+        "actions": ["collapse_incident", "pan_to_top", "show_resolved_status", "show_updated_business_impact"],
+        "key_points": [
+            "Incident collapsed and marked as 'Resolved' in Active Incidents",
+            "Business Impact (Projected) updated with live data",
+            "Incidents Resolved Today: 1",
+            "AI Time to Resolution: 2.5m",
+            "95.2% MTTR improvement demonstrated"
+        ],
+        "screenshots": [
+            {"name": "final_business_impact", "description": "Business Impact module after incident resolution showing live metrics"}
         ]
     }
 ]
@@ -567,7 +600,184 @@ class EnhancedDemoRecorder:
                 # Show service integration
                 await asyncio.sleep(3)
                 await self.take_screenshot(f"{scenario['name']}_integration", "Complete AWS AI portfolio integration", scenario)
-                
+
+            # New actions for consolidated dashboard narrative
+            elif action == "pan_business_impact":
+                # Pan/scroll to Business Impact module
+                await asyncio.sleep(2)
+                await self.take_screenshot(f"{scenario['name']}_business_impact", "Business Impact (Projected) module showing $2.8M annual savings", scenario)
+
+            elif action == "focus_predictive_prevention":
+                # Focus on Predictive Prevention System module
+                await asyncio.sleep(2)
+                await self.take_screenshot(f"{scenario['name']}_predictive_system", "Predictive Prevention System module", scenario)
+
+            elif action == "show_prevention_sequence":
+                # Show the full prevention sequence
+                await asyncio.sleep(4)
+                await self.take_screenshot(f"{scenario['name']}_prevention_sequence", "Predictive alert → Time to impact → Incident Prevented sequence", scenario)
+
+            elif action == "pan_to_system_controls":
+                # Navigate to System Controls module
+                await asyncio.sleep(2)
+
+            elif action == "trigger_demo_incident":
+                # Trigger demo incident via System Controls
+                trigger_selectors = [
+                    "button:has-text('Trigger Demo Incident')",
+                    "button:has-text('Trigger')",
+                    "button:has-text('🚨')",
+                    "[data-testid='demo-trigger']",
+                    ".demo-trigger-btn"
+                ]
+
+                triggered = False
+                for selector in trigger_selectors:
+                    try:
+                        trigger_button = await self.page.query_selector(selector)
+                        if trigger_button:
+                            await trigger_button.click()
+                            await asyncio.sleep(3)
+                            triggered = True
+                            break
+                    except:
+                        continue
+
+                if not triggered:
+                    print("   ⚠️  No demo trigger button found")
+
+            elif action == "wait_for_incident_trigger":
+                # Wait for incident to trigger and new modules to appear
+                await asyncio.sleep(5)
+
+            elif action == "focus_byzantine_module":
+                # Focus on Byzantine Fault Tolerance Status module
+                await asyncio.sleep(3)
+                await self.take_screenshot(f"{scenario['name']}_byzantine_overview", "Byzantine Fault Tolerance Status module", scenario)
+
+            elif action == "show_consensus_sequence":
+                # Show the consensus degradation and recovery sequence
+                await asyncio.sleep(5)
+                await self.take_screenshot(f"{scenario['name']}_consensus_sequence", "Byzantine consensus: 90.5% → 65.8% → 72.8% sequence", scenario)
+
+            elif action == "pan_to_active_incidents":
+                # Pan to Active Incidents module
+                await asyncio.sleep(2)
+
+            elif action == "expand_database_cascade":
+                # Click to expand the Database Cascade incident
+                incident_selectors = [
+                    "button:has-text('Database Cascade')",
+                    ".incident-item:has-text('Database')",
+                    "[data-testid='incident-database-cascade']"
+                ]
+
+                expanded = False
+                for selector in incident_selectors:
+                    try:
+                        incident = await self.page.query_selector(selector)
+                        if incident:
+                            await incident.click()
+                            await asyncio.sleep(2)
+                            expanded = True
+                            break
+                    except:
+                        continue
+
+                if not expanded:
+                    print("   ⚠️  Database Cascade incident not found")
+
+            elif action == "show_reasoning_tab":
+                # Click the Reasoning tab
+                tab_selectors = [
+                    "button:has-text('Reasoning')",
+                    "[data-testid='tab-reasoning']",
+                    ".tab-reasoning"
+                ]
+
+                for selector in tab_selectors:
+                    try:
+                        tab = await self.page.query_selector(selector)
+                        if tab:
+                            await tab.click()
+                            await asyncio.sleep(2)
+                            break
+                    except:
+                        continue
+
+            elif action == "show_q_business_analysis":
+                # Show the Amazon Q Business Analysis module
+                await asyncio.sleep(2)
+                await self.take_screenshot(f"{scenario['name']}_q_business", "Analysis by Amazon Q Business module", scenario)
+
+            elif action == "show_rag_sources":
+                # Show the Evidence & RAG Sources module
+                await asyncio.sleep(2)
+                await self.take_screenshot(f"{scenario['name']}_rag_sources", "Evidence & RAG Sources module showing past incident matches", scenario)
+
+            elif action == "show_decisions_tab":
+                # Click the Decisions tab
+                tab_selectors = [
+                    "button:has-text('Decisions')",
+                    "[data-testid='tab-decisions']",
+                    ".tab-decisions"
+                ]
+
+                for selector in tab_selectors:
+                    try:
+                        tab = await self.page.query_selector(selector)
+                        if tab:
+                            await tab.click()
+                            await asyncio.sleep(2)
+                            break
+                    except:
+                        continue
+
+            elif action == "show_nova_act_plan":
+                # Show the Action Plan by Nova Act module
+                await asyncio.sleep(3)
+                await self.take_screenshot(f"{scenario['name']}_nova_act", "Action Plan by Nova Act module", scenario)
+
+            elif action == "show_strands_integration":
+                # Show the Strands SDK integration text
+                await asyncio.sleep(2)
+                await self.take_screenshot(f"{scenario['name']}_strands", "Agent lifecycle managed by AWS Strands SDK", scenario)
+
+            elif action == "collapse_incident":
+                # Collapse the expanded incident
+                await asyncio.sleep(2)
+                # Try to find and click collapse button or click incident again
+                collapse_selectors = [
+                    "button:has-text('Collapse')",
+                    ".incident-collapse",
+                    "[data-testid='incident-collapse']"
+                ]
+
+                for selector in collapse_selectors:
+                    try:
+                        collapse = await self.page.query_selector(selector)
+                        if collapse:
+                            await collapse.click()
+                            await asyncio.sleep(1)
+                            break
+                    except:
+                        continue
+
+            elif action == "pan_to_top":
+                # Scroll back to top of dashboard
+                await self.page.evaluate("window.scrollTo({top: 0, behavior: 'smooth'})")
+                await asyncio.sleep(2)
+
+            elif action == "show_resolved_status":
+                # Show the resolved incident status
+                await asyncio.sleep(2)
+                await self.take_screenshot(f"{scenario['name']}_resolved", "Incident marked as 'Resolved' in Active Incidents", scenario)
+
+            elif action == "show_updated_business_impact":
+                # Show updated Business Impact with live demo data
+                await asyncio.sleep(2)
+                await self.take_screenshot(f"{scenario['name']}_final_impact", "Business Impact updated with live demo data", scenario)
+
         except Exception as e:
             print(f"⚠️  Action '{action}' failed: {e}")
             # Take screenshot of current state even if action failed

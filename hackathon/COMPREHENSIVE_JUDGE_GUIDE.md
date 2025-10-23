@@ -1,16 +1,16 @@
-# 🏆 Comprehensive Judge Guide - Autonomous Incident Commander
+# 🏆 System Evaluation Guide - Autonomous Incident Commander
 
-**Complete evaluation guide for judges with all Task 12 & 22 features demonstrated.**
+**Complete evaluation guide with all interactive features demonstrated.**
 
 ## 🎬 **Enhanced Recording System Available - October 23, 2025**
 
-**Professional HD recording system optimized for hackathon submission:**
+**Professional HD recording system for system demonstration:**
 
 ```bash
 # Full enhanced recording for comprehensive demonstration
 python record_demo.py
 
-# Quick recording optimized for judges (2 minutes)
+# Quick recording for evaluation (2 minutes)
 python quick_demo_record.py
 
 # Validate recording system readiness
@@ -22,7 +22,7 @@ python test_enhanced_recorder.py
 - **5 Comprehensive Scenarios**: Homepage (20s) → PowerDashboard (60s) → Transparency (80s) → Operations (40s) → AWS AI Showcase (30s)
 - **Professional Quality**: HD 1920x1080 with comprehensive screenshot capture and metadata
 - **Business Impact Focus**: $2.8M savings, 458% ROI, 95.2% MTTR improvement with quantified metrics
-- **Judge-Ready Materials**: Organized videos, screenshots, metrics, and comprehensive evaluation summaries
+- **Evaluation Materials**: Organized videos, screenshots, metrics, and comprehensive evaluation summaries
 - **AWS AI Integration**: All 8 services prominently featured with explicit integration demonstration
 
 **Key Demo Points:**
@@ -38,7 +38,7 @@ python test_enhanced_recorder.py
 ```bash
 # Test live deployment immediately - no setup required
 curl https://h8xlzr74h8.execute-api.us-east-1.amazonaws.com/health
-curl https://h8xlzr74h8.execute-api.us-east-1.amazonaws.com/real-aws-ai/prize-eligibility
+curl https://h8xlzr74h8.execute-api.us-east-1.amazonaws.com/real-aws-ai/integration-status
 ```
 
 **Live AWS URL:** `https://h8xlzr74h8.execute-api.us-east-1.amazonaws.com`
@@ -656,8 +656,8 @@ curl https://h8xlzr74h8.execute-api.us-east-1.amazonaws.com/health
 # Real AWS AI services status
 curl https://h8xlzr74h8.execute-api.us-east-1.amazonaws.com/real-aws-ai/services/status
 
-# Prize eligibility verification
-curl https://h8xlzr74h8.execute-api.us-east-1.amazonaws.com/real-aws-ai/prize-eligibility
+# AWS integration verification
+curl https://h8xlzr74h8.execute-api.us-east-1.amazonaws.com/real-aws-ai/integration-status
 
 # Test Amazon Q Business integration
 curl -X POST https://h8xlzr74h8.execute-api.us-east-1.amazonaws.com/real-aws-ai/amazon-q/analyze \
@@ -767,6 +767,6 @@ curl https://h8xlzr74h8.execute-api.us-east-1.amazonaws.com/real-aws-ai/strands/
 
 ---
 
-**JUDGE TESTING STATUS**: ✅ **READY FOR IMMEDIATE EVALUATION**
+**EVALUATION STATUS**: ✅ **READY FOR IMMEDIATE TESTING**
 
-Judges can verify real AWS AI integrations and prize eligibility in under 30 seconds using the live deployment, with comprehensive local setup options and multiple evaluation presets available.
+System demonstrates real AWS AI integrations in under 30 seconds using the live deployment, with comprehensive local setup options and multiple evaluation presets available.

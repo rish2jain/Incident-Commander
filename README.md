@@ -4,6 +4,22 @@
 
 An AI-powered multi-agent system that provides zero-touch incident resolution for cloud infrastructure. The system uses coordinated agent swarms to detect, diagnose, and resolve incidents autonomously, reducing mean time to resolution (MTTR) by **95.2%**—from the industry average of **30 minutes** to **1.4 minutes**—while **preventing 85% of incidents** before customer impact. This exceeds proven AIOps benchmarks of 50-80% MTTR improvement (Forrester, IBM Watson studies) and represents the market's first predictive prevention capability with complete AWS AI portfolio integration (8/8 services).
 
+## 🏆 For Judges & Evaluators
+
+**New to this project? Start here:**
+
+- 📋 **[JUDGE_REVIEW_INSTRUCTIONS.md](JUDGE_REVIEW_INSTRUCTIONS.md)** - Complete evaluation guide (15-30 min read)
+- 🏗️ **[SwarmAI_Architecture_Diagrams.pdf](SwarmAI_Architecture_Diagrams.pdf)** - Printable architecture reference
+- 📊 **[SYSTEM_ARCHITECTURE_DIAGRAMS.md](SYSTEM_ARCHITECTURE_DIAGRAMS.md)** - Interactive architecture diagrams
+- 📁 **[REPOSITORY_ORGANIZATION.md](REPOSITORY_ORGANIZATION.md)** - Complete repository navigation guide
+
+**Quick Evaluation Options:**
+- **30 seconds:** `curl https://h8xlzr74h8.execute-api.us-east-1.amazonaws.com/health` (Live AWS)
+- **2 minutes:** Local demo setup (see Quick Start below)
+- **5 minutes:** Professional demo recording (see `demo_recordings/`)
+
+---
+
 ## 🚀 Quick Start
 
 ### **🎨 Modern Dashboard System (Recommended)**

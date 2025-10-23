@@ -38,7 +38,7 @@ export function LearningJourneyChart() {
   const chartHeight = height - padding.top - padding.bottom;
 
   // Scales
-  const maxIncidents = Math.max(...LEARNING_DATA.map((d) => d.incidents));
+  const maxIncidents = Math.max(1, ...LEARNING_DATA.map((d) => d.incidents));
   const xScale = (incidents: number) =>
     padding.left + (incidents / maxIncidents) * chartWidth;
 
@@ -65,7 +65,8 @@ export function LearningJourneyChart() {
           System Gets Smarter Over Time
         </CardTitle>
         <p className="text-xs text-slate-400 mt-1">
-          Confidence and success rate improvement through cross-incident learning
+          Confidence and success rate improvement through cross-incident
+          learning
         </p>
       </CardHeader>
       <CardContent>
@@ -244,7 +245,9 @@ export function LearningJourneyChart() {
               transition={{ delay: 3.2 }}
               className="bg-slate-800/50 p-3 rounded border-l-4 border-l-blue-500"
             >
-              <div className="text-xs text-slate-400 mb-1">After 200 Incidents</div>
+              <div className="text-xs text-slate-400 mb-1">
+                After 200 Incidents
+              </div>
               <div className="text-lg font-bold text-blue-400">96%</div>
               <div className="text-xs text-slate-500">Success Rate</div>
             </motion.div>
@@ -271,10 +274,11 @@ export function LearningJourneyChart() {
             <div className="flex items-start gap-3">
               <Award className="w-5 h-5 text-yellow-400 mt-0.5 flex-shrink-0" />
               <div className="text-sm text-slate-300">
-                <span className="font-semibold">Long-term Value:</span> The system
-                continuously improves through cross-incident learning. After processing
-                200 incidents, agent confidence reaches 92% and success rate hits 96%.
-                Each resolved incident makes the system smarter for the next one.
+                <span className="font-semibold">Long-term Value:</span> The
+                system continuously improves through cross-incident learning.
+                After processing 200 incidents, agent confidence reaches 92% and
+                success rate hits 96%. Each resolved incident makes the system
+                smarter for the next one.
               </div>
             </div>
           </motion.div>

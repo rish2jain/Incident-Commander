@@ -24,7 +24,7 @@ logger = get_logger("main")
 async def lifespan(app: FastAPI):
     """Application lifespan management."""
     # Startup
-    logger.info("Starting Incident Commander with enhanced features")
+    logger.info("Starting SwarmAI - Autonomous Incident Commander with enhanced features")
     
     # Initialize LocalStack for testing
     await initialize_localstack_for_testing()
@@ -66,8 +66,8 @@ async def lifespan(app: FastAPI):
 
 # Create FastAPI app with enhanced features
 app = FastAPI(
-    title="Incident Commander - Enhanced Edition",
-    description="AI-powered incident response with 3D visualization and Byzantine consensus",
+    title="SwarmAI - Autonomous Incident Commander",
+    description="Revolutionary AI-powered multi-agent incident response system with Byzantine consensus",
     version="2.0.0",
     lifespan=lifespan
 )

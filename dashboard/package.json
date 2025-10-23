@@ -1,7 +1,7 @@
 {
-  "name": "incident-commander-dashboard",
+  "name": "swarm-ai-dashboard",
   "version": "1.0.0",
-  "description": "3D Dashboard for Incident Commander with Byzantine Consensus Visualization",
+  "description": "3D Dashboard for SwarmAI with Byzantine Consensus Visualization",
   "main": "index.js",
   "scripts": {
     "dev": "next dev",
@@ -60,6 +60,7 @@
     "typescript": "^5.2.0"
   },
   "keywords": [
+    "swarm-ai",
     "incident-response",
     "byzantine-consensus",
     "3d-visualization",
@@ -67,7 +68,7 @@
     "aws-bedrock",
     "multi-agent-system"
   ],
-  "author": "Incident Commander Team",
+  "author": "SwarmAI Team",
   "license": "MIT",
   "repository": {
     "type": "git",

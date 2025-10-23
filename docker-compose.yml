@@ -46,13 +46,13 @@ services:
     ports:
       - "5432:5432"
     environment:
-      - POSTGRES_DB=incident_commander
+      - POSTGRES_DB=swarm_ai
       - POSTGRES_USER=dev_user
       - POSTGRES_PASSWORD=dev_password
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U dev_user -d incident_commander"]
+      test: ["CMD-SHELL", "pg_isready -U dev_user -d swarm_ai"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -121,5 +121,5 @@ volumes:
 
 networks:
   default:
-    name: incident-commander-network
+    name: swarm-ai-network
     driver: bridge

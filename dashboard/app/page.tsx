@@ -4,9 +4,10 @@ import { DashboardLayout, DashboardGrid } from "@/components/shared";
 export default function HomePage() {
   return (
     <DashboardLayout
-      title="Autonomous Incident Commander"
+      title="SwarmAI"
       subtitle="Revolutionary AI-powered multi-agent incident response system"
-      icon="🛡️"
+      showLogo={true}
+      logoVariant="logo-with-name"
     >
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-6">

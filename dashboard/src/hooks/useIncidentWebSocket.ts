@@ -15,7 +15,7 @@
  * Dashboard 1 and Dashboard 2 do NOT use WebSocket.
  */
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback } from "react";
 
 export interface AgentState {
   name: string;
@@ -105,7 +105,8 @@ export function useIncidentWebSocket(
   options: UseIncidentWebSocketOptions = {}
 ): WebSocketHookState {
   const {
-    url = process.env.NEXT_PUBLIC_WEBSOCKET_URL || 'ws://localhost:8000/ws',
+    url = process.env.NEXT_PUBLIC_WEBSOCKET_URL ||
+      "ws://localhost:8000/dashboard/ws",
     autoConnect = true,
     reconnectInterval = 3000,
     maxReconnectAttempts = 10,
@@ -118,17 +119,24 @@ export function useIncidentWebSocket(
   const [connectionError, setConnectionError] = useState<string | null>(null);
   const [latency, setLatency] = useState<number | null>(null);
 
-  const [agentStates, setAgentStates] = useState<Record<string, AgentState>>({});
+  const [agentStates, setAgentStates] = useState<Record<string, AgentState>>(
+    {}
+  );
   const [activeIncidents, setActiveIncidents] = useState<IncidentUpdate[]>([]);
-  const [businessMetrics, setBusinessMetrics] = useState<BusinessMetrics | null>(null);
-  const [systemHealth, setSystemHealth] = useState<SystemHealthMetrics | null>(null);
+  const [businessMetrics, setBusinessMetrics] =
+    useState<BusinessMetrics | null>(null);
+  const [systemHealth, setSystemHealth] = useState<SystemHealthMetrics | null>(
+    null
+  );
 
   // Refs
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectAttempts = useRef(0);
   const reconnectTimeout = useRef<NodeJS.Timeout | null>(null);
-  const heartbeatInterval = useRef<NodeJS.Timeout | null>(null);
-  const connectionId = useRef<string>(`dashboard-3-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
+  const heartbeatIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const connectionId = useRef<string>(
+    `dashboard-3-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+  );
 
   // Message handler
   const handleMessage = useCallback((event: MessageEvent) => {
@@ -136,7 +144,7 @@ export function useIncidentWebSocket(
       const data = JSON.parse(event.data);
 
       // Handle batched messages
-      if (data.type === 'message_batch') {
+      if (data.type === "message_batch") {
         data.messages?.forEach((msg: WebSocketMessage) => {
           handleSingleMessage(msg);
         });
@@ -146,7 +154,7 @@ export function useIncidentWebSocket(
       // Handle single message
       handleSingleMessage(data);
     } catch (error) {
-      console.error('Error parsing WebSocket message:', error);
+      console.error("Error parsing WebSocket message:", error);
     }
   }, []);
 
@@ -154,7 +162,7 @@ export function useIncidentWebSocket(
     const { type, data: messageData } = message;
 
     switch (type) {
-      case 'initial_state':
+      case "initial_state":
         // Initial state on connection
         if (messageData.agent_states) {
           const states: Record<string, AgentState> = {};
@@ -171,10 +179,10 @@ export function useIncidentWebSocket(
         }
         break;
 
-      case 'agent_state_update':
+      case "agent_state_update":
         // Update specific agent state
         if (messageData.agent_name && messageData.state) {
-          setAgentStates(prev => ({
+          setAgentStates((prev) => ({
             ...prev,
             [messageData.agent_name]: {
               name: messageData.agent_name,
@@ -197,11 +205,13 @@ export function useIncidentWebSocket(
         }
         break;
 
-      case 'incident_update':
+      case "incident_update":
         // Update incident and incident list
         if (messageData.incident) {
-          setActiveIncidents(prev => {
-            const filtered = prev.filter(inc => inc.id !== messageData.incident.id);
+          setActiveIncidents((prev) => {
+            const filtered = prev.filter(
+              (inc) => inc.id !== messageData.incident.id
+            );
             return [messageData.incident, ...filtered];
           });
         }
@@ -210,42 +220,42 @@ export function useIncidentWebSocket(
         }
         break;
 
-      case 'business_metrics_update':
+      case "business_metrics_update":
         // Update business metrics
         setBusinessMetrics(messageData);
         break;
 
-      case 'system_health_update':
+      case "system_health_update":
         // Update system health metrics
         setSystemHealth(messageData);
         break;
 
-      case 'consensus_update':
+      case "consensus_update":
         // Log consensus decisions
-        console.log('Consensus decision:', messageData);
+        console.log("Consensus decision:", messageData);
         break;
 
-      case 'pong':
+      case "pong":
         // Update latency from ping/pong
         if (messageData.latency_ms) {
           setLatency(messageData.latency_ms);
         }
         break;
 
-      case 'demo_triggered':
-      case 'demo_scenario_started':
-      case 'agent_reset_complete':
+      case "demo_triggered":
+      case "demo_scenario_started":
+      case "agent_reset_complete":
         // Log demo/reset events
         console.log(`WebSocket event: ${type}`, messageData);
         break;
 
-      case 'error':
-        console.error('WebSocket error message:', messageData);
-        setConnectionError(messageData.message || 'Unknown error');
+      case "error":
+        console.error("WebSocket error message:", messageData);
+        setConnectionError(messageData.message || "Unknown error");
         break;
 
       default:
-        console.log('Unknown message type:', type, messageData);
+        console.log("Unknown message type:", type, messageData);
     }
   }, []);
 
@@ -263,22 +273,24 @@ export function useIncidentWebSocket(
       const ws = new WebSocket(wsUrl);
 
       ws.onopen = () => {
-        console.log('✓ WebSocket connected');
+        console.log("✓ WebSocket connected");
         setConnected(true);
         setConnecting(false);
         setConnectionError(null);
         reconnectAttempts.current = 0;
 
         // Start heartbeat
-        if (heartbeatInterval.current) {
-          clearInterval(heartbeatInterval.current);
+        if (heartbeatIntervalRef.current) {
+          clearInterval(heartbeatIntervalRef.current);
         }
-        heartbeatInterval.current = setInterval(() => {
+        heartbeatIntervalRef.current = setInterval(() => {
           if (ws.readyState === WebSocket.OPEN) {
-            ws.send(JSON.stringify({
-              action: 'ping',
-              timestamp: new Date().toISOString(),
-            }));
+            ws.send(
+              JSON.stringify({
+                action: "ping",
+                timestamp: new Date().toISOString(),
+              })
+            );
           }
         }, heartbeatInterval);
       };
@@ -286,42 +298,54 @@ export function useIncidentWebSocket(
       ws.onmessage = handleMessage;
 
       ws.onerror = (error) => {
-        console.error('WebSocket error:', error);
-        setConnectionError('Connection error');
+        console.error("WebSocket error:", error);
+        setConnectionError("Connection error");
       };
 
       ws.onclose = (event) => {
-        console.log('WebSocket closed:', event.code, event.reason);
+        console.log("WebSocket closed:", event.code, event.reason);
         setConnected(false);
         setConnecting(false);
 
         // Clear heartbeat
-        if (heartbeatInterval.current) {
-          clearInterval(heartbeatInterval.current);
-          heartbeatInterval.current = null;
+        if (heartbeatIntervalRef.current) {
+          clearInterval(heartbeatIntervalRef.current);
+          heartbeatIntervalRef.current = null;
         }
 
         // Attempt reconnection
         if (reconnectAttempts.current < maxReconnectAttempts) {
-          const delay = reconnectInterval * Math.pow(1.5, reconnectAttempts.current);
-          console.log(`Reconnecting in ${delay}ms... (attempt ${reconnectAttempts.current + 1}/${maxReconnectAttempts})`);
+          const delay =
+            reconnectInterval * Math.pow(1.5, reconnectAttempts.current);
+          console.log(
+            `Reconnecting in ${delay}ms... (attempt ${
+              reconnectAttempts.current + 1
+            }/${maxReconnectAttempts})`
+          );
 
           reconnectTimeout.current = setTimeout(() => {
             reconnectAttempts.current++;
             connect();
           }, delay);
         } else {
-          setConnectionError('Max reconnection attempts reached');
+          setConnectionError("Max reconnection attempts reached");
         }
       };
 
       wsRef.current = ws;
     } catch (error) {
-      console.error('Failed to create WebSocket:', error);
+      console.error("Failed to create WebSocket:", error);
       setConnecting(false);
-      setConnectionError('Failed to create WebSocket connection');
+      setConnectionError("Failed to create WebSocket connection");
     }
-  }, [url, connecting, handleMessage, reconnectInterval, maxReconnectAttempts, heartbeatInterval]);
+  }, [
+    url,
+    connecting,
+    handleMessage,
+    reconnectInterval,
+    maxReconnectAttempts,
+    heartbeatInterval,
+  ]);
 
   const disconnect = useCallback(() => {
     if (reconnectTimeout.current) {
@@ -329,9 +353,9 @@ export function useIncidentWebSocket(
       reconnectTimeout.current = null;
     }
 
-    if (heartbeatInterval.current) {
-      clearInterval(heartbeatInterval.current);
-      heartbeatInterval.current = null;
+    if (heartbeatIntervalRef.current) {
+      clearInterval(heartbeatIntervalRef.current);
+      heartbeatIntervalRef.current = null;
     }
 
     if (wsRef.current) {
@@ -345,22 +369,24 @@ export function useIncidentWebSocket(
 
   const sendMessage = useCallback((action: string, data: any = {}) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
-      wsRef.current.send(JSON.stringify({
-        action,
-        ...data,
-        timestamp: new Date().toISOString(),
-      }));
+      wsRef.current.send(
+        JSON.stringify({
+          action,
+          ...data,
+          timestamp: new Date().toISOString(),
+        })
+      );
     } else {
-      console.warn('WebSocket not connected, cannot send message');
+      console.warn("WebSocket not connected, cannot send message");
     }
   }, []);
 
   const triggerDemo = useCallback(() => {
-    sendMessage('trigger_demo_incident');
+    sendMessage("trigger_demo_incident");
   }, [sendMessage]);
 
   const resetAgents = useCallback(() => {
-    sendMessage('reset_agents');
+    sendMessage("reset_agents");
   }, [sendMessage]);
 
   const reconnect = useCallback(() => {

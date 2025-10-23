@@ -14,6 +14,7 @@ Usage:
     cdk deploy
 """
 
+import os
 import aws_cdk as cdk
 from constructs import Construct
 from aws_cdk import (
@@ -379,6 +380,3 @@ IncidentCommanderStack(
 )
 
 app.synth()
-
-
-import os

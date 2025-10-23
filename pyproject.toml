@@ -3,16 +3,16 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "incident-commander"
+name = "swarm-ai"
 version = "0.1.0"
-description = "Autonomous Incident Commander - AI-powered multi-agent incident response system"
+description = "SwarmAI - Revolutionary AI-powered multi-agent incident response system"
 readme = "README.md"
 requires-python = ">=3.11"
 license = {text = "MIT"}
 authors = [
-    {name = "Incident Commander Team"}
+    {name = "SwarmAI Team"}
 ]
-keywords = ["ai", "incident-response", "devops", "sre", "automation"]
+keywords = ["swarm-ai", "ai", "incident-response", "devops", "sre", "automation", "multi-agent"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",

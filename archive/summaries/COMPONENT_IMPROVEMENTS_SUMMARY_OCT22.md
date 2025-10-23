@@ -33,9 +33,13 @@ The PredictivePreventionDemo component has been enhanced with production-ready m
 ```typescript
 // Enhanced cleanup pattern
 useEffect(() => {
-  const progressIntervalRef = { current: null as NodeJS.Timeout | null };
-  const countdownIntervalRef = { current: null as NodeJS.Timeout | null };
-  const timeoutIds: NodeJS.Timeout[] = [];
+  const progressIntervalRef = {
+    current: null as ReturnType<typeof setTimeout> | null,
+  };
+  const countdownIntervalRef = {
+    current: null as ReturnType<typeof setTimeout> | null,
+  };
+  const timeoutIds: ReturnType<typeof setTimeout>[] = [];
   let isMounted = true;
 
   // Demo sequence with mounting checks

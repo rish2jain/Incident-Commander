@@ -58,6 +58,56 @@ class IncidentCommanderSecurityStack(Stack):
             ]
         )
 
+        # Add S3 permissions to ECS task role
+        self.ecs_task_role.add_to_policy(
+            iam.PolicyStatement(
+                effect=iam.Effect.ALLOW,
+                actions=[
+                    "s3:GetObject",
+                    "s3:PutObject",
+                    "s3:DeleteObject",
+                    "s3:ListBucket"
+                ],
+                resources=[
+                    f"arn:aws:s3:::incident-commander-artifacts-{environment_name}",
+                    f"arn:aws:s3:::incident-commander-artifacts-{environment_name}/*"
+                ]
+            )
+        )
+
+        # Add AWS AI services permissions to ECS task role
+        self.ecs_task_role.add_to_policy(
+            iam.PolicyStatement(
+                effect=iam.Effect.ALLOW,
+                actions=[
+                    "bedrock:*",
+                    "bedrock-runtime:*",
+                    "bedrock-agent:*",
+                    "bedrock-agent-runtime:*",
+                    "qbusiness:*",
+                    "comprehend:*",
+                    "textract:*"
+                ],
+                resources=["*"]
+            )
+        )
+
+        # Add CloudTrail permissions for audit logging
+        self.ecs_task_role.add_to_policy(
+            iam.PolicyStatement(
+                effect=iam.Effect.ALLOW,
+                actions=[
+                    "cloudtrail:LookupEvents",
+                    "logs:CreateLogGroup",
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents",
+                    "logs:DescribeLogGroups",
+                    "logs:DescribeLogStreams"
+                ],
+                resources=["*"]
+            )
+        )
+
     def _create_security_groups(self) -> dict:
         """Create security groups for different services."""
         

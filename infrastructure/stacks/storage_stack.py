@@ -34,6 +34,7 @@ class IncidentCommanderStorageStack(Stack):
             billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
             encryption=dynamodb.TableEncryption.CUSTOMER_MANAGED,
             encryption_key=kms_key,
+            point_in_time_recovery=True,
             removal_policy=RemovalPolicy.RETAIN if environment_name == "production" else RemovalPolicy.DESTROY
         )
 

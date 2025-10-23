@@ -19,6 +19,7 @@ import {
   ConfidenceScore,
   SeverityIndicator,
 } from "../../src/components/shared";
+import { motion, AnimatePresence } from "framer-motion";
 import ByzantineConsensusDemo from "../../src/components/ByzantineConsensusDemo";
 import PredictivePreventionDemo from "../../src/components/PredictivePreventionDemo";
 import { ReasoningPanel } from "../../src/components/enhanced/ReasoningPanel";
@@ -402,7 +403,10 @@ export default function TransparencyDashboardPage() {
         return data;
       }
     } catch (error) {
-      console.warn("Failed to load cached scenario, using simulated data:", error);
+      console.warn(
+        "Failed to load cached scenario, using simulated data:",
+        error
+      );
     }
     return null;
   }, []);
@@ -635,15 +639,27 @@ export default function TransparencyDashboardPage() {
 
       // 1-5 for tab navigation
       if (e.key >= "1" && e.key <= "5") {
-        const tabs = ["reasoning", "decisions", "confidence", "communication", "analytics"];
+        const tabs = [
+          "reasoning",
+          "decisions",
+          "confidence",
+          "communication",
+          "analytics",
+        ];
         const tabIndex = parseInt(e.key) - 1;
-        const tabElement = document.querySelector(`[value="${tabs[tabIndex]}"]`) as HTMLElement;
+        const tabElement = document.querySelector(
+          `[value="${tabs[tabIndex]}"]`
+        ) as HTMLElement;
         if (tabElement) {
           tabElement.click();
         }
       }
       // Enter or Space to trigger demo
-      if ((e.key === "Enter" || e.key === " ") && !incidentActive && e.target === document.body) {
+      if (
+        (e.key === "Enter" || e.key === " ") &&
+        !incidentActive &&
+        e.target === document.body
+      ) {
         e.preventDefault();
         triggerIncident();
       }
@@ -655,9 +671,10 @@ export default function TransparencyDashboardPage() {
 
   return (
     <DashboardLayout
-      title="AI Transparency Dashboard"
+      title="SwarmAI Transparency"
       subtitle="Complete AI explainability for incident response - Deep technical demonstration"
-      icon="🧠"
+      showLogo={true}
+      logoVariant="logo-only"
     >
       {/* Status Bar */}
       <DashboardSection variant="glass" className="mb-4">
@@ -713,7 +730,9 @@ export default function TransparencyDashboardPage() {
               className="bg-slate-800 border-2 border-blue-500 rounded-lg p-6 max-w-md"
             >
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-bold text-blue-400">⌨️ Keyboard Shortcuts</h3>
+                <h3 className="text-xl font-bold text-blue-400">
+                  ⌨️ Keyboard Shortcuts
+                </h3>
                 <Button
                   size="sm"
                   variant="ghost"
@@ -726,39 +745,61 @@ export default function TransparencyDashboardPage() {
               <div className="space-y-2 text-sm">
                 <div className="flex items-center justify-between py-2 border-b border-slate-700">
                   <span className="text-slate-400">Switch to Reasoning</span>
-                  <kbd className="px-2 py-1 bg-slate-700 rounded border border-slate-600 text-blue-400 font-mono">1</kbd>
+                  <kbd className="px-2 py-1 bg-slate-700 rounded border border-slate-600 text-blue-400 font-mono">
+                    1
+                  </kbd>
                 </div>
                 <div className="flex items-center justify-between py-2 border-b border-slate-700">
                   <span className="text-slate-400">Switch to Decisions</span>
-                  <kbd className="px-2 py-1 bg-slate-700 rounded border border-slate-600 text-blue-400 font-mono">2</kbd>
+                  <kbd className="px-2 py-1 bg-slate-700 rounded border border-slate-600 text-blue-400 font-mono">
+                    2
+                  </kbd>
                 </div>
                 <div className="flex items-center justify-between py-2 border-b border-slate-700">
                   <span className="text-slate-400">Switch to Confidence</span>
-                  <kbd className="px-2 py-1 bg-slate-700 rounded border border-slate-600 text-blue-400 font-mono">3</kbd>
+                  <kbd className="px-2 py-1 bg-slate-700 rounded border border-slate-600 text-blue-400 font-mono">
+                    3
+                  </kbd>
                 </div>
                 <div className="flex items-center justify-between py-2 border-b border-slate-700">
-                  <span className="text-slate-400">Switch to Communication</span>
-                  <kbd className="px-2 py-1 bg-slate-700 rounded border border-slate-600 text-blue-400 font-mono">4</kbd>
+                  <span className="text-slate-400">
+                    Switch to Communication
+                  </span>
+                  <kbd className="px-2 py-1 bg-slate-700 rounded border border-slate-600 text-blue-400 font-mono">
+                    4
+                  </kbd>
                 </div>
                 <div className="flex items-center justify-between py-2 border-b border-slate-700">
                   <span className="text-slate-400">Switch to Analytics</span>
-                  <kbd className="px-2 py-1 bg-slate-700 rounded border border-slate-600 text-blue-400 font-mono">5</kbd>
+                  <kbd className="px-2 py-1 bg-slate-700 rounded border border-slate-600 text-blue-400 font-mono">
+                    5
+                  </kbd>
                 </div>
                 <div className="flex items-center justify-between py-2 border-b border-slate-700">
                   <span className="text-slate-400">Trigger Demo</span>
-                  <kbd className="px-2 py-1 bg-slate-700 rounded border border-slate-600 text-green-400 font-mono">Enter</kbd>
+                  <kbd className="px-2 py-1 bg-slate-700 rounded border border-slate-600 text-green-400 font-mono">
+                    Enter
+                  </kbd>
                 </div>
                 <div className="flex items-center justify-between py-2 border-b border-slate-700">
                   <span className="text-slate-400">Stop Demo</span>
-                  <kbd className="px-2 py-1 bg-slate-700 rounded border border-slate-600 text-red-400 font-mono">Esc</kbd>
+                  <kbd className="px-2 py-1 bg-slate-700 rounded border border-slate-600 text-red-400 font-mono">
+                    Esc
+                  </kbd>
                 </div>
                 <div className="flex items-center justify-between py-2">
                   <span className="text-slate-400">Toggle This Help</span>
-                  <kbd className="px-2 py-1 bg-slate-700 rounded border border-slate-600 text-purple-400 font-mono">?</kbd>
+                  <kbd className="px-2 py-1 bg-slate-700 rounded border border-slate-600 text-purple-400 font-mono">
+                    ?
+                  </kbd>
                 </div>
               </div>
               <div className="mt-4 text-xs text-center text-slate-500">
-                Press <kbd className="px-1 py-0.5 bg-slate-700 rounded text-slate-400">Esc</kbd> to close
+                Press{" "}
+                <kbd className="px-1 py-0.5 bg-slate-700 rounded text-slate-400">
+                  Esc
+                </kbd>{" "}
+                to close
               </div>
             </motion.div>
           </motion.div>
@@ -770,19 +811,29 @@ export default function TransparencyDashboardPage() {
         <DashboardSection variant="glass" className="mb-4">
           <div className="flex items-center justify-between text-sm">
             <div className="flex items-center gap-3">
-              <Badge variant="outline" className="bg-orange-500/20 text-orange-200 border-orange-500/50">
+              <Badge
+                variant="outline"
+                className="bg-orange-500/20 text-orange-200 border-orange-500/50"
+              >
                 🧠 AWS-Generated Scenario
               </Badge>
               <span className="text-slate-400">
-                Generated: {new Date(scenarioMetadata.generated_at).toLocaleDateString()}
+                Generated:{" "}
+                {new Date(scenarioMetadata.generated_at).toLocaleDateString()}
               </span>
-              {scenarioMetadata.aws_services_used && scenarioMetadata.aws_services_used.length > 0 && (
-                <span className="text-slate-400">
-                  Services: {scenarioMetadata.aws_services_used.join(", ") || "Cached Demo Data"}
-                </span>
-              )}
+              {scenarioMetadata.aws_services_used &&
+                scenarioMetadata.aws_services_used.length > 0 && (
+                  <span className="text-slate-400">
+                    Services:{" "}
+                    {scenarioMetadata.aws_services_used.join(", ") ||
+                      "Cached Demo Data"}
+                  </span>
+                )}
             </div>
-            <Badge variant="default" className="bg-purple-500/20 text-purple-200 border-purple-500/50">
+            <Badge
+              variant="default"
+              className="bg-purple-500/20 text-purple-200 border-purple-500/50"
+            >
               Phase 0: Hybrid Approach
             </Badge>
           </div>
@@ -900,7 +951,10 @@ export default function TransparencyDashboardPage() {
         {/* Reasoning Tab - Enhanced with new ReasoningPanel */}
         <TabsContent value="reasoning" data-testid="panel-reasoning">
           <ReasoningPanel
-            reasoningSteps={agentReasonings}
+            reasoningSteps={agentReasonings.map((reasoning) => ({
+              ...reasoning,
+              step: reasoning.step || "Processing",
+            }))}
             onStepClick={(step) => {
               // Could track reasoning step interactions for analytics
             }}
@@ -911,13 +965,24 @@ export default function TransparencyDashboardPage() {
         {/* Decision Trees Tab - Enhanced with new DecisionTreeVisualization */}
         <TabsContent value="decisions" data-testid="panel-decisions">
           {decisionTree ? (
-            <DecisionTreeVisualization
-              rootNode={decisionTree.rootNode}
-              onNodeClick={(node) => {
-                // Could track decision node interactions for analytics
-              }}
-              className="w-full"
-            />
+            <Card className="card-glass">
+              <CardHeader>
+                <CardTitle>🌳 Decision Tree Analysis</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center text-status-neutral">
+                  <div className="text-4xl mb-3">🌳</div>
+                  <h3 className="text-lg font-medium mb-2">
+                    Decision Tree Available
+                  </h3>
+                  <p className="text-sm">Root: {decisionTree.rootNode.label}</p>
+                  <p className="text-xs mt-2 text-slate-500">
+                    Confidence:{" "}
+                    {(decisionTree.rootNode.confidence * 100).toFixed(1)}%
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
           ) : (
             <Card className="card-glass">
               <CardContent className="py-12">

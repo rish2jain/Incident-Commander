@@ -274,9 +274,9 @@ export default function RefinedDashboard() {
     queueMessage,
   } = useConnection({
     config: {
-      wsUrl: `${
-        window.location.protocol === "https:" ? "wss:" : "ws:"
-      }//localhost:8000/ws`,
+      wsUrl: typeof window !== "undefined" 
+        ? `${window.location.protocol === "https:" ? "wss:" : "ws:"}//localhost:8000/ws`
+        : process.env.NEXT_PUBLIC_WS_URL || "",
       reconnectInterval: 1000,
       maxReconnectAttempts: 10,
       heartbeatInterval: 30000,
@@ -305,7 +305,7 @@ export default function RefinedDashboard() {
   const { handleError } = useErrorHandler();
 
   const {
-    state: fallbackState,
+    state: managerFallbackState,
     handleAutoScrollFallback,
     handleConnectionFallback,
     handleIncidentTrackingFallback,
@@ -705,8 +705,13 @@ export default function RefinedDashboard() {
 
           // Update incident phase with error handling
           try {
-            incidentTracker.updateStatus?.({ phase: step.type as any }) ||
-              incidentTracker.updateIncident?.({ phase: step.type });
+            if (incidentTracker.updateStatus) {
+              incidentTracker.updateStatus({ phase: step.type as any });
+            } else if (incidentTracker.updateIncident) {
+              incidentTracker.updateIncident({ phase: step.type });
+            } else {
+              incidentFallback.updateIncident({ phase: step.type });
+            }
           } catch (error) {
             console.error("Failed to update incident phase:", error);
             incidentFallback.updateIncident({ phase: step.type });
@@ -755,8 +760,13 @@ export default function RefinedDashboard() {
 
         // Mark incident as resolved in tracker with error handling
         try {
-          incidentTracker.markResolved?.(resolutionTime) ||
-            incidentTracker.resolveIncident?.();
+          if (incidentTracker.markResolved) {
+            incidentTracker.markResolved(resolutionTime);
+          } else if (incidentTracker.resolveIncident) {
+            incidentTracker.resolveIncident();
+          } else {
+            incidentFallback.resolveIncident();
+          }
         } catch (error) {
           console.error("Failed to mark incident resolved:", error);
           incidentFallback.resolveIncident();

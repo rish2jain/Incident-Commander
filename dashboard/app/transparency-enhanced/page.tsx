@@ -626,7 +626,6 @@ export default function EnhancedTransparencyDashboard() {
       icon="🧠"
       headerActions={<ExportButton onExport={handleExport} />}
     >
-
       {/* Enhanced Status Bar */}
       <DashboardSection variant="glass" className="mb-4">
         <div className="flex items-center justify-between">
@@ -918,7 +917,7 @@ export default function EnhancedTransparencyDashboard() {
                     baseline: 85,
                     unit: "%",
                     trend: performanceMetrics.trends?.accuracy?.map(
-                      (v) => v * 100
+                      (v: number) => v * 100
                     ) || [85, 88, 91, 94, 95],
                     target: 95,
                   },

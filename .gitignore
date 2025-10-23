@@ -207,3 +207,35 @@ dashboard/tsconfig.tsbuildinfo
 
 # Deployment packages (too large for GitHub)
 deployment_package/
+
+# Build artifacts (can be regenerated)
+cdk.out/
+htmlcov/
+.pytest_cache/
+node_modules/
+package-lock.json
+.coverage
+dashboard/.next/
+dashboard/.swc/
+dashboard/out/
+dashboard/tsconfig.tsbuildinfo
+
+# Python cache (can be regenerated)
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Environment files (keep templates)
+.env.local
+.env.*.local
+!.env.example
+!.env.production.template
+
+# IDE files
+.vscode/settings.json
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db

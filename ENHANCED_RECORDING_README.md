@@ -1,17 +1,18 @@
-# 🎬 Enhanced Demo Recording System
+# 🎬 Enhanced Demo Recording System - Consolidated Dashboard
 
 ## Overview
 
-The Enhanced Demo Recording System is optimized for the AWS AI Agent Global Hackathon 2025 submission. It creates professional HD recordings with comprehensive documentation, business impact visualization, and complete AWS AI services showcase.
+The Enhanced Demo Recording System is optimized for the AWS AI Agent Global Hackathon 2025 submission. It creates professional HD recordings with a 6-phase consolidated dashboard narrative, proving $9K prize eligibility and core technical claims in 150 seconds.
 
 ## Key Features
 
 ### 🏆 Hackathon Optimized
 
 - Professional HD recording (1920x1080)
-- Comprehensive screenshot capture with metadata
-- Business impact metrics visualization
-- AWS AI services integration showcase
+- 6-phase consolidated dashboard narrative (150 seconds)
+- 7 strategic screenshots with prize eligibility proof
+- Single unified SwarmAI Operations dashboard
+- Comprehensive metadata capture
 - Judge-ready presentation format
 
 ### 📊 Business Impact Focus
@@ -20,13 +21,14 @@ The Enhanced Demo Recording System is optimized for the AWS AI Agent Global Hack
 - 458% ROI calculation
 - 95.2% MTTR improvement showcase
 - Cost reduction visualization ($47 vs $5,600 per incident)
+- Live demo metrics (incidents resolved, resolution time)
 
-### 🎯 Prize Eligibility
+### 🎯 Prize Eligibility Proof
 
-- Amazon Bedrock AgentCore integration
-- Amazon Q Business showcase
-- Nova Act demonstration
-- Strands SDK integration
+- **Amazon Q Business** ($3,000) - Analysis by Amazon Q Business module, Evidence & RAG Sources
+- **Nova Act** ($3,000) - Action Plan by Nova Act module
+- **Strands SDK** ($3,000) - Agent lifecycle management integration
+- **Best Bedrock AgentCore** - Multi-agent orchestration with Byzantine consensus
 - Complete AWS AI portfolio (8/8 services)
 
 ## Quick Start
@@ -54,13 +56,31 @@ python quick_demo_record.py
 python test_enhanced_recorder.py
 ```
 
-## Recording Scenarios
+## Recording Scenarios - 6-Phase Narrative
 
-1. **Homepage** (20s) - System architecture overview
-2. **PowerDashboard** (60s) - Business metrics and ROI
-3. **Transparency** (80s) - AI explainability system
-4. **Operations** (40s) - Production monitoring
-5. **AWS AI Showcase** (30s) - Complete service integration
+**All phases on unified SwarmAI Operations dashboard (`/demo`):**
+
+1. **Phase 1 & 2: Baseline & Predictive Prevention** (30s)
+   - Business Impact module: $2.8M savings
+   - Predictive Prevention: 85% prevention rate
+
+2. **Phase 3: Incident Trigger** (10s)
+   - System Controls activation
+   - Dashboard comes alive
+
+3. **Phase 4: Byzantine Fault Tolerance** (30s)
+   - Consensus visualization: 90.5% → 65.8% → 72.8%
+   - Agent compromise and recovery
+
+4. **Phase 5: AI Transparency & Prize Proof** (60s)
+   - Amazon Q Business integration
+   - Evidence & RAG Sources
+   - Nova Act action planning
+   - Strands SDK lifecycle management
+
+5. **Phase 6: The Payoff** (20s)
+   - Incident resolution
+   - Live business impact update
 
 ## Output Structure
 
@@ -93,6 +113,9 @@ The system generates judge-ready materials including:
 
 ---
 
-**Status:** ✅ Ready for Hackathon Submission  
-**Optimized For:** AWS AI Agent Global Hackathon 2025  
-**Prize Categories:** Best Bedrock, Amazon Q, Nova Act, Strands SDK
+**Status:** ✅ Updated for Consolidated Dashboard Narrative
+**Optimized For:** AWS AI Agent Global Hackathon 2025
+**Demo Approach:** 6-phase narrative on unified SwarmAI Operations dashboard
+**Total Duration:** 150 seconds (2.5 minutes)
+**Key Screenshots:** 7 strategic captures
+**Prize Categories:** Best Bedrock, Amazon Q ($3K), Nova Act ($3K), Strands SDK ($3K)

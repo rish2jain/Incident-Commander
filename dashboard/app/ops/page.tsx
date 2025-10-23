@@ -1,32 +1,35 @@
 "use client";
 
-import { ImprovedOperationsDashboardWebSocket } from "@/components/ImprovedOperationsDashboardWebSocket";
+import { ConsolidatedOperationsDashboard } from "@/components/ConsolidatedOperationsDashboard";
 
 /**
- * Operations Dashboard Route - PRODUCTION LIVE SYSTEM
+ * SwarmAI Operations Dashboard - CONSOLIDATED SINGLE PANE OF GLASS
  *
- * Dashboard 3: Production-ready dashboard with real-time WebSocket integration.
- * Connects to backend for live incident monitoring and agent coordination.
+ * Consolidated dashboard combining best features from all views.
+ * Designed to prove AWS integration and create cohesive judge experience.
  *
  * Features:
- * - Real-time WebSocket connection
- * - Live agent status updates
- * - Active incident monitoring
- * - Business metrics streaming
- * - System health dashboard
- * - Demo incident triggering
- * - Agent reset controls
+ * - Module 1: Business Impact (Projected) - Annual savings, ROI
+ * - Module 2: Predictive Prevention System - Live threat detection
+ * - Module 3: System Controls - Trigger incidents, reset agents
+ * - Module 4: Byzantine Fault Tolerance - Consensus visualization (conditional)
+ * - Module 5: Active Incidents - Expandable with reasoning tabs
+ *
+ * AWS Service Visual Proof:
+ * - Amazon Q Business - Natural language incident analysis
+ * - Nova Act - Step-by-step action plans
+ * - AWS Strands SDK - Agent lifecycle management
+ * - Amazon Titan Embeddings - RAG evidence retrieval
+ *
+ * Data Labeling:
+ * - "(Projected)" for financial projections
+ * - No labels for live simulation data
  *
  * Use this for:
- * - Production deployment and operations
- * - Real-time incident response
- * - SRE/DevOps daily monitoring
- * - Live system health tracking
- *
- * For demos use:
- * - Dashboard 1: /demo (executive presentation)
- * - Dashboard 2: /transparency (technical deep-dive)
+ * - Hackathon judging (primary dashboard)
+ * - Executive + technical demonstrations
+ * - Proving 8/8 AWS AI services integration
  */
 export default function OpsPage() {
-  return <ImprovedOperationsDashboardWebSocket />;
+  return <ConsolidatedOperationsDashboard />;
 }

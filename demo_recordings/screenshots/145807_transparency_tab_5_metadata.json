@@ -1,0 +1,13 @@
+{
+  "filename": "145807_transparency_tab_5.png",
+  "timestamp": "2025-10-23T14:58:07.276903",
+  "description": "Tab navigation: Analytics",
+  "scenario": "transparency",
+  "business_focus": "5-tab AI explainability, agent reasoning, decision transparency",
+  "url": "http://localhost:3000/transparency",
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "screenshot_number": 15
+}

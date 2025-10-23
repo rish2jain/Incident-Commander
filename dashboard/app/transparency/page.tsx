@@ -20,7 +20,6 @@ import {
   ConfidenceScore,
   SeverityIndicator,
 } from "../../src/components/shared";
-import { motion, AnimatePresence } from "framer-motion";
 import ByzantineConsensusDemo from "../../src/components/ByzantineConsensusDemo";
 import PredictivePreventionDemo from "../../src/components/PredictivePreventionDemo";
 import { ReasoningPanel } from "../../src/components/enhanced/ReasoningPanel";

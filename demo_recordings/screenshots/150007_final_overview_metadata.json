@@ -1,0 +1,13 @@
+{
+  "filename": "150007_final_overview.png",
+  "timestamp": "2025-10-23T15:00:07.539961",
+  "description": "Complete system overview - All dashboards and capabilities",
+  "scenario": "final",
+  "business_focus": "Complete system demonstration",
+  "url": "http://localhost:3000/",
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "screenshot_number": 25
+}

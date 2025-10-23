@@ -1,56 +1,56 @@
-# Tech Stack
+# Technology Stack
 
-## Language & Runtime
-- **Python 3.11+** (required)
-- Type hints enforced with mypy
-
-## Web Framework
-- **FastAPI** (0.104.1) - API server with async support
-- **Uvicorn** (0.24.0) - ASGI server with hot reload
-- **Pydantic** (2.5.0) - Data validation and models
+## Backend (Python 3.11+)
+- **Framework**: FastAPI + Uvicorn
+- **Async Runtime**: asyncio, aioboto3, aiohttp
+- **Data Validation**: Pydantic v2.5+
+- **AWS SDK**: boto3, aioboto3, botocore
 
 ## AWS Services
-- **boto3** / **aioboto3** - AWS SDK
-- **Kinesis** - Event streaming with partition key distribution
-- **DynamoDB** - Event persistence with optimistic locking
-- **OpenSearch Serverless** - Vector search for RAG memory
-- **Bedrock** - Claude 3 Sonnet/Haiku for agent reasoning
-- **IAM** - Role assumption with least privilege
+- **AI/ML**: Bedrock (Claude, Titan), Amazon Q, Nova Act, Strands SDK
+- **Storage**: S3, DynamoDB
+- **Streaming**: Kinesis
+- **Search**: OpenSearch Serverless
+- **Infrastructure**: LocalStack (dev), AWS CDK (prod)
 
-## Data & Storage
-- **Redis** (5.0.1) - Caching and rate limiting
-- **OpenSearch** (2.4.0) - Hierarchical indexing for 100K+ incidents
+## Data & Caching
+- **Cache/Message Bus**: Redis 5.0+ (with hiredis)
+- **Data Processing**: numpy, pandas, scikit-learn
 
-## Monitoring & Observability
-- **structlog** (23.2.0) - Structured logging with correlation IDs
-- **prometheus-client** (0.19.0) - Metrics collection
-- **Datadog API** - External monitoring integration
-- **PagerDuty API** - Incident escalation
-- **Slack Bot** - Communication agent
+## Frontend (Next.js 16 + React 18.3)
+- **Framework**: Next.js 16.0.0 with Turbopack
+- **UI Library**: React 18.3.1 + TypeScript 5.2
+- **Styling**: Tailwind CSS 3.3 + PostCSS
+- **Components**: Radix UI, Framer Motion 12.23
+- **3D Visualization**: Three.js 0.180 + @react-three/fiber + @react-three/drei
+- **Icons**: Lucide React 0.546
 
-## Machine Learning
-- **numpy** (1.24.4) - Numerical computing
-- **scikit-learn** (1.3.2) - Pattern recognition
-- **Bedrock Titan** - Embedding generation (1536 dimensions)
+## Communication
+- **WebSocket**: websockets 12.0, python-socketio, ws
+- **HTTP**: requests, httpx, aiohttp
 
-## Security & Crypto
-- **cryptography** (41.0.8) - Event integrity verification
-- **python-jose** (3.3.0) - Cryptographic operations
+## Security
+- **Cryptography**: cryptography 41.0+, pycryptodome 3.19+
+- **Auth**: PyJWT 2.8+, python-jose 3.3+, passlib 1.7+
 
-## Development & Testing
-- **pytest** (7.4.3) - Test framework (37 tests passing)
-- **pytest-asyncio** (0.21.1) - Async test support
-- **pytest-cov** (4.1.0) - Coverage reporting (target ≥80%)
-- **pytest-mock** (3.12.0) - Mocking utilities
-- **black** (23.11.0) - Code formatting
-- **isort** (5.12.0) - Import sorting
-- **mypy** (1.7.1) - Static type checking
-- **pre-commit** (3.6.0) - Git hooks for quality
+## Observability
+- **Monitoring**: Prometheus, psutil, memory-profiler
+- **Telemetry**: OpenTelemetry API/SDK 1.21+
+- **Structured Logging**: structlog (implicit from AWS integrations)
 
-## Chaos & Load Testing
-- **locust** (2.17.0) - Load testing
-- **chaos-toolkit** (1.16.0) - Chaos engineering
+## Testing
+- **Framework**: pytest 7.4+ with pytest-asyncio, pytest-cov, pytest-mock
+- **Coverage**: 80% minimum requirement
+- **Mocking**: requests-mock, moto[all]
+- **Frontend Testing**: Jest 29.7, @testing-library/react, @testing-library/jest-dom
 
-## Local Development
-- **LocalStack** - AWS service emulation
-- **Docker** & **Docker Compose** - Containerization
+## Development Tools
+- **Formatting**: black (line-length 100), isort
+- **Linting**: ruff, flake8, mypy, eslint
+- **Security**: bandit
+- **Pre-commit**: pre-commit hooks configured
+
+## Infrastructure
+- **Containerization**: Docker + Docker Compose
+- **IaC**: AWS CDK (TypeScript)
+- **Package Management**: pip (Python), npm (Node.js)

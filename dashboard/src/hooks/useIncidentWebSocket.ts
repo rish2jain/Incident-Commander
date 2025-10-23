@@ -105,7 +105,8 @@ export function useIncidentWebSocket(
   options: UseIncidentWebSocketOptions = {}
 ): WebSocketHookState {
   const {
-    url = process.env.NEXT_PUBLIC_WEBSOCKET_URL || "ws://localhost:8000/ws",
+    url = process.env.NEXT_PUBLIC_WEBSOCKET_URL ||
+      "ws://localhost:8000/dashboard/ws",
     autoConnect = true,
     reconnectInterval = 3000,
     maxReconnectAttempts = 10,
@@ -132,7 +133,7 @@ export function useIncidentWebSocket(
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectAttempts = useRef(0);
   const reconnectTimeout = useRef<NodeJS.Timeout | null>(null);
-  const heartbeatInterval = useRef<NodeJS.Timeout | null>(null);
+  const heartbeatIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const connectionId = useRef<string>(
     `dashboard-3-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
   );
@@ -279,10 +280,10 @@ export function useIncidentWebSocket(
         reconnectAttempts.current = 0;
 
         // Start heartbeat
-        if (heartbeatInterval.current) {
-          clearInterval(heartbeatInterval.current);
+        if (heartbeatIntervalRef.current) {
+          clearInterval(heartbeatIntervalRef.current);
         }
-        heartbeatInterval.current = setInterval(() => {
+        heartbeatIntervalRef.current = setInterval(() => {
           if (ws.readyState === WebSocket.OPEN) {
             ws.send(
               JSON.stringify({
@@ -307,9 +308,9 @@ export function useIncidentWebSocket(
         setConnecting(false);
 
         // Clear heartbeat
-        if (heartbeatInterval.current) {
-          clearInterval(heartbeatInterval.current);
-          heartbeatInterval.current = null;
+        if (heartbeatIntervalRef.current) {
+          clearInterval(heartbeatIntervalRef.current);
+          heartbeatIntervalRef.current = null;
         }
 
         // Attempt reconnection
@@ -352,9 +353,9 @@ export function useIncidentWebSocket(
       reconnectTimeout.current = null;
     }
 
-    if (heartbeatInterval.current) {
-      clearInterval(heartbeatInterval.current);
-      heartbeatInterval.current = null;
+    if (heartbeatIntervalRef.current) {
+      clearInterval(heartbeatIntervalRef.current);
+      heartbeatIntervalRef.current = null;
     }
 
     if (wsRef.current) {

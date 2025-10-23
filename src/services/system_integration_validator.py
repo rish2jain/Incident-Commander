@@ -6,6 +6,7 @@ ensuring all components work together correctly and meet performance targets.
 """
 
 import asyncio
+import importlib
 import time
 from typing import Dict, List, Any, Optional, Tuple
 from datetime import datetime, timedelta
@@ -548,7 +549,7 @@ class SystemIntegrationValidator:
             
             for router_name in expected_routers:
                 try:
-                    module = __import__(f"src.api.routers.{router_name}", fromlist=[router_name])
+                    module = importlib.import_module(f"src.api.routers.{router_name}")
                     router = getattr(module, "router", None)
                     if router:
                         router_results[router_name] = {

@@ -154,6 +154,7 @@ const ActivityItem = React.memo(function ActivityItem({
   index: number;
   onClick?: (action: AgentAction) => void;
 }) {
+  const isClient = useClientSideTimestamp();
   const agentInfo = agentConfig[action.agent_type];
   const statusInfo = statusConfig[action.status];
   const AgentIcon = agentInfo.icon;
@@ -605,7 +606,7 @@ export function ActivityFeedDemo() {
           confidence: Math.random(),
           status: ["pending", "in_progress", "completed", "failed"][
             Math.floor(Math.random() * 4)
-          ] as unknown,
+          ] as "pending" | "in_progress" | "completed" | "failed",
           duration: Math.floor(Math.random() * 5000) + 500,
           details: {
             severity: ["low", "medium", "high"][Math.floor(Math.random() * 3)],

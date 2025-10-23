@@ -178,7 +178,6 @@ function ROIHighlight() {
             <DollarSign className="w-7 h-7 text-green-400" />
             Return on Investment
           </CardTitle>
-        </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-3 gap-6">
@@ -206,14 +205,13 @@ function ROIHighlight() {
             </div>
           </div>
           <div className="mt-6 pt-6 border-t border-slate-700 text-center">
-            <div className="text-sm text-slate-400 mb-2">
-              MTTR Reduction
-            </div>
+            <div className="text-sm text-slate-400 mb-2">MTTR Reduction</div>
             <div className="text-5xl font-bold text-green-400">
               <AnimatedCounter value={91.8} decimals={1} suffix="%" />
             </div>
             <div className="text-sm text-slate-400 mt-2">
-              Saves <span className="text-green-400 font-semibold">$229K</span> per major incident
+              Saves <span className="text-green-400 font-semibold">$229K</span>{" "}
+              per major incident
             </div>
           </div>
         </CardContent>
@@ -289,7 +287,9 @@ function SystemStatus() {
             <Badge
               variant={status === "operational" ? "default" : "destructive"}
               className={
-                status === "operational" ? "bg-green-600 text-lg px-4 py-2" : "text-lg px-4 py-2"
+                status === "operational"
+                  ? "bg-green-600 text-lg px-4 py-2"
+                  : "text-lg px-4 py-2"
               }
             >
               {status === "operational" ? "HEALTHY" : "ACTIVE"}
@@ -314,7 +314,7 @@ export function ExecutiveDashboard() {
           className="text-center mb-8"
         >
           <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-green-400 bg-clip-text text-transparent mb-3">
-            Incident Commander
+            SwarmAI
           </h1>
           <p className="text-xl text-slate-400">
             AI-Powered Incident Response • 92% Faster Resolution
@@ -346,9 +346,7 @@ export function ExecutiveDashboard() {
           <MetricCard
             icon={Clock}
             title="Mean Time to Resolution"
-            value={
-              <AnimatedCounter value={147} decimals={0} suffix="s" />
-            }
+            value={<AnimatedCounter value={147} decimals={0} suffix="s" />}
             change="↓ 91.8%"
             changeLabel="vs traditional"
             trend="up"
@@ -380,9 +378,7 @@ export function ExecutiveDashboard() {
           <MetricCard
             icon={Shield}
             title="System Accuracy"
-            value={
-              <AnimatedCounter value={95.3} decimals={1} suffix="%" />
-            }
+            value={<AnimatedCounter value={95.3} decimals={1} suffix="%" />}
             change="40% failures"
             changeLabel="tolerated"
             trend="up"
@@ -409,7 +405,8 @@ export function ExecutiveDashboard() {
               <AgentNetworkVisualization activeIncident={false} />
             </div>
             <div className="mt-4 text-center text-sm text-slate-400">
-              Distributed consensus ensures 95% accuracy even with 40% agent failures
+              Distributed consensus ensures 95% accuracy even with 40% agent
+              failures
             </div>
           </CardContent>
         </Card>
@@ -433,17 +430,14 @@ export function ExecutiveDashboard() {
                 Ready to Transform Your Incident Response?
               </h2>
               <p className="text-slate-400 mb-6 max-w-2xl mx-auto">
-                Deploy in 30 minutes with AWS CDK. Full production readiness with
-                health endpoints, metrics, and comprehensive documentation.
+                Deploy in 30 minutes with AWS CDK. Full production readiness
+                with health endpoints, metrics, and comprehensive documentation.
               </p>
               <div className="flex items-center justify-center gap-4">
                 <Button className="bg-blue-600 hover:bg-blue-700 text-lg px-6 py-3">
                   View Technical Details
                 </Button>
-                <Button
-                  variant="outline"
-                  className="text-lg px-6 py-3"
-                >
+                <Button variant="outline" className="text-lg px-6 py-3">
                   See Live Demo
                 </Button>
               </div>

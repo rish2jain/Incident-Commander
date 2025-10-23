@@ -98,7 +98,7 @@ class CloudWatchDataSource(MonitoringDataSource):
 
             return alerts
         except Exception as e:
-            print(f"Error fetching CloudWatch alerts: {e}")
+            logger.error(f"Error fetching CloudWatch alerts: {e}")
             return []
 
     async def get_metrics(self, metric_name: str, time_window_minutes: int = 15) -> List[Dict[str, Any]]:
@@ -183,7 +183,7 @@ class DatadogDataSource(MonitoringDataSource):
                 url = f"{self.base_url}/monitor"
                 async with session.get(url, headers=self._get_headers()) as response:
                     if response.status != 200:
-                        print(f"Datadog API error: {response.status}")
+                        logger.error(f"Datadog API error: {response.status}")
                         return []
 
                     monitors = await response.json()
@@ -236,7 +236,7 @@ class DatadogDataSource(MonitoringDataSource):
 
                 async with session.get(url, headers=self._get_headers(), params=params) as response:
                     if response.status != 200:
-                        print(f"Datadog metrics API error: {response.status}")
+                        logger.error(f"Datadog metrics API error: {response.status}")
                         return []
 
                     data = await response.json()

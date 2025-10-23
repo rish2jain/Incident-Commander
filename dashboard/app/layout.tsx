@@ -6,11 +6,23 @@ import "../src/styles/globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Autonomous Incident Commander",
-  description: "AI-Powered Multi-Agent Incident Response System",
-  keywords: ["incident management", "AI", "automation", "DevOps", "SRE"],
-  authors: [{ name: "Incident Commander Team" }],
-  viewport: "width=device-width, initial-scale=1",
+  title: "SwarmAI - Autonomous Incident Commander",
+  description: "Revolutionary AI-Powered Multi-Agent Incident Response System",
+  keywords: [
+    "SwarmAI",
+    "incident management",
+    "AI",
+    "automation",
+    "DevOps",
+    "SRE",
+    "multi-agent",
+  ],
+  authors: [{ name: "SwarmAI Team" }],
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({

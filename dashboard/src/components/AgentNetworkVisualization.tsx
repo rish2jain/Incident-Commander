@@ -13,7 +13,7 @@
 
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Eye,
@@ -47,7 +47,12 @@ const AGENT_DEFINITIONS = [
   { id: "diagnosis", name: "Diagnosis", icon: Activity, color: "#8b5cf6" },
   { id: "prediction", name: "Prediction", icon: TrendingUp, color: "#06b6d4" },
   { id: "resolution", name: "Resolution", icon: Wrench, color: "#10b981" },
-  { id: "communication", name: "Communication", icon: MessageSquare, color: "#f59e0b" },
+  {
+    id: "communication",
+    name: "Communication",
+    icon: MessageSquare,
+    color: "#f59e0b",
+  },
 ];
 
 export function AgentNetworkVisualization({
@@ -66,7 +71,8 @@ export function AgentNetworkVisualization({
     const radius = 120;
 
     const initialAgents = AGENT_DEFINITIONS.map((def, index) => {
-      const angle = (index / AGENT_DEFINITIONS.length) * 2 * Math.PI - Math.PI / 2;
+      const angle =
+        (index / AGENT_DEFINITIONS.length) * 2 * Math.PI - Math.PI / 2;
       return {
         id: def.id,
         name: def.name,
@@ -83,7 +89,16 @@ export function AgentNetworkVisualization({
   }, []);
 
   // Simulate agent activity when incident is active
+  const timeoutRefs = useRef<NodeJS.Timeout[]>([]);
+  const mountedRef = useRef(true);
+
   useEffect(() => {
+    mountedRef.current = true;
+
+    // Clear any existing timeouts
+    timeoutRefs.current.forEach(clearTimeout);
+    timeoutRefs.current = [];
+
     if (!activeIncident) {
       setAgents((prev) =>
         prev.map((agent) => ({ ...agent, state: "idle" as const }))
@@ -96,7 +111,13 @@ export function AgentNetworkVisualization({
     // Activate agents in sequence
     const activationSequence = async () => {
       // Detection activates first
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await new Promise((resolve) => {
+        const timeout = setTimeout(resolve, 500);
+        timeoutRefs.current.push(timeout);
+      });
+
+      if (!mountedRef.current || !activeIncident) return;
+
       setAgents((prev) =>
         prev.map((a) =>
           a.id === "detection" ? { ...a, state: "analyzing" as const } : a
@@ -104,7 +125,12 @@ export function AgentNetworkVisualization({
       );
 
       // Detection reports to others
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise((resolve) => {
+        const timeout = setTimeout(resolve, 1000);
+        timeoutRefs.current.push(timeout);
+      });
+
+      if (!mountedRef.current || !activeIncident) return;
       setCommunications([
         {
           id: "comm-1",
@@ -126,7 +152,13 @@ export function AgentNetworkVisualization({
       );
 
       // Diagnosis and prediction analyze
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      await new Promise((resolve) => {
+        const timeout = setTimeout(resolve, 1500);
+        timeoutRefs.current.push(timeout);
+      });
+
+      if (!mountedRef.current || !activeIncident) return;
+
       setCommunications((prev) => [
         ...prev,
         {
@@ -145,14 +177,26 @@ export function AgentNetworkVisualization({
       );
 
       // All agents converge for consensus
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise((resolve) => {
+        const timeout = setTimeout(resolve, 1000);
+        timeoutRefs.current.push(timeout);
+      });
+
+      if (!mountedRef.current || !activeIncident) return;
+
       setConsensusForming(true);
       setAgents((prev) =>
         prev.map((a) => ({ ...a, state: "consensus" as const }))
       );
 
       // Consensus reached
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      await new Promise((resolve) => {
+        const timeout = setTimeout(resolve, 2000);
+        timeoutRefs.current.push(timeout);
+      });
+
+      if (!mountedRef.current || !activeIncident) return;
+
       setAgents((prev) =>
         prev.map((a) =>
           a.id === "resolution" ? { ...a, state: "analyzing" as const } : a
@@ -161,7 +205,13 @@ export function AgentNetworkVisualization({
       setConsensusForming(false);
 
       // Resolution takes action
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      await new Promise((resolve) => {
+        const timeout = setTimeout(resolve, 1500);
+        timeoutRefs.current.push(timeout);
+      });
+
+      if (!mountedRef.current || !activeIncident) return;
+
       setCommunications((prev) => [
         ...prev,
         {
@@ -175,21 +225,28 @@ export function AgentNetworkVisualization({
 
       setAgents((prev) =>
         prev.map((a) =>
-          a.id === "communication"
-            ? { ...a, state: "reporting" as const }
-            : a
+          a.id === "communication" ? { ...a, state: "reporting" as const } : a
         )
       );
 
       // Complete
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setAgents((prev) =>
-        prev.map((a) => ({ ...a, state: "idle" as const }))
-      );
+      await new Promise((resolve) => {
+        const timeout = setTimeout(resolve, 1000);
+        timeoutRefs.current.push(timeout);
+      });
+
+      if (!mountedRef.current || !activeIncident) return;
+      setAgents((prev) => prev.map((a) => ({ ...a, state: "idle" as const })));
       setCommunications([]);
     };
 
     activationSequence();
+
+    return () => {
+      mountedRef.current = false;
+      timeoutRefs.current.forEach(clearTimeout);
+      timeoutRefs.current = [];
+    };
   }, [activeIncident]);
 
   // Calculate consensus ring center

@@ -387,6 +387,52 @@ class EnhancedDemoRecorder:
             print(f"⚠️  Dashboard readiness check failed: {e}")
             print("   Continuing with recording - some features may not be fully loaded")
             return False
+
+    async def focus_on_element(self, selectors: List[str], element_name: str, scroll_fallback_y: int = 0):
+        """Helper method to find, scroll to, and focus on an element."""
+        print(f"   🎯 Looking for {element_name}...")
+        
+        for selector in selectors:
+            try:
+                element = await self.page.query_selector(selector)
+                if element:
+                    # Scroll element into view
+                    await element.scroll_into_view_if_needed()
+                    await asyncio.sleep(1)
+                    
+                    # Hover to highlight
+                    await element.hover()
+                    await asyncio.sleep(1)
+                    
+                    print(f"   ✅ Found and focused on {element_name}: {selector}")
+                    return True
+            except Exception as e:
+                print(f"   ⚠️  Failed to focus on {selector}: {e}")
+                continue
+        
+        # Fallback scrolling
+        if scroll_fallback_y > 0:
+            print(f"   ⚠️  Using fallback scroll for {element_name} (y={scroll_fallback_y})")
+            await self.page.evaluate(f"window.scrollTo({{top: {scroll_fallback_y}, behavior: 'smooth'}})")
+            await asyncio.sleep(2)
+        
+        return False
+
+    async def smart_screenshot(self, filename: str, description: str, scenario: Dict[str, Any], focus_selectors: List[str] = None):
+        """Take a screenshot with optional element focusing."""
+        if focus_selectors:
+            # Try to focus on specific elements before screenshot
+            for selector in focus_selectors:
+                try:
+                    element = await self.page.query_selector(selector)
+                    if element:
+                        await element.scroll_into_view_if_needed()
+                        await asyncio.sleep(0.5)
+                        break
+                except:
+                    continue
+        
+        await self.take_screenshot(filename, description, scenario)
             
     async def record_scenario(self, scenario: Dict[str, Any]):
         """Record enhanced scenario with comprehensive documentation for hackathon submission."""

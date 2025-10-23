@@ -1,0 +1,208 @@
+# AWS Bedrock AgentCore Identity Configuration
+# Configures authentication, authorization, and identity management for agents
+
+identity:
+  # AgentCore identity provider configuration
+  provider:
+    type: bedrock-agentcore-identity
+    region: us-east-1
+
+    # Authentication methods
+    authentication:
+      - type: iam_role
+        enabled: true
+      - type: api_key
+        enabled: true
+        rotation_days: 90
+      - type: oauth2
+        enabled: false  # Enable for production
+
+    # Token configuration
+    tokens:
+      access_token_ttl_seconds: 3600
+      refresh_token_ttl_seconds: 86400
+      signing_algorithm: RS256
+
+  # Agent identities and roles
+  agents:
+    detection:
+      identity_id: detection-agent-01
+      role_arn: arn:aws:iam::ACCOUNT_ID:role/IncidentCommander-DetectionAgent
+      permissions:
+        - service: bedrock-runtime
+          actions:
+            - InvokeModel
+            - InvokeModelWithResponseStream
+          resources:
+            - arn:aws:bedrock:*::foundation-model/anthropic.claude-*
+        - service: agentcore-memory
+          actions:
+            - ReadMemory
+            - WriteMemory
+          resources:
+            - arn:aws:agentcore:*:ACCOUNT_ID:memory/incident-patterns
+            - arn:aws:agentcore:*:ACCOUNT_ID:memory/telemetry-sources
+        - service: eventbridge
+          actions:
+            - PutEvents
+          resources:
+            - arn:aws:events:*:ACCOUNT_ID:event-bus/incident-commander
+
+    diagnosis:
+      identity_id: diagnosis-agent-01
+      role_arn: arn:aws:iam::ACCOUNT_ID:role/IncidentCommander-DiagnosisAgent
+      permissions:
+        - service: bedrock-runtime
+          actions:
+            - InvokeModel
+          resources:
+            - arn:aws:bedrock:*::foundation-model/anthropic.claude-*
+        - service: agentcore-memory
+          actions:
+            - ReadMemory
+            - WriteMemory
+          resources:
+            - arn:aws:agentcore:*:ACCOUNT_ID:memory/root-cause-library
+            - arn:aws:agentcore:*:ACCOUNT_ID:memory/log-patterns
+        - service: logs
+          actions:
+            - FilterLogEvents
+            - GetLogEvents
+          resources:
+            - arn:aws:logs:*:ACCOUNT_ID:log-group:/aws/incident-commander/*
+
+    prediction:
+      identity_id: prediction-agent-01
+      role_arn: arn:aws:iam::ACCOUNT_ID:role/IncidentCommander-PredictionAgent
+      permissions:
+        - service: bedrock-runtime
+          actions:
+            - InvokeModel
+          resources:
+            - arn:aws:bedrock:*::foundation-model/anthropic.claude-*
+        - service: agentcore-memory
+          actions:
+            - ReadMemory
+            - WriteMemory
+          resources:
+            - arn:aws:agentcore:*:ACCOUNT_ID:memory/business-impact-models
+            - arn:aws:agentcore:*:ACCOUNT_ID:memory/historical-incidents
+        - service: cloudwatch
+          actions:
+            - GetMetricStatistics
+            - GetMetricData
+          resources:
+            - "*"
+
+    resolution:
+      identity_id: resolution-agent-01
+      role_arn: arn:aws:iam::ACCOUNT_ID:role/IncidentCommander-ResolutionAgent
+      permissions:
+        - service: bedrock-runtime
+          actions:
+            - InvokeModel
+          resources:
+            - arn:aws:bedrock:*::foundation-model/anthropic.claude-*
+        - service: agentcore-memory
+          actions:
+            - ReadMemory
+            - WriteMemory
+          resources:
+            - arn:aws:agentcore:*:ACCOUNT_ID:memory/runbook-library
+            - arn:aws:agentcore:*:ACCOUNT_ID:memory/action-outcomes
+        - service: ssm
+          actions:
+            - StartAutomationExecution
+            - GetAutomationExecution
+          resources:
+            - arn:aws:ssm:*:ACCOUNT_ID:automation-definition/IncidentCommander-*
+
+    communication:
+      identity_id: communication-agent-01
+      role_arn: arn:aws:iam::ACCOUNT_ID:role/IncidentCommander-CommunicationAgent
+      permissions:
+        - service: bedrock-runtime
+          actions:
+            - InvokeModel
+          resources:
+            - arn:aws:bedrock:*::foundation-model/anthropic.claude-*
+        - service: agentcore-memory
+          actions:
+            - ReadMemory
+            - WriteMemory
+          resources:
+            - arn:aws:agentcore:*:ACCOUNT_ID:memory/communication-templates
+            - arn:aws:agentcore:*:ACCOUNT_ID:memory/escalation-paths
+        - service: sns
+          actions:
+            - Publish
+          resources:
+            - arn:aws:sns:*:ACCOUNT_ID:incident-commander-*
+        - service: ses
+          actions:
+            - SendEmail
+          resources:
+            - "*"
+
+    consensus:
+      identity_id: consensus-engine-01
+      role_arn: arn:aws:iam::ACCOUNT_ID:role/IncidentCommander-ConsensusEngine
+      permissions:
+        - service: agentcore-memory
+          actions:
+            - ReadMemory
+            - WriteMemory
+          resources:
+            - arn:aws:agentcore:*:ACCOUNT_ID:memory/consensus-history
+            - arn:aws:agentcore:*:ACCOUNT_ID:memory/incident-context
+        - service: kms
+          actions:
+            - Sign
+            - Verify
+          resources:
+            - arn:aws:kms:*:ACCOUNT_ID:key/consensus-signing-key
+
+  # Cross-agent trust relationships
+  trust:
+    # Allow agents to communicate with each other
+    agent_to_agent:
+      enabled: true
+      verification: mutual_tls
+
+    # Trust boundary with external services
+    external_services:
+      - service: pagerduty
+        type: webhook
+        authentication: api_key_header
+      - service: slack
+        type: bot_token
+        authentication: oauth2
+
+# Security policies
+security:
+  # Least privilege enforcement
+  enforce_least_privilege: true
+
+  # Audit logging
+  audit:
+    enabled: true
+    log_group: /aws/agentcore/audit
+    events:
+      - authentication_success
+      - authentication_failure
+      - permission_denied
+      - privileged_action
+      - cross_agent_communication
+
+  # Rate limiting
+  rate_limiting:
+    enabled: true
+    per_agent_requests_per_minute: 1000
+    burst_capacity: 100
+
+  # Secret management
+  secrets:
+    provider: aws_secrets_manager
+    rotation_enabled: true
+    rotation_days: 90
+    auto_rotate_on_compromise: true

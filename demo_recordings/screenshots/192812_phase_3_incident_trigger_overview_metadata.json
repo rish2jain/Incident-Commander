@@ -1,0 +1,13 @@
+{
+  "filename": "192812_phase_3_incident_trigger_overview.png",
+  "timestamp": "2025-10-23T19:28:13.003952",
+  "description": "Phase 3: Incident Trigger (10 Seconds) - Initial view",
+  "scenario": "phase_3_incident_trigger",
+  "business_focus": "Pan to System Controls module and trigger demo",
+  "url": "http://localhost:3000/demo",
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "screenshot_number": 5
+}

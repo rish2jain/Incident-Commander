@@ -1,0 +1,13 @@
+{
+  "filename": "192707_06_strands_sdk_integration.png",
+  "timestamp": "2025-10-23T19:27:07.345932",
+  "description": "Screenshot 6: UI element explicitly mentioning Strands SDK integration",
+  "scenario": "phase_5_ai_transparency_prizes",
+  "business_focus": "Prove $9K prize eligibility through Active Incidents module interaction",
+  "url": "http://localhost:3000/demo",
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "screenshot_number": 11
+}

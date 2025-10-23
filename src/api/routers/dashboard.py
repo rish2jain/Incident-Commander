@@ -22,8 +22,7 @@ from src.services.demo_scenario_manager import (
     ByzantineFaultType,
     get_demo_manager,
 )
-
-logger = get_logger("dashboard_api")
+from src.orchestrator.real_time_orchestrator import get_real_time_orchestrator
 from src.models.incident import Incident
 from src.utils.logging import get_logger
 
@@ -104,6 +103,135 @@ async def get_latest_decision_brief() -> Dict[str, Any]:
 async def get_finops_cards() -> Dict[str, Any]:
     """Provide FinOps summary metrics for the executive dashboard view."""
     return await get_finops_summary()
+
+
+@router.get("/system/health")
+async def get_system_health() -> Dict[str, Any]:
+    """Get current system health metrics for Dashboard 3."""
+    orchestrator = await get_real_time_orchestrator()
+    health = await orchestrator.get_system_health()
+    return health.model_dump(mode='json')
+
+
+@router.get("/health")
+async def health_check() -> Dict[str, Any]:
+    """
+    Basic health check endpoint for load balancer and monitoring.
+
+    Returns simple status for ALB health checks.
+    """
+    from datetime import datetime, timezone
+    
+    return {
+        "status": "healthy",
+        "service": "incident-commander",
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    }
+
+
+@router.get("/health/detailed")
+async def detailed_health_check(
+    ws_manager: WebSocketManager = Depends(get_websocket_manager)
+) -> Dict[str, Any]:
+    """
+    Comprehensive health check with all service dependencies.
+
+    Checks:
+    - WebSocket manager connectivity
+    - Real-time orchestrator status
+    - System health metrics
+    - Service readiness
+    """
+    try:
+        # Get system health from orchestrator
+        orchestrator = await get_real_time_orchestrator()
+        system_health = await orchestrator.get_system_health()
+
+        # Get WebSocket metrics
+        ws_metrics = ws_manager.get_metrics()
+
+        # Determine overall health status
+        overall_status = "healthy"
+        if system_health.error_agents > 0:
+            overall_status = "degraded"
+        if system_health.processing_capacity < 0.2:
+            overall_status = "degraded"
+
+        from datetime import datetime, timezone
+        from src.version import VERSION
+        
+        return {
+            "status": overall_status,
+            "service": "incident-commander",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "version": VERSION,
+            "components": {
+                "websocket": {
+                    "status": "healthy" if ws_metrics.get("active_connections", 0) > 0 else "degraded",
+                    "active_connections": ws_metrics.get("active_connections", 0),
+                    "total_messages": ws_metrics.get("total_messages_sent", 0),
+                    "latency_ms": ws_metrics.get("latency_ms")
+                },
+                "orchestrator": {
+                    "status": "healthy" if system_health.active_agents > 0 else "degraded",
+                    "active_agents": system_health.active_agents,
+                    "current_incidents": system_health.current_incidents,
+                    "processing_capacity": system_health.processing_capacity
+                },
+                "system": {
+                    "status": overall_status,
+                    "healthy_agents": system_health.healthy_agents,
+                    "degraded_agents": system_health.degraded_agents,
+                    "error_agents": system_health.error_agents,
+                    "average_latency_ms": system_health.average_latency_ms
+                }
+            },
+            "metrics": {
+                "websocket_connections": system_health.websocket_connections,
+                "websocket_latency_ms": system_health.websocket_latency_ms,
+                "messages_per_second": system_health.messages_per_second,
+                "queue_depth": system_health.queue_depth,
+                "p95_latency_ms": system_health.p95_latency_ms,
+                "p99_latency_ms": system_health.p99_latency_ms
+            }
+        }
+
+    except Exception as e:
+        logger.error(f"Health check failed: {e}")
+        return {
+            "status": "unhealthy",
+            "service": "incident-commander",
+            "timestamp": asyncio.get_event_loop().time(),
+            "error": str(e)
+        }
+
+
+@router.post("/incidents/process")
+async def process_incident_realtime(incident_data: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Process an incident in real-time with WebSocket streaming.
+
+    This endpoint triggers real-time incident processing that streams
+    agent status updates to Dashboard 3 via WebSocket.
+    """
+    try:
+        # Create incident from data
+        incident = Incident(**incident_data)
+
+        # Get orchestrator and process
+        orchestrator = await get_real_time_orchestrator()
+        result = await orchestrator.process_incident_realtime(incident)
+
+        return {
+            "status": "success",
+            "incident_id": result["incident_id"],
+            "processing_duration": result["processing_duration"],
+            "message": "Incident processed with real-time streaming"
+        }
+
+    except Exception as e:
+        logger.error(f"Error processing real-time incident: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/scenarios/{scenario_id}")

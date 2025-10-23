@@ -10,6 +10,7 @@ Services:
 Total Prize Potential: $9,000
 """
 
+import os
 import boto3
 import json
 import uuid
@@ -550,13 +551,19 @@ class AmazonNovaService:
 
     def get_cost_savings(self, nova_calls: int, comparison_model: str = "claude") -> Dict[str, Any]:
         """Calculate cost savings using Nova vs other models"""
-        nova_cost = (
-            nova_calls * 0.3 * self.COSTS["micro"] +  # 30% micro
-            nova_calls * 0.5 * self.COSTS["lite"] +   # 50% lite
-            nova_calls * 0.2 * self.COSTS["pro"]      # 20% pro
+        # Estimate tokens per call (adjust based on your use case)
+        tokens_per_call = 1000  # Assume 1K tokens per call on average
+        total_thousands = nova_calls * tokens_per_call / 1000
+        
+        nova_cost = total_thousands * (
+            0.3 * self.COSTS["micro"] +  # 30% micro
+            0.5 * self.COSTS["lite"] +   # 50% lite
+            0.2 * self.COSTS["pro"]      # 20% pro
         )
 
-        comparison_cost = nova_calls * self.COSTS[comparison_model]
+        if comparison_model not in self.COSTS:
+            comparison_model = "claude"  # Fallback to valid key
+        comparison_cost = total_thousands * self.COSTS[comparison_model]
         savings = comparison_cost - nova_cost
         savings_percent = (savings / comparison_cost * 100) if comparison_cost > 0 else 0
 
@@ -934,5 +941,4 @@ async def get_memory_service() -> BedrockAgentsWithMemoryService:
     return memory_service
 
 
-# Import os for environment variables
-import os
+

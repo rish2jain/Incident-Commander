@@ -1,0 +1,28 @@
+{
+  "timestamp": "20251022_175521",
+  "duration_seconds": 140.7610976251308,
+  "format": "3-minute production-ready hackathon demo",
+  "resolution": "1920x1080",
+  "video_path": "demo_recordings/videos/hackathon_demo_3min_20251022_175521.webm",
+  "screenshots_count": 12,
+  "system_capabilities": {
+    "dashboards": 3,
+    "aws_services": 8,
+    "prize_eligible_services": [
+      "Amazon Q Business",
+      "Amazon Nova",
+      "Bedrock Agents with Memory"
+    ],
+    "websocket_capacity": "1,000+ concurrent connections",
+    "mttr_reduction": "95% (30min \u2192 1.4min)",
+    "architecture": "Byzantine fault-tolerant consensus",
+    "infrastructure": "AWS CDK with auto-scaling"
+  },
+  "sections": {
+    "opening_hook": "0:00-0:20",
+    "dashboard_1_executive": "0:20-0:50",
+    "dashboard_2_transparency": "0:50-1:35",
+    "dashboard_3_operations": "1:35-2:40",
+    "closing_production_ready": "2:40-3:00"
+  }
+}

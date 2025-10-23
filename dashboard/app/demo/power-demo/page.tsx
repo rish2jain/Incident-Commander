@@ -1,7 +1,7 @@
 "use client";
 
-import PowerDashboard from "@/components/PowerDashboard";
+import { ExecutiveDashboard } from "@/components/ExecutiveDashboard";
 
 export default function PowerDemoPage() {
-  return <PowerDashboard />;
+  return <ExecutiveDashboard />;
 }

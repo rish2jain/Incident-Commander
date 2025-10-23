@@ -1,0 +1,46 @@
+{
+  "main": {
+    "service": "Autonomous Incident Commander",
+    "description": "AI-powered multi-agent system for zero-touch incident resolution",
+    "features": [
+      "5 specialized AI agents powered by Claude 3.5 Sonnet",
+      "Zero-touch autonomous incident resolution",
+      "Byzantine consensus for fault-tolerant decisions",
+      "95% MTTR reduction (30+ minutes \u2192 3 minutes)",
+      "Predictive incident prevention",
+      "Real-time multi-agent coordination"
+    ],
+    "endpoints": [
+      "/health - Service health check",
+      "/demo/incident - Demo incident resolution",
+      "/demo/stats - Performance statistics"
+    ]
+  },
+  "health": {
+    "status": "healthy",
+    "service": "Incident Commander Demo",
+    "timestamp": "2025-10-19T16:10:02.429854",
+    "version": "1.0.0"
+  },
+  "demo_incident": {
+    "incident_id": "demo-cascade-001",
+    "status": "resolved",
+    "resolution_time": "2:47",
+    "agents_involved": [
+      "detection",
+      "diagnosis",
+      "resolution"
+    ],
+    "cost_saved": "$163,000",
+    "message": "Database cascade failure resolved autonomously in 2:47 minutes"
+  },
+  "demo_stats": {
+    "mttr_improvement": "95.2%",
+    "incidents_prevented": "85%",
+    "annual_savings": "$2,847,500",
+    "roi": "458%",
+    "payback_period": "6.2 months",
+    "aws_services": 8,
+    "agents_active": 5
+  }
+}

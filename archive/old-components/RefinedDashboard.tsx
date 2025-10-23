@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * Refined Dashboard Component
  *
@@ -612,57 +614,95 @@ export const RefinedDashboard: React.FC = () => {
   );
 
   // WebSocket connection for real-time updates
+  const wsRef = useRef<WebSocket | null>(null);
+  const reconnectTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const mountedRef = useRef(true);
+
   useEffect(() => {
+    mountedRef.current = true;
+
     const connectWebSocket = () => {
+      // Don't create new connection if one already exists
+      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+        return;
+      }
+
       try {
         // Build WebSocket URL from environment or current location
         const wsUrl =
           process.env.NEXT_PUBLIC_WS_URL ||
           (() => {
+            if (typeof window === "undefined") return "";
             const protocol =
               window.location.protocol === "https:" ? "wss:" : "ws:";
             const host = window.location.host || "localhost:8000";
             return `${protocol}//${host}/dashboard/ws`;
           })();
 
+        if (!wsUrl) return;
+
         const ws = new WebSocket(wsUrl);
+        wsRef.current = ws;
 
         ws.onopen = () => {
-          setIsConnected(true);
-          console.log("Dashboard WebSocket connected");
+          if (mountedRef.current) {
+            setIsConnected(true);
+            console.log("Dashboard WebSocket connected");
+          }
         };
 
         ws.onmessage = (event) => {
-          const data = JSON.parse(event.data);
-          handleWebSocketMessage(data);
-          setLastUpdate(new Date());
+          if (mountedRef.current) {
+            const data = JSON.parse(event.data);
+            handleWebSocketMessage(data);
+            setLastUpdate(new Date());
+          }
         };
 
         ws.onclose = () => {
-          setIsConnected(false);
-          console.log("Dashboard WebSocket disconnected");
-          // Attempt to reconnect after 3 seconds
-          setTimeout(connectWebSocket, 3000);
+          if (mountedRef.current) {
+            setIsConnected(false);
+            console.log("Dashboard WebSocket disconnected");
+            // Only schedule reconnect if still mounted
+            if (mountedRef.current) {
+              reconnectTimerRef.current = setTimeout(() => {
+                if (mountedRef.current) {
+                  connectWebSocket();
+                }
+              }, 3000);
+            }
+          }
         };
 
         ws.onerror = (error) => {
-          console.error("WebSocket error:", error);
-          setIsConnected(false);
+          if (mountedRef.current) {
+            console.error("WebSocket error:", error);
+            setIsConnected(false);
+          }
         };
-
-        return ws;
       } catch (error) {
-        console.error("Failed to connect WebSocket:", error);
-        setIsConnected(false);
-        return null;
+        if (mountedRef.current) {
+          console.error("Failed to connect WebSocket:", error);
+          setIsConnected(false);
+        }
       }
     };
 
-    const ws = connectWebSocket();
+    connectWebSocket();
 
     return () => {
-      if (ws) {
-        ws.close();
+      mountedRef.current = false;
+
+      // Clear any pending reconnect timer
+      if (reconnectTimerRef.current) {
+        clearTimeout(reconnectTimerRef.current);
+        reconnectTimerRef.current = null;
+      }
+
+      // Close WebSocket connection
+      if (wsRef.current) {
+        wsRef.current.close();
+        wsRef.current = null;
       }
     };
   }, [handleWebSocketMessage]);

@@ -12,6 +12,9 @@ export {
   DashboardGrid,
 } from "./DashboardLayout";
 
+// Logo Component
+export { SwarmAILogo } from "./SwarmAILogo";
+
 // Status Indicators
 export {
   AgentStatus,

@@ -11,6 +11,7 @@
 ## Overview
 
 Phase 0 implements the **hybrid approach** for Dashboard 2 (`/transparency`):
+
 - Generate authentic demo content using **real AWS services**
 - Cache results as JSON for **reliable, consistent demos**
 - Dashboard loads from cache (no WebSocket needed)
@@ -19,9 +20,11 @@ Phase 0 implements the **hybrid approach** for Dashboard 2 (`/transparency`):
 ## Completed Tasks
 
 ### ✅ Task 0.1: Create AWS Content Generation Script
+
 **File**: `scripts/generate_transparency_scenarios_with_aws.py`
 
 **Features**:
+
 - AWS Services integration:
   - Amazon Bedrock (Claude 3.5 Sonnet) for multi-agent reasoning
   - Amazon Q Business for knowledge retrieval (optional)
@@ -36,6 +39,7 @@ Phase 0 implements the **hybrid approach** for Dashboard 2 (`/transparency`):
   - Performance metrics
 
 **Usage**:
+
 ```bash
 # Generate all scenarios
 python scripts/generate_transparency_scenarios_with_aws.py
@@ -48,9 +52,11 @@ python scripts/generate_transparency_scenarios_with_aws.py --force
 ```
 
 ### ✅ Task 0.2: Implement Scenario Caching System
+
 **Directory**: `dashboard/public/scenarios/`
 
 **Structure**:
+
 ```
 dashboard/public/scenarios/
 ├── database_cascade.json
@@ -60,6 +66,7 @@ dashboard/public/scenarios/
 ```
 
 **Scenario JSON Format**:
+
 ```json
 {
   "scenario_type": "database_cascade",
@@ -81,15 +88,18 @@ dashboard/public/scenarios/
 ```
 
 ### ✅ Task 0.3: Generate Demo Scenarios
+
 **Status**: 4 scenarios generated successfully
 
 **Scenarios**:
+
 1. `database_cascade` - Database Cascade Failure (Infrastructure, High severity)
 2. `api_overload` - API Rate Limit Breach (Performance, Medium severity)
 3. `memory_leak` - Memory Leak Detection (Resource, Medium severity)
 4. `security_breach` - Security Anomaly Alert (Security, Critical severity)
 
 **Note**: Generated with fallback data since AWS credentials not configured. To use real AWS services:
+
 ```bash
 export AWS_REGION=us-west-2
 export AWS_ACCESS_KEY_ID=your_key
@@ -102,9 +112,11 @@ python scripts/generate_transparency_scenarios_with_aws.py --force
 ```
 
 ### ✅ Task 0.4: Update Dashboard 2 to Load Cached Scenarios
+
 **File**: `dashboard/app/transparency/page.tsx`
 
 **Changes**:
+
 1. Added state for cached scenarios and metadata
 2. Implemented `loadCachedScenario()` function to fetch from `/scenarios/*.json`
 3. Modified `triggerIncident()` to use AWS-generated data when available
@@ -115,23 +127,27 @@ python scripts/generate_transparency_scenarios_with_aws.py --force
 5. Auto-load scenario when selection changes
 
 **Dashboard Behavior**:
+
 - On scenario selection → loads cached JSON
 - On "Trigger Demo" → uses AWS-generated reasonings if available
 - Fallback to simulated data if cache unavailable
 - AWS attribution visible when cached data loaded
 
 ### ✅ Task 0.5: Test Dashboard 2 Hybrid Approach
+
 **Status**: Implementation complete, ready for testing
 
 **Test Plan**:
 
 1. **Scenario Loading Test**:
+
    - Visit `/transparency` dashboard
    - Select each of 4 scenarios
    - Verify AWS attribution badge appears
    - Verify metadata displays correctly
 
 2. **Demo Execution Test**:
+
    - Click "🚨 Trigger Demo"
    - Verify agent reasonings load from cache
    - Verify decision tree displays AWS-generated structure
@@ -139,6 +155,7 @@ python scripts/generate_transparency_scenarios_with_aws.py --force
    - Check browser console for "✓ Using AWS-generated scenario data from cache"
 
 3. **AWS Attribution Test**:
+
    - Verify badge shows "AWS-Generated Scenario"
    - Verify generation timestamp displays
    - Verify "Phase 0: Hybrid Approach" label visible
@@ -149,6 +166,7 @@ python scripts/generate_transparency_scenarios_with_aws.py --force
    - Verify no errors in console
 
 **Testing Commands**:
+
 ```bash
 # Install dependencies (if not already)
 cd dashboard
@@ -174,7 +192,7 @@ npm run dev
 │                                                              │
 │  1. GENERATION (One-time or on-demand)                      │
 │     ┌─────────────────────────────────────┐                │
-│     │ generate_transparency_scenarios.py  │                │
+│     │ scripts/generate_transparency_scenarios_with_aws.py  │                │
 │     │                                      │                │
 │     │  ┌──────────────────────┐           │                │
 │     │  │ Amazon Bedrock       │           │                │
@@ -214,23 +232,27 @@ npm run dev
 ### Key Features
 
 #### 1. Authentic AWS Content
+
 - Uses real AWS services when credentials available
 - Graceful fallback when AWS unavailable
 - Can regenerate anytime with `--force` flag
 
 #### 2. Reliable Demos
+
 - Cached JSON ensures consistency
 - No API latency during demos
 - Works offline after generation
 - Version-controlled scenario data
 
 #### 3. AWS Attribution
+
 - Clear badges showing AWS generation
 - Displays services used
 - Shows generation timestamp
 - "Phase 0: Hybrid Approach" label
 
 #### 4. Extensible Design
+
 - Easy to add new scenarios
 - Simple to add new AWS services
 - Clear separation of concerns
@@ -241,18 +263,21 @@ npm run dev
 ## Benefits of Phase 0 Approach
 
 ### ✅ For Demos
+
 - **Reliability**: Cached data = no API failures during presentations
 - **Speed**: Instant loading, no API latency
 - **Consistency**: Same experience every time
 - **Control**: Can curate best examples
 
 ### ✅ For Development
+
 - **Testing**: Can test without AWS credentials
 - **Cost**: Generate once, use many times
 - **Iteration**: Easy to regenerate with improvements
 - **Version Control**: JSON files tracked in git
 
 ### ✅ For AWS Integration
+
 - **Authentic**: Uses real AWS services when generating
 - **Showcase**: Demonstrates AWS capabilities clearly
 - **Expandable**: Easy to add more services
@@ -263,17 +288,20 @@ npm run dev
 ## Next Steps
 
 ### Immediate (Ready Now)
+
 1. Test Dashboard 2 with cached scenarios
 2. Verify AWS attribution displays correctly
 3. Demo to stakeholders
 
 ### Optional Enhancements
+
 1. Configure AWS credentials to regenerate with real services
 2. Add more scenarios (network issues, deployment failures, etc.)
 3. Enhance UI with service-specific badges
 4. Add scenario comparison features
 
 ### Future Phases
+
 - **Phase 1**: WebSocket infrastructure for Dashboard 3
 - **Phase 2**: Real-time agent processing
 - **Phase 3**: Full AWS AI services integration (Q Business, Nova, Memory)
@@ -284,17 +312,21 @@ npm run dev
 ## File Changes Summary
 
 ### New Files Created
+
 1. `scripts/generate_transparency_scenarios_with_aws.py` (850+ lines)
+
    - AWS service integration
    - Scenario generation logic
    - Caching implementation
 
 2. `dashboard/public/scenarios/` (directory)
+
    - 4 scenario JSON files generated
 
 3. `PHASE_0_IMPLEMENTATION_SUMMARY.md` (this file)
 
 ### Modified Files
+
 1. `dashboard/app/transparency/page.tsx`
    - Added cached scenario loading
    - Added AWS attribution UI
@@ -302,6 +334,7 @@ npm run dev
    - Added metadata display
 
 ### Dependencies Added
+
 - boto3 (upgraded to 1.40.49)
 - aioboto3 (upgraded to compatible version)
 
@@ -367,6 +400,7 @@ cat dashboard/public/scenarios/database_cascade.json | python -m json.tool
 ## Phase 0 Complete ✓
 
 Dashboard 2 now uses a **hybrid approach**:
+
 - Real AWS content (when generated with credentials)
 - Cached for reliability
 - No WebSocket dependency

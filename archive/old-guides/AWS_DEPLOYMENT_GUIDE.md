@@ -14,7 +14,7 @@ Deploy the AI Insights Dashboard to AWS so judges can access your demo from anyw
 - ✅ **Guaranteed to work** during judging
 - ✅ **15-minute setup** with one command
 - ✅ **$1-5/month cost** (almost free)
-- ✅ **99.99% uptime** with AWS CloudFront
+- ✅ **99.9% uptime** with AWS CloudFront
 - ✅ **Global CDN** for fast loading worldwide
 - ✅ **Custom domain** support (e.g., `ai-insights.yourname.com`)
 

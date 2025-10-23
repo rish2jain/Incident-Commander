@@ -31,12 +31,13 @@ import {
 } from "../lib/agent-completion-manager";
 import { useAgentCompletions } from "../lib/hooks/useAgentCompletions";
 
-const AGENT_ICONS = {
-  detection: AlertTriangle,
-  diagnosis: Activity,
-  prediction: TrendingUp,
-  resolution: Shield,
-  communication: Users,
+const AGENT_ICONS: Record<AgentType, any> = {
+  Detection: AlertTriangle,
+  Diagnosis: Activity,
+  Prediction: TrendingUp,
+  Resolution: Shield,
+  Communication: Users,
+  Validation: CheckCircle,
 };
 
 interface AgentCompletionIndicatorProps {
@@ -106,7 +107,7 @@ const SuccessAnimation = ({
                 }}
                 className={`
                   relative p-4 rounded-full border-2
-                  ${config.bgColor} ${config.borderColor} ${config.color}
+                  ${config.bgColor} ${config.borderColor} ${config.textColor}
                 `}
               >
                 <Icon className="w-8 h-8" />
@@ -129,7 +130,7 @@ const SuccessAnimation = ({
                 transition={{ delay: 0.2 }}
                 className="text-center"
               >
-                <h3 className={`text-xl font-bold ${config.color} mb-1`}>
+                <h3 className={`text-xl font-bold ${config.textColor} mb-1`}>
                   Task Complete!
                 </h3>
                 <p className="text-sm text-muted-foreground">

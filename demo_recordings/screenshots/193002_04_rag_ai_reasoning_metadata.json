@@ -1,0 +1,13 @@
+{
+  "filename": "193002_04_rag_ai_reasoning.png",
+  "timestamp": "2025-10-23T19:30:02.604829",
+  "description": "Screenshot 4: Reasoning tab showing both Analysis by Amazon Q Business and Evidence & RAG Sources modules",
+  "scenario": "phase_5_ai_transparency_prizes",
+  "business_focus": "Prove $9K prize eligibility through Active Incidents module interaction",
+  "url": "http://localhost:3000/demo",
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "screenshot_number": 9
+}

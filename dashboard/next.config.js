@@ -4,13 +4,7 @@ const nextConfig = {
     domains: ["i.pravatar.cc"],
   },
   async redirects() {
-    return [
-      {
-        source: "/demo",
-        destination: "/insights-demo",
-        permanent: true,
-      },
-    ];
+    return [];
   },
   async rewrites() {
     // Use AWS API Gateway in production, localhost in development

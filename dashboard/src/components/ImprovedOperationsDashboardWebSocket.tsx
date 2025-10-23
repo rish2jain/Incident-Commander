@@ -490,7 +490,7 @@ export function ImprovedOperationsDashboardWebSocket() {
           </div>
           <div className="text-right">
             <div className="text-sm text-slate-400">
-              {formatTimeSafe(new Date(), isClient)}
+              {isClient ? formatTimeSafe(new Date(), isClient) : "Loading..."}
             </div>
           </div>
         </div>

@@ -17,7 +17,7 @@ python src/main.py
 
 **Access Points:**
 
-- **Executive Demo**: http://localhost:3000/demo (Business value presentation)
+- **PowerDashboard**: http://localhost:3000/demo (4-column interactive layout)
 - **AI Transparency**: http://localhost:3000/transparency (Technical deep-dive)
 - **Operations**: http://localhost:3000/ops (Live monitoring)
 - **API Documentation**: http://localhost:8000/docs

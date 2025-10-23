@@ -198,6 +198,8 @@ winning_enhancements/
 # Next.js build artifacts
 dashboard/.next/
 .next/
+dashboard/.next/cache/
+.next/cache/
 
 # TypeScript build artifacts
 *.tsbuildinfo

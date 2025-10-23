@@ -1,168 +1,430 @@
-# Design Patterns & Guidelines
+# Design Patterns and Guidelines
 
-## Core Design Patterns
+## Architectural Patterns
 
-### 1. Multi-Agent System
-All agents inherit from `BaseAgent` interface in `src/interfaces/agent.py`:
-- **Detection Agent**: Alert correlation, incident detection
-- **Diagnosis Agent**: Root cause analysis, log investigation
-- **Prediction Agent**: Trend forecasting, risk assessment
-- **Resolution Agent**: Automated remediation with sandbox validation
-- **Communication Agent**: Stakeholder notifications, escalation
+### Event-Driven Architecture
+- **Event Store**: Kinesis for streaming, DynamoDB for persistence
+- **Event Sourcing**: All state changes captured as events
+- **CQRS**: Separate read and write models where applicable
+- **Correlation IDs**: Track events across system boundaries
 
-### 2. Event Sourcing
-- All state changes flow through event store
-- Kinesis for streaming, DynamoDB for persistence
-- Event integrity verification with cryptographic hashing
-- Optimistic locking for concurrent updates
-- Cross-region disaster recovery
+### Multi-Agent System
+- **Agent Specialization**: Each agent has single responsibility
+  - Detection: Alert correlation and incident detection
+  - Diagnosis: Root cause analysis
+  - Prediction: Trend forecasting and risk assessment
+  - Resolution: Automated remediation
+  - Communication: Stakeholder notifications
 
-### 3. Circuit Breaker Pattern
-- Implemented for ALL external service calls
-- Three states: CLOSED, OPEN, HALF_OPEN
-- Configurable thresholds and timeouts
-- Agent-level circuit breakers with health monitoring
-- Service-level circuit breakers (Bedrock, Slack, PagerDuty, Datadog)
+- **Agent Communication**: Message bus pattern via Redis
+- **Consensus**: Byzantine fault-tolerant consensus for decisions
+- **Coordination**: Orchestrator manages agent lifecycle
 
-### 4. Byzantine Fault-Tolerant Consensus
-- Ensures reliable multi-agent decision making
-- Voting-based consensus with confidence thresholds
-- Handles malicious/faulty agent responses
-- Human approval required for low confidence (<0.7)
+### Circuit Breaker Pattern
+- External service protection (Bedrock, Slack, PagerDuty, Datadog)
+- Configurable thresholds and fallback strategies
+- Health monitoring and automatic recovery
+- Agent-level circuit breakers for fault isolation
 
-### 5. Defensive Programming
-- **Bounds Checking**: All collections have max size limits
-- **Timeout Protection**: All operations have configurable timeouts
-- **Input Validation**: Pydantic models for all inputs
-- **Memory Pressure Management**: 80% threshold with emergency cleanup
-- **Circular Reference Detection**: Prevent infinite loops in correlation
+### Memory System (RAG)
+- **Vector Search**: OpenSearch Serverless
+- **Embeddings**: Bedrock Titan (1536 dimensions)
+- **Pattern Storage**: Historical incident patterns
+- **Similarity Search**: K-nearest neighbors for pattern matching
 
-## Performance Targets & Constraints
+## Python Backend Patterns
 
-### Agent Processing Targets
-| Agent | Target | Max | Current |
-|-------|--------|-----|---------|
-| Detection | 30s | 60s | <1s ✅ |
-| Diagnosis | 120s | 180s | <1s ✅ |
-| Prediction | 90s | 150s | TBD |
-| Resolution | 180s | 300s | TBD |
-| Communication | 10s | 30s | TBD |
+### Async/Await
+```python
+# Prefer async for I/O-bound operations
+async def fetch_data() -> dict:
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as response:
+            return await response.json()
 
-### System Constraints
-- **Alert Storm Handling**: 100 alerts/sec with priority sampling
-- **Log Analysis**: 100MB limit with intelligent sampling
-- **Correlation Depth**: Max depth 5 to prevent runaway analysis
-- **Memory Threshold**: 80% with emergency cleanup
-- **Embedding Cache**: Performance optimization for RAG
+# Use asyncio.gather for concurrent operations
+results = await asyncio.gather(
+    fetch_data_1(),
+    fetch_data_2(),
+    fetch_data_3()
+)
+```
 
-## Security Guidelines
+### Dependency Injection
+```python
+# Use dependency injection for testability
+class DetectionAgent:
+    def __init__(
+        self,
+        event_store: EventStore,
+        message_bus: MessageBus,
+        circuit_breaker: CircuitBreaker
+    ):
+        self.event_store = event_store
+        self.message_bus = message_bus
+        self.circuit_breaker = circuit_breaker
+```
 
-### Zero Trust Architecture
-- Never trust, always verify
-- Validate all inputs with Pydantic
-- Sanitize all external data
-- Audit log all sensitive operations
+### Error Handling
+```python
+# Custom exception hierarchy
+class SwarmAIException(Exception):
+    """Base exception"""
+    pass
 
-### IAM & Access Control
-- IAM role assumption with least privilege
-- 12-hour credential rotation
-- No hardcoded credentials
-- Environment variables for secrets
+class AgentException(SwarmAIException):
+    """Agent-specific errors"""
+    pass
 
-### Cryptographic Integrity
-- Event integrity verification with SHA-256
-- Audit trail with cryptographic hashing
-- Tamper detection and corruption recovery
+# Structured error handling with logging
+try:
+    result = await dangerous_operation()
+except AgentException as e:
+    logger.error(
+        "Agent operation failed",
+        exc_info=True,
+        extra={"correlation_id": correlation_id}
+    )
+    raise
+```
 
-## Error Handling Strategy
+### Configuration Management
+```python
+# Centralized config with validation
+from pydantic_settings import BaseSettings
 
-### Custom Exception Hierarchy
-All exceptions inherit from `IncidentCommanderError` in `src/utils/exceptions.py`:
-- `ConfigurationError` - Invalid configuration
-- `EventStoreError` - Event persistence failures
-- `ConsensusError` - Consensus failures
-- `CircuitBreakerError` - Circuit breaker trips
-- `AgentExecutionError` - Agent processing failures
+class Config(BaseSettings):
+    aws_region: str = "us-east-1"
+    redis_host: str = "localhost"
+    redis_port: int = 6379
+    
+    class Config:
+        env_file = ".env"
+        
+config = Config()
+```
 
-### Logging Standards
-- Structured logging with `structlog`
-- Correlation IDs for request tracing
-- JSON formatting for machine parsing
-- Log levels: DEBUG, INFO, WARNING, ERROR, CRITICAL
+### Defensive Programming
+```python
+# Bounds checking and validation
+def process_alerts(alerts: list[Alert]) -> list[Incident]:
+    if len(alerts) > MAX_ALERTS:
+        # Alert storm protection
+        alerts = sample_alerts(alerts, MAX_ALERTS)
+    
+    # Depth limiting for recursion
+    def correlate(alert, depth=0, max_depth=5):
+        if depth >= max_depth:
+            logger.warning("Max correlation depth reached")
+            return []
+        # ... correlation logic
+    
+    # Size limiting for logs
+    if log_size > MAX_LOG_SIZE:
+        log_data = intelligently_sample(log_data, MAX_LOG_SIZE)
+```
 
-### Graceful Degradation
-- Circuit breakers prevent cascade failures
-- Rate limiters protect external services
-- Fallback mechanisms for all critical paths
-- Health checks for early failure detection
+## React/TypeScript Frontend Patterns
 
-## RAG Memory System
+### Component Organization
+```typescript
+// Functional components with hooks
+interface CardProps {
+  title: string;
+  children: React.ReactNode;
+}
 
-### OpenSearch Serverless Integration
-- Hierarchical indexing for 100K+ incident patterns
-- Bedrock Titan embeddings (1536 dimensions)
-- Similarity search for pattern matching
-- Embedding caching for performance
+export function Card({ title, children }: CardProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  
+  return (
+    <div className="card">
+      <h3>{title}</h3>
+      {children}
+    </div>
+  );
+}
+```
 
-### Pattern Storage
-- Store successful resolution patterns
-- Similarity-based retrieval
-- Confidence scoring for recommendations
-- Historical pattern learning
+### Custom Hooks
+```typescript
+// Reusable logic in custom hooks
+function useWebSocket(url: string) {
+  const [data, setData] = useState(null);
+  const [isConnected, setIsConnected] = useState(false);
+  
+  useEffect(() => {
+    const ws = new WebSocket(url);
+    
+    ws.onopen = () => setIsConnected(true);
+    ws.onmessage = (event) => setData(JSON.parse(event.data));
+    ws.onclose = () => setIsConnected(false);
+    
+    return () => ws.close();
+  }, [url]);
+  
+  return { data, isConnected };
+}
+```
 
-## API Design Principles
+### State Management
+```typescript
+// React hooks for local state
+// Context API for shared state across components
+const DashboardContext = createContext<DashboardState | null>(null);
 
-### RESTful Conventions
-- Use HTTP verbs correctly (GET, POST, PUT, DELETE)
-- Plural resource names (`/incidents`, `/agents`)
-- Versioning in URL path if needed
-- Status codes: 200 OK, 201 Created, 400 Bad Request, 404 Not Found, 500 Internal Error
+export function useDashboard() {
+  const context = useContext(DashboardContext);
+  if (!context) {
+    throw new Error("useDashboard must be used within DashboardProvider");
+  }
+  return context;
+}
+```
 
-### Response Format
-- Consistent JSON structure
-- Include timestamps in ISO 8601 format
-- Provide correlation IDs for debugging
-- Include business impact metrics
+### Styling with Tailwind
+```typescript
+// Use Tailwind utility classes
+<div className="flex items-center justify-between p-4 bg-gray-900 rounded-lg">
+  <span className="text-white font-semibold">{title}</span>
+</div>
 
-## Testing Strategy
+// Use clsx/cn for conditional classes
+import { cn } from "@/lib/utils";
 
-### Test Organization
-- **Unit Tests**: `tests/unit/` - Individual component testing
-- **Integration Tests**: `tests/integration/` - End-to-end flows
-- **Chaos Tests**: `tests/chaos/` - Fault injection scenarios
-- **Load Tests**: `tests/load/` - Performance validation
+<div className={cn(
+  "base-class",
+  isActive && "active-class",
+  isError && "error-class"
+)}>
+```
 
-### Test Fixtures
-Located in `tests/conftest.py`:
-- Slack stubs for communication testing
-- Bedrock stubs for agent reasoning
-- LocalStack stubs for AWS services
-- Mock data for incident scenarios
+## API Design Patterns
 
-### Coverage Requirements
-- Minimum 80% statement coverage
-- Critical paths require 100% coverage
-- Edge cases explicitly tested
-- Regression tests for all bug fixes
+### RESTful Endpoints
+```python
+# Versioned API routes
+app.include_router(incidents_router, prefix="/api/v1/incidents")
 
-## Development Workflow
+# Resource-based endpoints
+@router.get("/incidents/{incident_id}")
+async def get_incident(incident_id: str) -> IncidentResponse:
+    """Get incident by ID"""
+    pass
 
-### Branch Strategy
-- `main` - Production-ready code
-- Feature branches: `feature/<feature-name>`
-- Never commit directly to main
+@router.post("/incidents")
+async def create_incident(incident: IncidentCreate) -> IncidentResponse:
+    """Create new incident"""
+    pass
+```
 
-### Commit Conventions
-Use Conventional Commits format:
-- `feat:` - New features
-- `fix:` - Bug fixes
-- `docs:` - Documentation changes
-- `infra:` - Infrastructure updates
-- `test:` - Test additions/updates
-- `refactor:` - Code refactoring
+### WebSocket Patterns
+```python
+# Connection management
+@app.websocket("/dashboard/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
+    connection_id = str(uuid4())
+    
+    try:
+        # Register connection
+        await connection_manager.connect(connection_id, websocket)
+        
+        # Message loop
+        while True:
+            data = await websocket.receive_json()
+            await handle_message(connection_id, data)
+            
+    except WebSocketDisconnect:
+        await connection_manager.disconnect(connection_id)
+```
 
-### Code Review Guidelines
-- Reference incident IDs or steering docs
-- Include testing evidence
-- Request reviews from relevant domain owners
-- Ensure all quality checks pass before review
+### Response Schemas
+```python
+# Consistent response format with Pydantic
+class APIResponse(BaseModel):
+    success: bool
+    data: Optional[dict] = None
+    error: Optional[str] = None
+    timestamp: datetime = Field(default_factory=datetime.utcnow)
+```
+
+## Testing Patterns
+
+### Unit Testing
+```python
+# Pytest with fixtures
+@pytest.fixture
+async def detection_agent():
+    event_store = MockEventStore()
+    message_bus = MockMessageBus()
+    agent = DetectionAgent(event_store, message_bus)
+    return agent
+
+async def test_alert_correlation(detection_agent):
+    # Arrange
+    alerts = [create_test_alert() for _ in range(3)]
+    
+    # Act
+    incidents = await detection_agent.correlate_alerts(alerts)
+    
+    # Assert
+    assert len(incidents) == 1
+    assert incidents[0].severity == "high"
+```
+
+### Integration Testing
+```python
+# Mark integration tests
+@pytest.mark.integration
+async def test_end_to_end_incident_flow():
+    # Test complete flow from detection to resolution
+    pass
+```
+
+### Mocking
+```python
+# Use pytest-mock for external dependencies
+async def test_bedrock_call(mocker):
+    mock_bedrock = mocker.patch("boto3.client")
+    mock_bedrock.return_value.invoke_model.return_value = {
+        "body": json.dumps({"response": "test"})
+    }
+    
+    result = await call_bedrock_model("test prompt")
+    assert result == "test"
+```
+
+## Performance Patterns
+
+### Caching
+```python
+# Redis caching for expensive operations
+async def get_incident_with_cache(incident_id: str) -> Incident:
+    # Try cache first
+    cached = await redis.get(f"incident:{incident_id}")
+    if cached:
+        return Incident.parse_raw(cached)
+    
+    # Fetch from database
+    incident = await db.get_incident(incident_id)
+    
+    # Update cache
+    await redis.setex(
+        f"incident:{incident_id}",
+        3600,  # TTL: 1 hour
+        incident.json()
+    )
+    
+    return incident
+```
+
+### Rate Limiting
+```python
+# Token bucket rate limiting
+class RateLimiter:
+    def __init__(self, requests_per_second: int):
+        self.rate = requests_per_second
+        self.tokens = requests_per_second
+        self.last_update = time.time()
+    
+    async def acquire(self) -> bool:
+        now = time.time()
+        elapsed = now - self.last_update
+        self.tokens = min(
+            self.rate,
+            self.tokens + elapsed * self.rate
+        )
+        self.last_update = now
+        
+        if self.tokens >= 1:
+            self.tokens -= 1
+            return True
+        return False
+```
+
+### Batch Processing
+```python
+# Process items in batches
+async def process_alerts_batch(alerts: list[Alert]):
+    batch_size = 100
+    for i in range(0, len(alerts), batch_size):
+        batch = alerts[i:i + batch_size]
+        await asyncio.gather(*[
+            process_alert(alert) for alert in batch
+        ])
+```
+
+## Security Patterns
+
+### Input Validation
+```python
+# Pydantic for request validation
+class IncidentCreate(BaseModel):
+    title: str = Field(..., min_length=1, max_length=200)
+    severity: Literal["low", "medium", "high", "critical"]
+    service_tier: int = Field(..., ge=1, le=3)
+    
+    @validator("title")
+    def sanitize_title(cls, v):
+        # Remove dangerous characters
+        return v.replace("<", "").replace(">", "")
+```
+
+### Authentication
+```python
+# JWT-based authentication
+from fastapi.security import HTTPBearer
+
+security = HTTPBearer()
+
+@app.get("/protected")
+async def protected_route(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    token = credentials.credentials
+    # Verify JWT token
+    payload = verify_jwt(token)
+    return {"user_id": payload["sub"]}
+```
+
+## Logging Patterns
+
+### Structured Logging
+```python
+# JSON-formatted logs with correlation IDs
+logger.info(
+    "Incident detected",
+    extra={
+        "incident_id": incident.id,
+        "correlation_id": correlation_id,
+        "severity": incident.severity,
+        "service_tier": incident.service_tier,
+        "business_impact": incident.business_impact
+    }
+)
+```
+
+## Guidelines Summary
+
+### DO
+✅ Use async/await for I/O operations
+✅ Implement circuit breakers for external services
+✅ Add correlation IDs for request tracing
+✅ Use type hints everywhere
+✅ Write tests for new features
+✅ Document complex logic
+✅ Validate all inputs
+✅ Handle errors gracefully
+✅ Use environment variables for config
+✅ Follow SOLID principles
+
+### DON'T
+❌ Block the event loop with sync operations
+❌ Ignore error handling
+❌ Hard-code configuration values
+❌ Skip input validation
+❌ Leave debug print statements
+❌ Create circular dependencies
+❌ Expose sensitive data in logs
+❌ Use global mutable state
+❌ Write untested code
+❌ Violate single responsibility principle

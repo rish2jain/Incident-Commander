@@ -1,0 +1,13 @@
+{
+  "filename": "150332_transparency_demo_active.png",
+  "timestamp": "2025-10-23T15:03:32.904591",
+  "description": "Demo triggered - showing active state",
+  "scenario": "transparency",
+  "business_focus": "5-tab AI explainability, agent reasoning, decision transparency",
+  "url": "http://localhost:3000/transparency",
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "screenshot_number": 8
+}

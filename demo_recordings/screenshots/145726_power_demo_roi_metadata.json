@@ -1,0 +1,13 @@
+{
+  "filename": "145726_power_demo_roi.png",
+  "timestamp": "2025-10-23T14:57:27.178398",
+  "description": "ROI calculation and cost savings",
+  "scenario": "power_demo",
+  "business_focus": "$2.8M annual savings, 458% ROI, 95.2% MTTR improvement",
+  "url": "http://localhost:3000/demo",
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "screenshot_number": 8
+}

@@ -1,0 +1,13 @@
+{
+  "filename": "145745_transparency_overview.png",
+  "timestamp": "2025-10-23T14:57:46.114768",
+  "description": "AI Transparency Dashboard - Complete explainability system - Initial view",
+  "scenario": "transparency",
+  "business_focus": "5-tab AI explainability, agent reasoning, decision transparency",
+  "url": "http://localhost:3000/transparency",
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "screenshot_number": 9
+}

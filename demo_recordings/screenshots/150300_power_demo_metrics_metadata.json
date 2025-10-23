@@ -1,0 +1,13 @@
+{
+  "filename": "150300_power_demo_metrics.png",
+  "timestamp": "2025-10-23T15:03:00.459533",
+  "description": "Business impact metrics display",
+  "scenario": "power_demo",
+  "business_focus": "$2.8M annual savings, 458% ROI, 95.2% MTTR improvement",
+  "url": "http://localhost:3000/demo",
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "screenshot_number": 5
+}

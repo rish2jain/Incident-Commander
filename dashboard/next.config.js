@@ -1,7 +1,16 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ["i.pravatar.cc"],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "i.pravatar.cc",
+      },
+    ],
+  },
+  // Suppress workspace root warning for monorepo structure
+  turbopack: {
+    root: __dirname,
   },
   async redirects() {
     return [];

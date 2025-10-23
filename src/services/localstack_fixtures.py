@@ -27,6 +27,35 @@ class LocalStackManager:
         self.is_localstack = 'localhost' in self.localstack_endpoint or '127.0.0.1' in self.localstack_endpoint
         self._initialized_services: set = set()
         self._service_factory: Optional[AWSServiceFactory] = None
+        self._availability_checked: bool = False
+        self._available: bool = False
+        self._availability_lock: asyncio.Lock = asyncio.Lock()
+
+    async def ensure_available(self) -> bool:
+        """Detect whether LocalStack is reachable before initializing services."""
+        if not self.is_localstack:
+            return False
+
+        async with self._availability_lock:
+            # Re-check after acquiring lock to avoid race condition
+            if self._availability_checked:
+                return self._available
+
+            try:
+                import aiohttp
+
+                async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=2)) as session:
+                    health_endpoint = f"{self.localstack_endpoint.rstrip('/')}/_localstack/health"
+                    async with session.get(health_endpoint) as resp:
+                        self._available = resp.status == 200
+            except Exception:
+                self._available = False
+
+            self._availability_checked = True
+            if not self._available:
+                logger.warning("LocalStack endpoint not reachable at %s; skipping initialization", self.localstack_endpoint)
+            
+        return self._available
     
     def get_service_factory(self) -> AWSServiceFactory:
         """Get AWS service factory configured for LocalStack."""
@@ -442,7 +471,7 @@ def get_localstack_manager() -> LocalStackManager:
 async def initialize_localstack_for_testing():
     """Initialize LocalStack services for testing."""
     manager = get_localstack_manager()
-    if manager.is_localstack:
+    if manager.is_localstack and await manager.ensure_available():
         await manager.initialize_all_services()
         logger.info("LocalStack initialized for testing")
     else:

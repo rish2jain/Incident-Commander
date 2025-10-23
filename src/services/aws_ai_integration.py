@@ -29,13 +29,23 @@ class BedrockAgentService:
     
     def __init__(self, region: str = "us-east-1"):
         self.region = region
-        self.bedrock_runtime = boto3.client('bedrock-runtime', region_name=region)
-        self.bedrock_agent = boto3.client('bedrock-agent', region_name=region)
+        self._bedrock_runtime = None
+        self._bedrock_agent = None
         
         # Model configurations
         self.claude_sonnet_model = "anthropic.claude-3-5-sonnet-20241022-v2:0"
         self.claude_haiku_model = "anthropic.claude-3-haiku-20240307-v1:0"
         
+    def _get_bedrock_runtime(self):
+        if self._bedrock_runtime is None:
+            self._bedrock_runtime = boto3.client('bedrock-runtime', region_name=self.region)
+        return self._bedrock_runtime
+
+    def _get_bedrock_agent(self):
+        if self._bedrock_agent is None:
+            self._bedrock_agent = boto3.client('bedrock-agent', region_name=self.region)
+        return self._bedrock_agent
+
     async def invoke_claude_sonnet(self, prompt: str, system_prompt: str = None) -> AgentResponse:
         """Invoke Claude 3.5 Sonnet for complex reasoning."""
         try:
@@ -51,12 +61,15 @@ class BedrockAgentService:
             if system_prompt:
                 body["system"] = system_prompt
             
-            response = self.bedrock_runtime.invoke_model(
+            runtime = self._get_bedrock_runtime()
+            response = await asyncio.to_thread(
+                runtime.invoke_model,
                 modelId=self.claude_sonnet_model,
                 body=json.dumps(body)
             )
-            
-            response_body = json.loads(response['body'].read())
+
+            body_bytes = await asyncio.to_thread(lambda: response['body'].read())
+            response_body = json.loads(body_bytes)
             content = response_body['content'][0]['text']
             
             return AgentResponse(
@@ -89,12 +102,15 @@ class BedrockAgentService:
             if system_prompt:
                 body["system"] = system_prompt
             
-            response = self.bedrock_runtime.invoke_model(
+            runtime = self._get_bedrock_runtime()
+            response = await asyncio.to_thread(
+                runtime.invoke_model,
                 modelId=self.claude_haiku_model,
                 body=json.dumps(body)
             )
-            
-            response_body = json.loads(response['body'].read())
+
+            body_bytes = await asyncio.to_thread(lambda: response['body'].read())
+            response_body = json.loads(body_bytes)
             content = response_body['content'][0]['text']
             
             return AgentResponse(

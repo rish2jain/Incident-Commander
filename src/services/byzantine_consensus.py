@@ -390,7 +390,7 @@ class ByzantineFaultTolerantConsensus:
             # Validate proposal is a proper AgentRecommendation instance
             if not isinstance(round_info.proposal, AgentRecommendation):
                 raise ValueError(f"Expected AgentRecommendation, got {type(round_info.proposal)}")
-            
+
             agent_recommendations = [round_info.proposal]
             
             decision = ConsensusDecision(

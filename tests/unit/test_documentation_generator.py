@@ -57,7 +57,7 @@ class TestDocumentationGenerator:
             ),
             metadata=IncidentMetadata(
                 source_system="monitoring",
-                tags={"affected_systems": ["database", "api-gateway"]}
+                tags={"affected_systems": "database,api-gateway", "priority": "high"}
             )
         )
     

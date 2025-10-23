@@ -17,6 +17,7 @@ class BaseAgent(ABC):
         """Initialize base agent."""
         self.agent_type = agent_type
         self.name = name
+        self.agent_id = name  # For backward compatibility with tests expecting agent_id
         self.is_healthy = True
         self.last_heartbeat = datetime.utcnow()
         self.processing_count = 0

@@ -1,0 +1,13 @@
+{
+  "filename": "192757_phase_6_payoff_overview.png",
+  "timestamp": "2025-10-23T19:27:58.265514",
+  "description": "Phase 6: The Payoff (20 Seconds) - Initial view",
+  "scenario": "phase_6_payoff",
+  "business_focus": "Show resolution and updated business impact metrics",
+  "url": "http://localhost:3000/demo",
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "screenshot_number": 12
+}

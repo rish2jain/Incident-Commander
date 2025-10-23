@@ -1,12 +1,58 @@
 #!/usr/bin/env python3
 """
 Generate Architecture PDF from Markdown
-Converts the architecture diagrams markdown to a professional PDF
+Converts the architecture diagrams markdown to a professional PDF with rendered Mermaid diagrams
 """
 
 import markdown
 from weasyprint import HTML, CSS
 from pathlib import Path
+import re
+import requests
+import base64
+from urllib.parse import quote
+
+def render_mermaid_to_image(mermaid_code):
+    """Convert Mermaid code to image using Mermaid.ink API"""
+    try:
+        # Encode mermaid code for URL
+        encoded = base64.b64encode(mermaid_code.encode('utf-8')).decode('utf-8')
+
+        # Use mermaid.ink service to render diagram
+        img_url = f"https://mermaid.ink/img/{encoded}"
+
+        return img_url
+    except Exception as e:
+        print(f"⚠️  Warning: Could not render mermaid diagram: {e}")
+        return None
+
+def process_mermaid_diagrams(md_content):
+    """Extract and replace mermaid diagrams with rendered images"""
+
+    # Pattern to match mermaid code blocks
+    mermaid_pattern = r'```mermaid\n(.*?)```'
+
+    diagram_counter = 0
+
+    def replace_mermaid(match):
+        nonlocal diagram_counter
+        diagram_counter += 1
+
+        mermaid_code = match.group(1)
+        img_url = render_mermaid_to_image(mermaid_code)
+
+        if img_url:
+            return f'<div class="mermaid-diagram"><img src="{img_url}" alt="Architecture Diagram {diagram_counter}" style="max-width: 100%; height: auto;"/></div>'
+        else:
+            # Fallback to code block if rendering fails
+            return f'<pre class="mermaid-code">{mermaid_code}</pre>'
+
+    # Replace all mermaid blocks
+    processed_content = re.sub(mermaid_pattern, replace_mermaid, md_content, flags=re.DOTALL)
+
+    print(f"📊 Processed {diagram_counter} Mermaid diagrams")
+
+    return processed_content
 
 def generate_pdf():
     """Generate PDF from architecture markdown"""
@@ -23,9 +69,9 @@ def generate_pdf():
     with open(md_file, 'r', encoding='utf-8') as f:
         md_content = f.read()
 
-    # Convert mermaid blocks to text (since PDF can't render them)
-    # We'll replace mermaid diagrams with notes about viewing in GitHub
-    md_content = md_content.replace('```mermaid', '```\n[Interactive Diagram - View in GitHub]')
+    # Process mermaid diagrams
+    print("🔄 Processing Mermaid diagrams...")
+    md_content = process_mermaid_diagrams(md_content)
 
     # Convert markdown to HTML
     html_content = markdown.markdown(
@@ -181,6 +227,32 @@ def generate_pdf():
             content: "📊 Interactive Diagram: ";
             font-weight: bold;
         }}
+
+        .mermaid-diagram {{
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            page-break-inside: avoid;
+        }}
+
+        .mermaid-diagram img {{
+            max-width: 100%;
+            height: auto;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }}
+
+        .mermaid-code {{
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            overflow-x: auto;
+            font-size: 11px;
+            page-break-inside: avoid;
+        }}
     </style>
 </head>
 <body>
@@ -197,12 +269,6 @@ def generate_pdf():
         <p style="margin-top: 40px; font-size: 14px;">
             Version 1.0 | October 23, 2025
         </p>
-    </div>
-
-    <div class="diagram-note" style="margin: 30px 0;">
-        <p><strong>Note:</strong> This PDF contains text-based architecture documentation.
-        Interactive Mermaid diagrams are best viewed in the GitHub repository at
-        <code>SYSTEM_ARCHITECTURE_DIAGRAMS.md</code> where they render as visual flowcharts.</p>
     </div>
 
     {html_content}

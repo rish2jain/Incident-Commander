@@ -1,0 +1,13 @@
+{
+  "filename": "193402_phase_1_2_baseline_predictive_business_impact_pan.png",
+  "timestamp": "2025-10-23T19:34:03.292909",
+  "description": "Business Impact (Projected) module showing $2.8M annual savings",
+  "scenario": "phase_1_2_baseline_predictive",
+  "business_focus": "Start on fully-loaded consolidated SwarmAI Operations dashboard",
+  "url": "http://localhost:3000/demo",
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "screenshot_number": 3
+}

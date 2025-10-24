@@ -1,35 +1,29 @@
 "use client";
 
-import { ConsolidatedOperationsDashboard } from "@/components/ConsolidatedOperationsDashboard";
+import { ImprovedOperationsDashboardWebSocket } from "@/components/ImprovedOperationsDashboardWebSocket";
 
 /**
- * SwarmAI Operations Dashboard - CONSOLIDATED SINGLE PANE OF GLASS
+ * Operations Dashboard Route - PRODUCTION LIVE SYSTEM
  *
- * Consolidated dashboard combining best features from all views.
- * Designed to prove AWS integration and create cohesive judge experience.
+ * Dashboard 3: Production-ready dashboard with real-time WebSocket integration.
+ * For Live SREs: The "Now" (Active Incidents)
  *
  * Features:
- * - Module 1: Business Impact (Projected) - Annual savings, ROI
- * - Module 2: Predictive Prevention System - Live threat detection
- * - Module 3: System Controls - Trigger incidents, reset agents
- * - Module 4: Byzantine Fault Tolerance - Consensus visualization (conditional)
- * - Module 5: Active Incidents - Expandable with reasoning tabs
- *
- * AWS Service Visual Proof:
- * - Amazon Q Business - Natural language incident analysis
- * - Nova Act - Step-by-step action plans
- * - AWS Strands SDK - Agent lifecycle management
- * - Amazon Titan Embeddings - RAG evidence retrieval
- *
- * Data Labeling:
- * - "(Projected)" for financial projections
- * - No labels for live simulation data
+ * - Real-time WebSocket connection
+ * - Live agent status updates
+ * - Active incident monitoring
+ * - Business metrics streaming
+ * - System health dashboard
+ * - Demo incident triggering
+ * - Agent reset controls
+ * - Clickable incidents that navigate to AI Transparency
  *
  * Use this for:
- * - Hackathon judging (primary dashboard)
- * - Executive + technical demonstrations
- * - Proving 8/8 AWS AI services integration
+ * - Production deployment and operations
+ * - Real-time incident response
+ * - SRE/DevOps daily monitoring
+ * - Live system health tracking
  */
 export default function OpsPage() {
-  return <ConsolidatedOperationsDashboard />;
+  return <ImprovedOperationsDashboardWebSocket />;
 }

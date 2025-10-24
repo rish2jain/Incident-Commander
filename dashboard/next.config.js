@@ -39,6 +39,13 @@ const nextConfig = {
       '@': path.resolve(__dirname, 'src'),
     };
 
+    // Ensure proper module resolution
+    config.resolve.modules = [
+      ...(config.resolve.modules || []),
+      path.resolve(__dirname, 'src'),
+      path.resolve(__dirname, 'node_modules'),
+    ];
+
     return config;
   },
 };

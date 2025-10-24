@@ -9,9 +9,9 @@ const nextConfig = {
       },
     ],
   },
-  // Suppress workspace root warning for monorepo structure
-  turbopack: {
-    root: __dirname,
+  // Disable Turbopack for production builds due to compatibility issues
+  experimental: {
+    turbo: false,
   },
   async redirects() {
     return [];

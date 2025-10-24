@@ -204,7 +204,9 @@ experimental: {
 | Build 4 | Turbopack compatibility errors | ❌ Failed |
 | Fix 4a | Disable Turbopack (--no-turbo flag) | ❌ Failed (flag doesn't exist) |
 | Build 5 | Unknown option --no-turbo | ❌ Failed |
-| Fix 4b | Disable via next.config.js | 🔄 Testing |
+| Fix 4b | Disable via next.config.js | ❌ Failed (invalid config) |
+| Build 6-15 | Persistent @/lib/utils resolution errors | ❌ Failed |
+| Fix 7 | Explicit webpack path alias configuration | 🔄 Testing |
 
 ---
 
@@ -212,8 +214,8 @@ experimental: {
 
 **Amplify App**: d1o5cfrpl0kgt3
 **Branch**: main
-**Latest Commit**: f44d4dc4
-**Build Status**: 🔄 Rebuilding (Fix #4b: Turbopack disabled via config)
+**Latest Commit**: dccdd687
+**Build Status**: 🔄 Rebuilding (Fix #7: Explicit webpack path alias resolution)
 
 **Monitor Build**: https://console.aws.amazon.com/amplify/home?region=us-east-1#/d1o5cfrpl0kgt3
 
@@ -280,3 +282,95 @@ applications:
 - Simple, explicit, version-controlled
 - Works with any Amplify setup
 - Easy to understand and reproduce
+
+---
+
+## Build Failure #7: Persistent Path Alias Resolution (Builds 6-15)
+
+### Error
+```
+Module not found: Can't resolve '@/lib/utils'
+at ./src/components/ui/alert.tsx:4:1
+Import map: aliased to relative './src/lib/utils' inside of [project]/
+```
+
+### Root Cause Analysis
+After fixing shell context, directory navigation, and Turbopack issues, a deeper problem emerged: AWS Amplify's build environment was unable to resolve TypeScript path aliases (`@/*` → `./src/*`) despite:
+- ✅ Correct tsconfig.json configuration
+- ✅ File existence verified (dashboard/src/lib/utils.ts)
+- ✅ Dependencies installed successfully (858 packages)
+- ✅ Local builds working perfectly
+
+### Evidence
+The error message shows Next.js **recognizes** the alias:
+```
+Import map: aliased to relative './src/lib/utils'
+```
+
+But webpack/Turbopack **cannot resolve** the file in AWS environment, affecting ALL UI components:
+- Core components: alert, badge, button, card, input, progress, tabs
+- Enhanced components: CommunicationPanel, DecisionTreeVisualization, InteractiveMetrics
+- Dashboard components: DashboardLayout, MetricCards, StatusIndicators
+
+### Fix Applied (Attempt 7)
+Add explicit webpack configuration to next.config.js:
+```javascript
+const path = require('path');
+
+const nextConfig = {
+  // ... existing config ...
+
+  webpack: (config, { isServer }) => {
+    // Add explicit path alias resolution
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@': path.resolve(__dirname, 'src'),
+    };
+    return config;
+  },
+};
+```
+
+**Why This Should Work**:
+1. **Explicit Path Resolution**: Uses Node.js `path.resolve()` to create absolute path
+2. **Webpack Control**: Bypasses potential tsconfig.json parsing issues in AWS
+3. **Environment Agnostic**: Works regardless of build directory context
+4. **Framework Standard**: Common pattern for resolving path alias issues
+
+**Commit**: `dccdd687` - "fix: Add explicit webpack path alias resolution for AWS Amplify"
+
+**Result**: 🔄 Build #16 triggered automatically (monitoring)
+
+---
+
+## Technical Deep Dive: Path Resolution
+
+### Why Local Works But AWS Fails
+1. **Local Development**: Uses Turbopack with native TypeScript support, reads tsconfig.json directly
+2. **AWS Amplify**: Uses webpack bundler, may have different module resolution behavior
+3. **Build Context**: After `cd dashboard`, path resolution relative to `__dirname` may differ
+
+### The Resolution Chain
+```
+Import: import { cn } from "@/lib/utils"
+         ↓
+tsconfig.json: "@/*": ["./src/*"]
+         ↓
+Next.js/webpack: Attempts to resolve
+         ↓
+AWS Environment: Fails to find file
+         ↓
+Error: Module not found
+```
+
+### Fix Strategy
+By adding explicit webpack configuration:
+```
+Import: import { cn } from "@/lib/utils"
+         ↓
+webpack config: '@': path.resolve(__dirname, 'src')
+         ↓
+Resolved: /codebuild/.../dashboard/src/lib/utils
+         ↓
+Success: File found and imported
+```

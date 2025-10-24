@@ -103,7 +103,7 @@ frontend:
         - cd dashboard && npm ci
     build:
       commands:
-        - cd dashboard && npm run build
+        - npm run build    # Already in dashboard/ from preBuild
   artifacts:
     baseDirectory: dashboard/.next
     files:
@@ -116,6 +116,36 @@ frontend:
 
 ---
 
+## Build Failure #3: Directory Already Changed
+
+### Error
+```
+cd: dashboard: No such file or directory
+```
+
+### Root Cause
+After `cd dashboard && npm ci` in **preBuild** phase, we remain in the `dashboard/` directory. Attempting `cd dashboard` again in **build** phase fails because we're already inside `dashboard/`.
+
+### Evidence from logs
+```
+Line 32: cd dashboard && npm ci     ✅ Succeeded (installed 858 packages)
+Line 53: cd dashboard && npm run build   ❌ Failed (no such directory)
+```
+
+### Fix Applied
+Remove `cd` from build phase since we're already in the correct directory:
+```yaml
+build:
+  commands:
+    - npm run build    # ✅ Already in dashboard/ from preBuild
+```
+
+**Commit**: `af16f169` - "fix: Remove cd from build phase - already in dashboard/ after preBuild"
+
+**Result**: 🔄 Build triggered automatically (monitoring)
+
+---
+
 ## Deployment Timeline
 
 | Time | Event | Status |
@@ -125,7 +155,9 @@ frontend:
 | Build 1 | Missing package-lock.json | ❌ Failed |
 | Fix 1 | Add `cd dashboard` command | ⚠️ Incomplete fix |
 | Build 2 | Module not found errors | ❌ Failed |
-| Fix 2 | Chain with `&&` operator | 🔄 Testing |
+| Fix 2 | Chain with `&&` operator | ⚠️ Incomplete fix |
+| Build 3 | cd dashboard fails (already there) | ❌ Failed |
+| Fix 3 | Remove cd from build phase | 🔄 Testing |
 
 ---
 
@@ -133,8 +165,8 @@ frontend:
 
 **Amplify App**: d1o5cfrpl0kgt3
 **Branch**: main
-**Latest Commit**: 7c9af30c
-**Build Status**: 🔄 Rebuilding with command chaining fix
+**Latest Commit**: af16f169
+**Build Status**: 🔄 Rebuilding (Fix #3: directory context)
 
 **Monitor Build**: https://console.aws.amazon.com/amplify/home?region=us-east-1#/d1o5cfrpl0kgt3
 
@@ -149,8 +181,9 @@ frontend:
    - Changes to dashboard/ ✅
    - Finds package-lock.json ✅
    - Installs all dependencies ✅
-4. Run: cd dashboard && npm run build
-   - Changes to dashboard/ ✅
+   - Remains in dashboard/ directory ✅
+4. Run: npm run build
+   - Already in dashboard/ from preBuild ✅
    - Builds Next.js application ✅
    - Generates .next output ✅
 5. Deploy dashboard/.next → Amplify CDN ✅

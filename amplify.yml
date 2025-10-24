@@ -3,11 +3,10 @@ frontend:
   phases:
     preBuild:
       commands:
-        - cd dashboard
-        - npm ci
+        - cd dashboard && npm ci
     build:
       commands:
-        - npm run build
+        - cd dashboard && npm run build
   artifacts:
     baseDirectory: dashboard/.next
     files:

@@ -1,0 +1,29 @@
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - cd dashboard
+        - npm ci
+    build:
+      commands:
+        - npm run build
+  artifacts:
+    baseDirectory: dashboard/.next
+    files:
+      - "**/*"
+  cache:
+    paths:
+      - dashboard/node_modules/**/*
+      - dashboard/.next/cache/**/*
+  customHeaders:
+    - pattern: "**/*"
+      headers:
+        - key: X-Frame-Options
+          value: DENY
+        - key: X-Content-Type-Options
+          value: nosniff
+        - key: Referrer-Policy
+          value: strict-origin-when-cross-origin
+        - key: Permissions-Policy
+          value: camera=(), microphone=(), geolocation=()

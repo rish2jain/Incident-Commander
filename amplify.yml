@@ -6,7 +6,7 @@ frontend:
         - cd dashboard && npm ci
     build:
       commands:
-        - cd dashboard && npm run build
+        - npm run build
   artifacts:
     baseDirectory: dashboard/.next
     files:

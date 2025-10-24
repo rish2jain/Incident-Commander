@@ -5,7 +5,7 @@
  * based on user feedback for the AI Transparency Dashboard.
  */
 
-import React, { useState } from "react";
+import React, { useId, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -21,7 +21,7 @@ interface TooltipProps {
 
 export function Tooltip({ content, children, position = "top" }: TooltipProps) {
   const [isVisible, setIsVisible] = useState(false);
-  const tooltipId = `tooltip-${Math.random().toString(36).substr(2, 9)}`;
+  const tooltipId = useId();
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
     if (event.key === "Enter" || event.key === " ") {

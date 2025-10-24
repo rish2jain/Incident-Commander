@@ -14,6 +14,7 @@
 
 "use client";
 
+import Link from "next/link";
 import React, { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -416,7 +417,7 @@ function IncidentCard({ incident }: { incident: any }) {
   };
 
   return (
-    <a href="/transparency" className="block">
+    <Link href="/transparency" className="block">
       <Card className={`border-l-4 ${getSeverityColor(incident.severity)} cursor-pointer transition-all hover:scale-[1.02]`}>
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
@@ -443,7 +444,7 @@ function IncidentCard({ incident }: { incident: any }) {
           </div>
         </CardContent>
       </Card>
-    </a>
+    </Link>
   );
 }
 

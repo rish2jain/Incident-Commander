@@ -105,7 +105,9 @@ export function useIncidentWebSocket(
   options: UseIncidentWebSocketOptions = {}
 ): WebSocketHookState {
   const {
-    url = process.env.NEXT_PUBLIC_WEBSOCKET_URL ||
+    url =
+      process.env.NEXT_PUBLIC_WEBSOCKET_URL ||
+      process.env.NEXT_PUBLIC_WS_URL ||
       "ws://localhost:8000/dashboard/ws",
     autoConnect = true,
     reconnectInterval = 3000,
@@ -138,26 +140,7 @@ export function useIncidentWebSocket(
     `dashboard-3-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
   );
 
-  // Message handler
-  const handleMessage = useCallback((event: MessageEvent) => {
-    try {
-      const data = JSON.parse(event.data);
-
-      // Handle batched messages
-      if (data.type === "message_batch") {
-        data.messages?.forEach((msg: WebSocketMessage) => {
-          handleSingleMessage(msg);
-        });
-        return;
-      }
-
-      // Handle single message
-      handleSingleMessage(data);
-    } catch (error) {
-      console.error("Error parsing WebSocket message:", error);
-    }
-  }, []);
-
+  // Single message handler (defined first)
   const handleSingleMessage = useCallback((message: WebSocketMessage) => {
     const { type, data: messageData } = message;
 
@@ -258,6 +241,29 @@ export function useIncidentWebSocket(
         console.log("Unknown message type:", type, messageData);
     }
   }, []);
+
+  // Message handler (defined after handleSingleMessage)
+  const handleMessage = useCallback(
+    (event: MessageEvent) => {
+      try {
+        const data = JSON.parse(event.data);
+
+        // Handle batched messages
+        if (data.type === "message_batch") {
+          data.messages?.forEach((msg: WebSocketMessage) => {
+            handleSingleMessage(msg);
+          });
+          return;
+        }
+
+        // Handle single message
+        handleSingleMessage(data);
+      } catch (error) {
+        console.error("Error parsing WebSocket message:", error);
+      }
+    },
+    [handleSingleMessage]
+  );
 
   // Connection management
   const connect = useCallback(() => {
@@ -367,19 +373,22 @@ export function useIncidentWebSocket(
     setConnecting(false);
   }, []);
 
-  const sendMessage = useCallback((action: string, data: unknown = {}) => {
-    if (wsRef.current?.readyState === WebSocket.OPEN) {
-      wsRef.current.send(
-        JSON.stringify({
-          action,
-          ...data,
-          timestamp: new Date().toISOString(),
-        })
-      );
-    } else {
-      console.warn("WebSocket not connected, cannot send message");
-    }
-  }, []);
+  const sendMessage = useCallback(
+    (action: string, data: Record<string, unknown> = {}) => {
+      if (wsRef.current?.readyState === WebSocket.OPEN) {
+        wsRef.current.send(
+          JSON.stringify({
+            action,
+            ...data,
+            timestamp: new Date().toISOString(),
+          })
+        );
+      } else {
+        console.warn("WebSocket not connected, cannot send message");
+      }
+    },
+    []
+  );
 
   const triggerDemo = useCallback(() => {
     sendMessage("trigger_demo_incident");
@@ -404,7 +413,7 @@ export function useIncidentWebSocket(
     return () => {
       disconnect();
     };
-  }, [autoConnect]); // Only run on mount/unmount
+  }, [autoConnect, connect, disconnect]);
 
   return {
     connected,

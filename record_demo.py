@@ -672,9 +672,9 @@ class EnhancedDemoRecorder:
                 await self.take_screenshot(f"{scenario['name']}_performance", "System performance metrics", scenario)
                 
             elif action == "show_aws_services":
-                # Highlight AWS AI services integration
+                # Highlight AWS AI services integration with enhanced UI
                 await asyncio.sleep(2)
-                await self.take_screenshot(f"{scenario['name']}_aws_services", "AWS AI services integration showcase", scenario)
+                await self.take_screenshot(f"{scenario['name']}_aws_services", "AWS AI services integration with enhanced UI indicators", scenario)
                 
             elif action == "demonstrate_integration":
                 # Show service integration
@@ -686,7 +686,15 @@ class EnhancedDemoRecorder:
                 print("   🎯 Navigating to AI Transparency Dashboard...")
                 await self.page.goto(f"{RECORDING_CONFIG['base_url']}/transparency")
                 await self.wait_for_dashboard_ready()
-                await asyncio.sleep(2)
+                
+                # Wait for Byzantine Consensus Demo component to initialize
+                try:
+                    await self.page.wait_for_selector("text=Byzantine", timeout=10000)
+                    await asyncio.sleep(3)  # Let the component's demo sequence start
+                    print("   ✅ Byzantine Consensus Demo component loaded and initialized")
+                except:
+                    print("   ⚠️  Byzantine component not found, continuing anyway")
+                    await asyncio.sleep(2)
 
             elif action == "locate_predictive_prevention_module":
                 print("   🔍 Locating Predictive Prevention System module...")
@@ -751,42 +759,133 @@ class EnhancedDemoRecorder:
 
             elif action == "click_trigger_demo_incident":
                 print("   🚨 Clicking Trigger Demo Incident button...")
+                
+                # Wait for WebSocket connection first
+                print("   ⏳ Waiting for WebSocket connection...")
+                await asyncio.sleep(2)
+                
+                # Look for the trigger button with multiple selectors
                 trigger_selectors = [
                     "button:has-text('Trigger Demo Incident')",
                     "button:has-text('Trigger')",
-                    "[data-testid='demo-trigger']"
+                    "[data-testid='demo-trigger']",
+                    ".bg-red-600",  # Button with red background
+                    "button[class*='bg-red']"  # Any button with red background class
                 ]
+                
+                button_found = False
                 for selector in trigger_selectors:
                     try:
+                        print(f"   🔍 Trying selector: {selector}")
                         trigger_btn = await self.page.query_selector(selector)
                         if trigger_btn:
-                            await trigger_btn.click()
-                            await asyncio.sleep(3)
-                            break
-                    except:
+                            # Check if button is visible and enabled
+                            is_visible = await trigger_btn.is_visible()
+                            is_enabled = await trigger_btn.is_enabled()
+                            print(f"   📍 Button found - Visible: {is_visible}, Enabled: {is_enabled}")
+                            
+                            if is_visible and is_enabled:
+                                await trigger_btn.click()
+                                print("   ✅ Demo incident triggered successfully!")
+                                button_found = True
+                                break
+                    except Exception as e:
+                        print(f"   ⚠️  Selector {selector} failed: {e}")
                         continue
+                
+                if not button_found:
+                    print("   ❌ Could not find or click trigger button")
+                    # Take a screenshot for debugging
+                    await self.take_screenshot("debug_trigger_button", "Debug: Trigger button not found", scenario)
+                
+                # Wait longer for the incident to be created and appear
+                print("   ⏳ Waiting for incident to be created...")
+                await asyncio.sleep(5)
 
             elif action == "wait_for_incident_appearance":
                 print("   ⏳ Waiting for incident to appear...")
-                await asyncio.sleep(3)
-                await self.take_screenshot(f"{scenario['name']}_incident_appeared", "Database Cascade incident appeared", scenario)
+                
+                # Wait for incident with polling
+                incident_appeared = False
+                max_wait_time = 15  # seconds
+                check_interval = 1  # second
+                
+                for i in range(max_wait_time):
+                    # Check for incident cards or indicators (using working selectors)
+                    incident_selectors = [
+                        ".incident-card",
+                        "[data-testid='incident-card']",
+                        ".active-incident",
+                        "[class*='incident']",
+                        ".bg-red-50",  # Incident background
+                        ".border-red-200",  # Incident border
+                        "div:has-text('Critical Database Cascade Failure')",  # Text-based detection
+                        "div:has-text('CRITICAL')",  # Severity-based detection
+                        "div:has-text('Database')",  # Partial text match
+                        "[class*='critical']",  # Critical severity styling
+                        "[class*='severity']"  # Any severity styling
+                    ]
+                    
+                    for selector in incident_selectors:
+                        try:
+                            incident_element = await self.page.query_selector(selector)
+                            if incident_element and await incident_element.is_visible():
+                                print(f"   ✅ Incident appeared! Found with selector: {selector}")
+                                incident_appeared = True
+                                break
+                        except:
+                            continue
+                    
+                    if incident_appeared:
+                        break
+                    
+                    print(f"   ⏳ Still waiting for incident... ({i+1}/{max_wait_time}s)")
+                    await asyncio.sleep(check_interval)
+                
+                if not incident_appeared:
+                    print("   ⚠️  Incident may not have appeared yet, continuing anyway...")
+                
+                await self.take_screenshot(f"{scenario['name']}_incident_appeared", "Incident appeared in operations view", scenario)
 
             elif action == "hover_incident_card":
                 print("   👆 Hovering over incident card...")
+                
                 card_selectors = [
                     ".incident-card",
                     "[data-testid='incident-card']",
-                    ".active-incident"
+                    ".active-incident",
+                    "[class*='incident']",
+                    ".bg-red-50",  # Incident background
+                    ".border-red-200",  # Incident border
+                    "div:has-text('Critical Database Cascade Failure')",  # Text-based detection
+                    "div:has-text('CRITICAL')",  # Severity-based detection
+                    "div:has-text('Database')",  # Partial text match
+                    "[class*='critical']",  # Critical severity styling
+                    "[class*='severity']"  # Any severity styling
                 ]
+                
+                card_found = False
                 for selector in card_selectors:
                     try:
-                        card = await self.page.query_selector(selector)
-                        if card:
-                            await card.hover()
-                            await asyncio.sleep(1.5)
+                        cards = await self.page.query_selector_all(selector)
+                        if cards:
+                            # Use the first visible card
+                            for card in cards:
+                                if await card.is_visible():
+                                    await card.hover()
+                                    print(f"   ✅ Hovered over incident card with selector: {selector}")
+                                    card_found = True
+                                    await asyncio.sleep(1.5)
+                                    break
+                        if card_found:
                             break
-                    except:
+                    except Exception as e:
+                        print(f"   ⚠️  Hover failed for {selector}: {e}")
                         continue
+                
+                if not card_found:
+                    print("   ⚠️  No incident card found to hover over")
+                
                 await self.take_screenshot(f"{scenario['name']}_hover", "Incident card hover state", scenario)
 
             elif action == "click_incident_navigate_to_transparency":
@@ -811,32 +910,93 @@ class EnhancedDemoRecorder:
             elif action == "scroll_to_byzantine_module":
                 print("   📜 Scrolling to Byzantine Fault Tolerance module...")
                 await self.page.evaluate("window.scrollTo({top: 400, behavior: 'smooth'})")
-                await asyncio.sleep(2)
+                await asyncio.sleep(3)  # Wait for smooth scroll and page stabilization
+                
+                # Wait for Byzantine module to be visible and stable
+                try:
+                    await self.page.wait_for_selector("text=Byzantine", timeout=5000)
+                    await asyncio.sleep(1)  # Additional stabilization
+                except:
+                    pass
+                
                 await self.take_screenshot(f"{scenario['name']}_bft_module", "Byzantine FT module visible", scenario)
 
             elif action == "show_initial_consensus_90_5":
                 print("   📊 Showing initial consensus 90.5%...")
-                await asyncio.sleep(2)
+                
+                # Wait for initial consensus to be fully loaded and stable
+                await asyncio.sleep(3)
+                
+                # Look for consensus elements and wait for them to stabilize
+                try:
+                    await self.page.wait_for_selector("[class*='progress'], [class*='consensus']", timeout=3000)
+                    await asyncio.sleep(1)  # Let animations settle
+                except:
+                    pass
+                
                 await self.take_screenshot(f"{scenario['name']}_consensus_initial", "Initial consensus 90.5%", scenario)
 
             elif action == "watch_prediction_agent_compromise":
                 print("   ⚠️  Watching Prediction Agent compromise...")
-                await asyncio.sleep(3)
+                
+                # Wait for the compromise phase (component changes after 5 seconds from start)
+                # We're already ~6s in, so wait for compromise to happen
+                await asyncio.sleep(4)
+                
+                # Wait for compromised status elements to appear and stabilize
+                try:
+                    await self.page.wait_for_selector("text=compromised, [class*='compromised'], [class*='offline']", timeout=4000)
+                    await asyncio.sleep(1)  # Let status change settle
+                except:
+                    pass
+                
                 await self.take_screenshot(f"{scenario['name']}_agent_compromised", "Prediction Agent compromised", scenario)
 
             elif action == "observe_consensus_drop_65_8":
                 print("   📉 Observing consensus drop to 65.8%...")
-                await asyncio.sleep(2)
+                
+                # Wait for consensus drop to be visible (happens during compromise)
+                await asyncio.sleep(3)
+                
+                # Wait for lower consensus values to stabilize
+                try:
+                    await self.page.wait_for_selector("[class*='progress']", timeout=3000)
+                    await asyncio.sleep(1)  # Let progress bars update
+                except:
+                    pass
+                
                 await self.take_screenshot(f"{scenario['name']}_consensus_drop", "Consensus dropped to 65.8%", scenario)
 
             elif action == "show_auto_recovery_72_8":
                 print("   ✅ Showing auto-recovery to 72.8%...")
-                await asyncio.sleep(3)
+                
+                # Wait for adaptation phase (component adapts after ~11 seconds total)
+                await asyncio.sleep(4)
+                
+                # Wait for recovery consensus values to stabilize
+                try:
+                    await self.page.wait_for_selector("[class*='progress'], [class*='success']", timeout=4000)
+                    await asyncio.sleep(1)  # Let recovery animation complete
+                except:
+                    pass
+                
                 await self.take_screenshot(f"{scenario['name']}_consensus_recovery", "Consensus recovered to 72.8%", scenario)
 
             elif action == "highlight_resilience_message":
                 print("   💪 Highlighting system resilience message...")
-                await asyncio.sleep(1)
+                
+                # Wait for success phase and stabilize
+                await asyncio.sleep(2)
+                
+                # Try to interact with success/resilience elements to ensure they're stable
+                try:
+                    success_elements = await self.page.query_selector_all("text=success, text=resilient, [class*='success']")
+                    if success_elements:
+                        await success_elements[0].hover()
+                        await asyncio.sleep(0.5)
+                except:
+                    pass
+                
                 await self.take_screenshot(f"{scenario['name']}_resilience", "System resilience maintained", scenario)
 
             # === PHASE 4: AWS Prize Proof (75-100s) ===
@@ -947,9 +1107,9 @@ class EnhancedDemoRecorder:
                 await self.take_screenshot(f"{scenario['name']}_savings", "Live savings counters", scenario)
 
             elif action == "show_multi_agent_status_panel":
-                print("   🤖 Showing multi-agent status panel...")
+                print("   🤖 Showing multi-agent status panel with enhanced success/failure indicators...")
                 await asyncio.sleep(2)
-                await self.take_screenshot(f"{scenario['name']}_agents_status", "Multi-agent system status", scenario)
+                await self.take_screenshot(f"{scenario['name']}_agents_status", "Multi-agent system status with success/failure indicators", scenario)
 
             elif action == "zoom_out_full_dashboard":
                 print("   🔍 Zooming out to show full dashboard...")
@@ -981,53 +1141,88 @@ class EnhancedDemoRecorder:
             print(f"\n📋 Phase {scenario['phase']} ({i}/{total_scenarios}): {scenario['name'].upper()}")
             print(f"   🎥 Creating separate video context for this phase...")
 
-            # Create new context with video recording for this phase
-            phase_context = await self.browser.new_context(
-                viewport=RECORDING_CONFIG["viewport"],
-                record_video_dir=str(self.videos_dir),
-                record_video_size=RECORDING_CONFIG["viewport"],
-                device_scale_factor=1,
-                has_touch=False,
-                is_mobile=False,
-                locale="en-US",
-                timezone_id="America/New_York"
-            )
-
-            # Create new page for this phase
-            phase_page = await phase_context.new_page()
-
-            # Set up logging for this page
-            phase_page.on("console", lambda msg: self._log_console_message(msg))
-            phase_page.on("pageerror", lambda error: self._log_page_error(error))
-
-            # Temporarily use this page for recording
+            # Create deterministic temp video identifier for this phase
+            phase_temp_id = f"{self.session_id}_phase_{scenario['phase']}_{scenario['name']}"
+            phase_context = None
+            phase_page = None
             original_page = self.page
-            self.page = phase_page
+            
+            try:
+                # Create new context with video recording for this phase
+                phase_context = await self.browser.new_context(
+                    viewport=RECORDING_CONFIG["viewport"],
+                    record_video_dir=str(self.videos_dir),
+                    record_video_size=RECORDING_CONFIG["viewport"],
+                    device_scale_factor=1,
+                    has_touch=False,
+                    is_mobile=False,
+                    locale="en-US",
+                    timezone_id="America/New_York"
+                )
 
-            # Record the scenario
-            await self.record_scenario(scenario)
+                # Create new page for this phase
+                phase_page = await phase_context.new_page()
 
-            # Close the phase-specific context to finalize the video
-            print(f"   ✅ Phase {scenario['phase']} recording complete - finalizing video...")
-            await phase_page.close()
-            await phase_context.close()
+                # Set up logging for this page
+                phase_page.on("console", lambda msg: self._log_console_message(msg))
+                phase_page.on("pageerror", lambda error: self._log_page_error(error))
 
-            # Wait for video to be saved
-            await asyncio.sleep(2)
+                # Temporarily use this page for recording
+                self.page = phase_page
 
-            # Find the most recent video file (just created)
-            video_files = sorted(self.videos_dir.glob("*.webm"), key=lambda x: x.stat().st_mtime, reverse=True)
-            if video_files:
-                latest_video = video_files[0]
-                # Rename to phase-specific name
+                # Record the scenario
+                await self.record_scenario(scenario)
+
+                # Close the phase-specific context to finalize the video
+                print(f"   ✅ Phase {scenario['phase']} recording complete - finalizing video...")
+                await phase_page.close()
+                phase_page = None
+                await phase_context.close()
+                
+                # Append successfully created context to tracking list
+                self.contexts.append(phase_context)
+                phase_context = None
+
+                # Wait for video to be saved
+                await asyncio.sleep(2)
+
+                # Look for video files matching our deterministic pattern
                 phase_video_name = f"phase_{scenario['phase']}_{scenario['name']}_{self.session_id}.webm"
                 phase_video_path = self.videos_dir / phase_video_name
-                latest_video.rename(phase_video_path)
-                self.phase_videos.append(phase_video_path)
-                print(f"   📹 Video saved: {phase_video_name}")
+                
+                # Find the most recent video file and rename it
+                video_files = sorted(self.videos_dir.glob("*.webm"), key=lambda x: x.stat().st_mtime, reverse=True)
+                if video_files:
+                    latest_video = video_files[0]
+                    latest_video.rename(phase_video_path)
+                    self.phase_videos.append(phase_video_path)
+                    print(f"   📹 Video saved: {phase_video_name}")
+                else:
+                    print(f"   ⚠️  No video file found for phase {scenario['phase']}")
 
-            # Restore original page for screenshot operations between phases
-            self.page = original_page
+            except Exception as e:
+                print(f"   ❌ Error recording phase {scenario['phase']}: {e}")
+                # Mark phase as failed but continue with other phases
+                print(f"   ⏭️  Skipping phase {scenario['phase']} and continuing...")
+                
+            finally:
+                # Always restore original page and clean up resources
+                self.page = original_page
+                
+                # Clean up phase-specific resources if they still exist
+                if phase_page:
+                    try:
+                        await phase_page.close()
+                    except:
+                        pass
+                        
+                if phase_context:
+                    try:
+                        await phase_context.close()
+                        # Only append to contexts if it was successfully created
+                        self.contexts.append(phase_context)
+                    except:
+                        pass
 
             # Brief pause between scenarios with progress update
             if i < total_scenarios:
@@ -1366,17 +1561,20 @@ async def check_system_requirements():
         print(f"❌ Dashboard check failed: {e}")
         requirements_met = False
     
-    # Check backend API
+    # Check backend API (supports both full and simplified deployment)
     try:
         response = requests.get(f"{RECORDING_CONFIG['backend_url']}/health", timeout=10)
         if response.status_code == 200:
-            print("✅ Backend API is accessible")
+            health_data = response.json()
+            backend_type = "simplified" if "environment" in health_data else "full"
+            print(f"✅ Backend API is accessible ({backend_type} deployment)")
         else:
             print(f"⚠️  Backend API returned status {response.status_code}")
             print("   Some features may not work properly")
     except requests.exceptions.ConnectionError:
         print("⚠️  Backend API not accessible")
-        print("   Start with: python src/main.py")
+        print("   Start full backend: python src/main.py")
+        print("   OR start simplified: cd simple_deployment && python src/main.py")
         print("   Demo will continue but some features may not work")
     except Exception as e:
         print(f"⚠️  Backend API check failed: {e}")

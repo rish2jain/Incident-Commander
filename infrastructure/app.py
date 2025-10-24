@@ -21,6 +21,7 @@ from stacks.bedrock_stack import IncidentCommanderBedrockStack
 from stacks.monitoring_stack import IncidentCommanderMonitoringStack
 from stacks.security_stack import IncidentCommanderSecurityStack
 from stacks.networking_stack import IncidentCommanderNetworkingStack
+from stacks.dashboard_stack import IncidentCommanderDashboardStack
 
 
 def get_environment_config():
@@ -157,7 +158,17 @@ def main():
         lambda_functions=compute_stack.lambda_functions,
         dynamodb_tables=storage_stack.dynamodb_tables
     )
-    
+
+    # Dashboard stack (CloudFront + S3 for static dashboard hosting)
+    dashboard_stack = IncidentCommanderDashboardStack(
+        app,
+        f"IncidentCommanderDashboard-{environment_name}",
+        env=aws_env,
+        environment_name=environment_name,
+        env_config=env_config,
+        kms_key=security_stack.kms_key
+    )
+
     # Add dependencies between stacks
     networking_stack.add_dependency(core_stack)
     security_stack.add_dependency(networking_stack)
@@ -166,10 +177,11 @@ def main():
     compute_stack.add_dependency(storage_stack)
     compute_stack.add_dependency(bedrock_stack)
     monitoring_stack.add_dependency(compute_stack)
+    dashboard_stack.add_dependency(security_stack)
     
     # Apply common tags to all stacks
-    for stack in [core_stack, networking_stack, security_stack, storage_stack, 
-                  bedrock_stack, compute_stack, monitoring_stack]:
+    for stack in [core_stack, networking_stack, security_stack, storage_stack,
+                  bedrock_stack, compute_stack, monitoring_stack, dashboard_stack]:
         for key, value in common_tags.items():
             Tags.of(stack).add(key, value)
     

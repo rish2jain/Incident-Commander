@@ -6,15 +6,15 @@
  */
 
 import React, { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/shared";
-import { Progress } from "@/components/shared";
-import { Badge } from "@/components/shared";
+import { Card, CardContent, CardHeader, CardTitle } from "./shared";
+import { Progress } from "./shared";
+import { Badge } from "./shared";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from "./ui/tooltip";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface AgentVote {

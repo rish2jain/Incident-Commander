@@ -27,7 +27,7 @@ import {
   CardHeader,
   CardTitle,
   Badge,
-} from "@/components/shared";
+} from "./shared";
 
 interface ServiceStats {
   total_queries?: number;

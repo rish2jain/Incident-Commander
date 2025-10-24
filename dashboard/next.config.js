@@ -1,5 +1,3 @@
-const path = require('path');
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
@@ -29,25 +27,8 @@ const nextConfig = {
     ];
   },
   // Configure for production deployment with full SSR support
-  // Remove 'output' to enable server-side rendering
-
-  // Explicit webpack configuration for path alias resolution
-  webpack: (config, { isServer }) => {
-    // Add explicit path alias resolution
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      '@': path.resolve(__dirname, 'src'),
-    };
-
-    // Ensure proper module resolution
-    config.resolve.modules = [
-      ...(config.resolve.modules || []),
-      path.resolve(__dirname, 'src'),
-      path.resolve(__dirname, 'node_modules'),
-    ];
-
-    return config;
-  },
+  // All path aliases have been replaced with relative imports
+  // No webpack configuration needed
 };
 
 module.exports = nextConfig;

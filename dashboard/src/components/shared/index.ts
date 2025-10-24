@@ -39,9 +39,9 @@ export { default as ByzantineConsensusDemo } from "../ByzantineConsensusDemo";
 export { default as PredictivePreventionDemo } from "../PredictivePreventionDemo";
 
 // Re-export commonly used UI components for convenience
-export { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-export { Badge } from "@/components/ui/badge";
-export { Button } from "@/components/ui/button";
-export { Progress } from "@/components/ui/progress";
-export { Alert, AlertDescription } from "@/components/ui/alert";
-export { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+export { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+export { Badge } from "../ui/badge";
+export { Button } from "../ui/button";
+export { Progress } from "../ui/progress";
+export { Alert, AlertDescription } from "../ui/alert";
+export { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";

@@ -24,7 +24,7 @@ import {
   CheckCircle,
   AlertCircle,
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/shared";
+import { Card, CardContent, CardHeader, CardTitle } from "./shared";
 
 interface Agent {
   id: string;

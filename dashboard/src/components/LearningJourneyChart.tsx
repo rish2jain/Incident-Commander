@@ -12,7 +12,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { TrendingUp, Brain, Award } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/shared";
+import { Card, CardContent, CardHeader, CardTitle } from "./shared";
 
 interface DataPoint {
   incidents: number;

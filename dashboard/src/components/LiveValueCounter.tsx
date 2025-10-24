@@ -15,7 +15,7 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { TrendingUp, Shield, DollarSign } from "lucide-react";
-import { Card, CardContent } from "@/components/shared";
+import { Card, CardContent } from "./shared";
 
 export function LiveValueCounter() {
   const [costSaved, setCostSaved] = useState(0);

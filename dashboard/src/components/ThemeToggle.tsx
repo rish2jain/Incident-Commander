@@ -11,7 +11,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Moon, Sun } from "lucide-react";
-import { Button } from "@/components/shared";
+import { Button } from "./shared";
 
 export function ThemeToggle() {
   const [theme, setTheme] = useState<"dark" | "light">("dark");

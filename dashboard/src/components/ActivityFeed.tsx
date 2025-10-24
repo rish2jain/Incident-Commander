@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   useClientSideTimestamp,
   formatTimeSafe,
-} from "@/hooks/useClientSideTimestamp";
+} from "../hooks/useClientSideTimestamp";
 import {
   Search,
   Stethoscope,

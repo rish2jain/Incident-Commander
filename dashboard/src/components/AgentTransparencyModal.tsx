@@ -12,19 +12,19 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Badge } from "@/components/shared";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/shared";
-import { Progress } from "@/components/shared";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
+} from "./ui/dialog";
+import { Badge } from "./shared";
+import { Card, CardContent, CardHeader, CardTitle } from "./shared";
+import { Progress } from "./shared";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+import { ScrollArea } from "./ui/scroll-area";
+import { Separator } from "./ui/separator";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from "./ui/tooltip";
 
 interface RagSource {
   type: "incident" | "knowledge" | "runbook";

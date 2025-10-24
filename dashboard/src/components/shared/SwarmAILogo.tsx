@@ -6,7 +6,7 @@
 
 import React from "react";
 import Image from "next/image";
-import { cn } from "@/lib/utils";
+import { cn } from "../../lib/utils";
 
 interface SwarmAILogoProps {
   variant?: "logo-only" | "logo-with-name";

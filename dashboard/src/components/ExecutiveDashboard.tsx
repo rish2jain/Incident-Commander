@@ -37,7 +37,7 @@ import {
   CardTitle,
   Badge,
   Button,
-} from "@/components/shared";
+} from "./shared";
 import { LiveValueCounter } from "./LiveValueCounter";
 import { AWSServicesMonitor } from "./AWSServicesMonitor";
 import { AgentNetworkVisualization } from "./AgentNetworkVisualization";

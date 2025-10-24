@@ -50,12 +50,12 @@ import {
   Badge,
   Button,
   Progress,
-} from "@/components/shared";
+} from "./shared";
 import {
   useClientSideTimestamp,
   formatTimeSafe,
-} from "@/hooks/useClientSideTimestamp";
-import { useIncidentWebSocket } from "@/hooks/useIncidentWebSocket";
+} from "../hooks/useClientSideTimestamp";
+import { useIncidentWebSocket } from "../hooks/useIncidentWebSocket";
 
 // Connection Status Component with enhanced visual feedback
 function ConnectionStatus({

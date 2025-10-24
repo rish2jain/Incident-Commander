@@ -9,7 +9,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
-import { Card, CardContent, CardHeader } from "@/components/shared";
+import { Card, CardContent, CardHeader } from "../shared";
 
 // Simple spinner
 export function Spinner({ size = "md", className = "" }: { size?: "sm" | "md" | "lg"; className?: string }) {

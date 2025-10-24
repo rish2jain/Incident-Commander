@@ -1,0 +1,6 @@
+Command failed: error: the argument '--sandbox <SANDBOX_MODE>' cannot be used multiple times
+
+Usage: codex [OPTIONS] [PROMPT]
+       codex [OPTIONS] [PROMPT] <COMMAND>
+
+For more information, try '--help'.

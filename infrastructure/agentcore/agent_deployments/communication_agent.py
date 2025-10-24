@@ -8,10 +8,11 @@ from .base import AgentCorePackageSpec
 COMMUNICATION_AGENT_SPEC = AgentCorePackageSpec(
     name="incident-communication",
     entrypoint="src.langgraph_orchestrator.agents.communication_node:CommunicationNode",
-    description="Generates stakeholder-facing updates and escalations",
+    description="Generates stakeholder notifications and incident summaries",
     requirements=[
+        "boto3>=1.34.0",
         "pydantic>=2.5.0",
-        "langgraph>=0.0.40",
+        "langgraph>=1.0.0",
     ],
     memory_mb=512,
     timeout_seconds=90,
@@ -23,4 +24,3 @@ COMMUNICATION_AGENT_SPEC = AgentCorePackageSpec(
 )
 
 __all__ = ["COMMUNICATION_AGENT_SPEC"]
-

@@ -6,7 +6,7 @@ import { ImprovedOperationsDashboardWebSocket } from "@/components/ImprovedOpera
  * Operations Dashboard Route - PRODUCTION LIVE SYSTEM
  *
  * Dashboard 3: Production-ready dashboard with real-time WebSocket integration.
- * Connects to backend for live incident monitoring and agent coordination.
+ * For Live SREs: The "Now" (Active Incidents)
  *
  * Features:
  * - Real-time WebSocket connection
@@ -16,16 +16,13 @@ import { ImprovedOperationsDashboardWebSocket } from "@/components/ImprovedOpera
  * - System health dashboard
  * - Demo incident triggering
  * - Agent reset controls
+ * - Clickable incidents that navigate to AI Transparency
  *
  * Use this for:
  * - Production deployment and operations
  * - Real-time incident response
  * - SRE/DevOps daily monitoring
  * - Live system health tracking
- *
- * For demos use:
- * - Dashboard 1: /demo (executive presentation)
- * - Dashboard 2: /transparency (technical deep-dive)
  */
 export default function OpsPage() {
   return <ImprovedOperationsDashboardWebSocket />;

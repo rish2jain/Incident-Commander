@@ -24,9 +24,12 @@ export default function HomePage() {
               <h3 className="text-lg font-semibold mb-2 text-blue-400">
                 Power Demo
               </h3>
-              <p className="text-status-neutral text-xs mb-3">
+              <p className="text-status-neutral text-xs mb-2">
                 Executive presentation with live incident animation, business
                 impact calculator, and ROI demonstration
+              </p>
+              <p className="text-xs text-blue-300 mb-3 font-medium">
+                For Business Leaders: The &apos;Why&apos; (ROI & Impact)
               </p>
               <div className="text-xs text-green-400">
                 ✨ RECOMMENDED FOR HACKATHON
@@ -40,9 +43,12 @@ export default function HomePage() {
               <h3 className="text-lg font-semibold mb-2 text-purple-400">
                 AI Transparency
               </h3>
-              <p className="text-status-neutral text-xs mb-3">
+              <p className="text-status-neutral text-xs mb-2">
                 Complete AI explainability with agent reasoning, decision trees,
                 confidence analysis, and scenario selection
+              </p>
+              <p className="text-xs text-purple-300 mb-3 font-medium">
+                For Engineers: The &apos;How&apos; (BFT & AI Reasoning)
               </p>
               <div className="text-xs text-purple-400">
                 🎯 TECHNICAL DEEP-DIVE
@@ -56,9 +62,12 @@ export default function HomePage() {
               <h3 className="text-lg font-semibold mb-2 text-green-400">
                 Operations Dashboard
               </h3>
-              <p className="text-status-neutral text-xs mb-3">
+              <p className="text-status-neutral text-xs mb-2">
                 Production-ready dashboard with live WebSocket backend
                 integration for real-time incident monitoring
+              </p>
+              <p className="text-xs text-green-300 mb-3 font-medium">
+                For Live SREs: The &apos;Now&apos; (Active Incidents)
               </p>
               <div className="text-xs text-green-400">⚡ PRODUCTION READY</div>
             </div>
@@ -70,7 +79,7 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
             <div className="flex items-center gap-2">
               <span className="text-green-400">✅</span>
-              <span>Sub-3 minute MTTR with 95%+ improvement (mock)</span>
+              <span>Sub-3 minute MTTR with 95%+ improvement</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-green-400">✅</span>
@@ -82,7 +91,7 @@ export default function HomePage() {
             </div>
             <div className="flex items-center gap-2">
               <span className="text-green-400">✅</span>
-              <span>$2.8M annual cost savings (458% ROI) (mock)</span>
+              <span>$2.8M annual cost savings (Projected)</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-green-400">✅</span>

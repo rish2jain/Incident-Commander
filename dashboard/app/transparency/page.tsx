@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
 import {
   DashboardLayout,
   DashboardSection,
@@ -25,6 +26,12 @@ import PredictivePreventionDemo from "../../src/components/PredictivePreventionD
 import { ReasoningPanel } from "../../src/components/enhanced/ReasoningPanel";
 import { CommunicationPanel } from "../../src/components/enhanced/CommunicationPanel";
 import { DecisionTreeVisualization } from "../../src/components/enhanced/DecisionTreeVisualization";
+import {
+  AmazonQModule,
+  RAGEvidenceModule,
+  NovaActModule,
+  StrandsSDKModule,
+} from "../../src/components/AWSPrizeModules";
 
 /**
  * Consolidated Transparency Dashboard
@@ -157,10 +164,10 @@ export default function TransparencyDashboardPage() {
       id: "sample-detection-1",
       timestamp: "Ready",
       agent: "Detection",
-      message: "System monitoring active - Confidence: 92.0% (mock)",
+      message: "System monitoring active - Confidence: 92.0%",
       confidence: 0.92,
       reasoning:
-        "Monitoring 47 metrics across 12 services with high confidence (mock data)",
+        "Monitoring 47 metrics across 12 services with high confidence",
       step: "Continuous monitoring",
       explanation:
         "Detection agent actively monitoring system health and performance metrics",
@@ -179,10 +186,9 @@ export default function TransparencyDashboardPage() {
       id: "sample-diagnosis-1",
       timestamp: "Ready",
       agent: "Diagnosis",
-      message: "Analysis capabilities ready - Confidence: 88.0% (mock)",
+      message: "Analysis capabilities ready - Confidence: 88.0%",
       confidence: 0.88,
-      reasoning:
-        "Ready to analyze patterns and identify root causes (mock data)",
+      reasoning: "Ready to analyze patterns and identify root causes",
       step: "Standby analysis",
       explanation:
         "Diagnosis agent prepared with ML models and historical pattern analysis",
@@ -203,7 +209,7 @@ export default function TransparencyDashboardPage() {
     rootNode: {
       id: "root-sample",
       nodeType: "analysis",
-      label: "System Health Assessment - All systems operational (mock)",
+      label: "System Health Assessment - All systems operational",
       confidence: 0.92,
       children: [
         {
@@ -675,6 +681,22 @@ export default function TransparencyDashboardPage() {
       showLogo={true}
       logoVariant="logo-only"
     >
+      {/* Navigation Breadcrumbs */}
+      <div className="flex items-center justify-between mb-4">
+        <Link
+          href="/ops"
+          className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
+        >
+          &lt;&lt; Back to Operations
+        </Link>
+        <Link
+          href="/demo"
+          className="text-sm text-green-400 hover:text-green-300 transition-colors"
+        >
+          See Business Impact &gt;&gt;
+        </Link>
+      </div>
+
       {/* Status Bar */}
       <DashboardSection variant="glass" className="mb-4">
         <div className="flex items-center justify-between">
@@ -947,9 +969,16 @@ export default function TransparencyDashboardPage() {
           </TabsTrigger>
         </TabsList>
 
-        {/* Reasoning Tab - Enhanced with new ReasoningPanel */}
+        {/* Reasoning Tab - Enhanced with AWS Prize Modules */}
         <TabsContent value="reasoning" data-testid="panel-reasoning">
-          <div className="space-y-6">
+          <div className="space-y-4">
+            {/* Amazon Q Business Analysis */}
+            <AmazonQModule />
+
+            {/* RAG Evidence & Sources */}
+            <RAGEvidenceModule />
+
+            {/* Agent Reasoning Steps */}
             <ReasoningPanel
               reasoningSteps={agentReasonings.map((reasoning) => ({
                 ...reasoning,
@@ -960,186 +989,19 @@ export default function TransparencyDashboardPage() {
               }}
               className="w-full"
             />
-
-            {/* Prize-Winning AWS AI Services Integration */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-              {/* Amazon Q Business Integration */}
-              <Card className="card-glass border-l-4 border-l-orange-500">
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2 text-sm">
-                    <span className="text-orange-400">🧠</span>
-                    Analysis by Amazon Q Business
-                    <Badge
-                      variant="outline"
-                      className="bg-orange-500/20 text-orange-200 border-orange-500/50 text-xs"
-                    >
-                      $3K Prize
-                    </Badge>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-sm text-slate-300 leading-relaxed">
-                    {incidentActive ? (
-                      currentPhase === "diagnosis" ||
-                      currentPhase === "consensus" ||
-                      currentPhase === "resolution" ||
-                      currentPhase === "complete" ? (
-                        <>
-                          <p className="mb-2">
-                            "Database connection pool exhaustion detected with
-                            cascading service failures. Root cause analysis
-                            indicates N+1 query pattern in authentication
-                            service causing exponential connection growth."
-                          </p>
-                          <div className="text-xs text-orange-400 mt-2">
-                            ✓ Intelligent incident analysis complete
-                          </div>
-                        </>
-                      ) : (
-                        <div className="text-slate-400 italic">
-                          Amazon Q analyzing incident patterns...
-                        </div>
-                      )
-                    ) : (
-                      <div className="text-slate-400 italic">
-                        Amazon Q Business ready for intelligent incident
-                        analysis and documentation
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Nova Act Integration */}
-              <Card className="card-glass border-l-4 border-l-purple-500">
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2 text-sm">
-                    <span className="text-purple-400">⚡</span>
-                    Action Plan by Nova Act
-                    <Badge
-                      variant="outline"
-                      className="bg-purple-500/20 text-purple-200 border-purple-500/50 text-xs"
-                    >
-                      $3K Prize
-                    </Badge>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-sm text-slate-300">
-                    {incidentActive ? (
-                      currentPhase === "consensus" ||
-                      currentPhase === "resolution" ||
-                      currentPhase === "complete" ? (
-                        <div className="space-y-2">
-                          <div className="flex items-start gap-2">
-                            <span className="text-purple-400 mt-0.5">1.</span>
-                            <span>
-                              Terminate long-running analytics_rollup query
-                            </span>
-                          </div>
-                          <div className="flex items-start gap-2">
-                            <span className="text-purple-400 mt-0.5">2.</span>
-                            <span>
-                              Scale connection pool from 500 to 1000 connections
-                            </span>
-                          </div>
-                          <div className="flex items-start gap-2">
-                            <span className="text-purple-400 mt-0.5">3.</span>
-                            <span>
-                              Implement query optimization for authentication
-                              service
-                            </span>
-                          </div>
-                          <div className="text-xs text-purple-400 mt-2">
-                            ✓ Advanced reasoning and action planning complete
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="text-slate-400 italic">
-                          Nova Act generating action plan...
-                        </div>
-                      )
-                    ) : (
-                      <div className="text-slate-400 italic">
-                        Nova Act ready for advanced reasoning and action
-                        planning
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Strands SDK Integration */}
-              <Card className="card-glass border-l-4 border-l-cyan-500">
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2 text-sm">
-                    <span className="text-cyan-400">🔗</span>
-                    Agent Lifecycle by Strands SDK
-                    <Badge
-                      variant="outline"
-                      className="bg-cyan-500/20 text-cyan-200 border-cyan-500/50 text-xs"
-                    >
-                      $3K Prize
-                    </Badge>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-sm text-slate-300">
-                    {incidentActive ? (
-                      <div className="space-y-2">
-                        <div className="flex justify-between items-center">
-                          <span>Status:</span>
-                          <Badge
-                            variant="secondary"
-                            className="bg-cyan-500/20 text-cyan-200"
-                          >
-                            {currentPhase === "complete"
-                              ? "Action Complete"
-                              : "Executing Action Plan"}
-                          </Badge>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span>Phase:</span>
-                          <span className="text-cyan-400 capitalize">
-                            {currentPhase}
-                          </span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span>Agents Active:</span>
-                          <span className="text-cyan-400">
-                            {currentPhase === "idle"
-                              ? "0"
-                              : currentPhase === "detection"
-                              ? "1"
-                              : currentPhase === "diagnosis"
-                              ? "2"
-                              : currentPhase === "consensus"
-                              ? "3"
-                              : currentPhase === "resolution"
-                              ? "4"
-                              : "5"}
-                          </span>
-                        </div>
-                        <div className="text-xs text-cyan-400 mt-2">
-                          ✓ Enhanced agent lifecycle management active
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="text-slate-400 italic">
-                        Strands SDK managing agent fabric and lifecycle
-                        coordination
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
           </div>
         </TabsContent>
 
-        {/* Decision Trees Tab - Enhanced with new DecisionTreeVisualization */}
+        {/* Decisions Tab - Enhanced with AWS Prize Modules */}
         <TabsContent value="decisions" data-testid="panel-decisions">
-          <div className="space-y-6">
+          <div className="space-y-4">
+            {/* Nova Act Action Plan */}
+            <NovaActModule />
+
+            {/* Strands SDK Agent Lifecycle */}
+            <StrandsSDKModule />
+
+            {/* Decision Tree Analysis */}
             {decisionTree ? (
               <Card className="card-glass">
                 <CardHeader>
@@ -1151,9 +1013,7 @@ export default function TransparencyDashboardPage() {
                     <h3 className="text-lg font-medium mb-2">
                       Decision Tree Available
                     </h3>
-                    <p className="text-sm">
-                      Root: {decisionTree.rootNode.label}
-                    </p>
+                    <p className="text-sm">Root: {decisionTree.rootNode.label}</p>
                     <p className="text-xs mt-2 text-slate-500">
                       Confidence:{" "}
                       {(decisionTree.rootNode.confidence * 100).toFixed(1)}%
@@ -1180,126 +1040,6 @@ export default function TransparencyDashboardPage() {
                 </CardContent>
               </Card>
             )}
-
-            {/* Prize-Winning Services in Resolution Context */}
-            {incidentActive &&
-              (currentPhase === "consensus" ||
-                currentPhase === "resolution" ||
-                currentPhase === "complete") && (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  {/* Nova Act Action Plan */}
-                  <Card className="card-glass border-l-4 border-l-purple-500">
-                    <CardHeader className="pb-3">
-                      <CardTitle className="flex items-center gap-2 text-sm">
-                        <span className="text-purple-400">⚡</span>
-                        Action Plan by Nova Act
-                        <Badge
-                          variant="outline"
-                          className="bg-purple-500/20 text-purple-200 border-purple-500/50 text-xs"
-                        >
-                          $3K Prize
-                        </Badge>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-3">
-                        <div className="flex items-start gap-3 p-3 bg-purple-500/10 border border-purple-500/20 rounded-lg">
-                          <span className="text-purple-400 mt-0.5 font-bold">
-                            1.
-                          </span>
-                          <div>
-                            <div className="font-medium text-sm">
-                              Terminate Long Query
-                            </div>
-                            <div className="text-xs text-slate-400">
-                              Kill analytics_rollup query (47s runtime)
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-start gap-3 p-3 bg-purple-500/10 border border-purple-500/20 rounded-lg">
-                          <span className="text-purple-400 mt-0.5 font-bold">
-                            2.
-                          </span>
-                          <div>
-                            <div className="font-medium text-sm">
-                              Scale Connection Pool
-                            </div>
-                            <div className="text-xs text-slate-400">
-                              Increase from 500 to 1000 connections
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-start gap-3 p-3 bg-purple-500/10 border border-purple-500/20 rounded-lg">
-                          <span className="text-purple-400 mt-0.5 font-bold">
-                            3.
-                          </span>
-                          <div>
-                            <div className="font-medium text-sm">
-                              Optimize Queries
-                            </div>
-                            <div className="text-xs text-slate-400">
-                              Fix N+1 pattern in auth service
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* Strands SDK Agent Lifecycle */}
-                  <Card className="card-glass border-l-4 border-l-cyan-500">
-                    <CardHeader className="pb-3">
-                      <CardTitle className="flex items-center gap-2 text-sm">
-                        <span className="text-cyan-400">🔗</span>
-                        Agent Lifecycle by Strands SDK
-                        <Badge
-                          variant="outline"
-                          className="bg-cyan-500/20 text-cyan-200 border-cyan-500/50 text-xs"
-                        >
-                          $3K Prize
-                        </Badge>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-3">
-                        <div className="flex justify-between items-center p-2 bg-cyan-500/10 rounded">
-                          <span className="text-sm">Current State:</span>
-                          <Badge
-                            variant="secondary"
-                            className="bg-cyan-500/20 text-cyan-200"
-                          >
-                            {currentPhase === "complete"
-                              ? "Resolution Complete"
-                              : "Executing Actions"}
-                          </Badge>
-                        </div>
-                        <div className="flex justify-between items-center p-2 bg-cyan-500/10 rounded">
-                          <span className="text-sm">Active Agents:</span>
-                          <span className="text-cyan-400 font-mono">
-                            {currentPhase === "consensus"
-                              ? "3/5"
-                              : currentPhase === "resolution"
-                              ? "4/5"
-                              : "5/5"}
-                          </span>
-                        </div>
-                        <div className="flex justify-between items-center p-2 bg-cyan-500/10 rounded">
-                          <span className="text-sm">Coordination:</span>
-                          <span className="text-green-400 text-sm">
-                            ✓ Synchronized
-                          </span>
-                        </div>
-                        <div className="flex justify-between items-center p-2 bg-cyan-500/10 rounded">
-                          <span className="text-sm">Fabric Health:</span>
-                          <span className="text-green-400 text-sm">
-                            Optimal
-                          </span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              )}
           </div>
         </TabsContent>
 

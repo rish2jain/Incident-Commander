@@ -1,19 +1,23 @@
-"""AgentCore deployment specifications for Incident Commander agents."""
+"""Agent deployment specifications for AWS Bedrock AgentCore Runtime."""
 
-from .base import AgentCoreDeployer, AgentCorePackageSpec
-from .communication_agent import COMMUNICATION_AGENT_SPEC
-from .diagnosis_agent import DIAGNOSIS_AGENT_SPEC
-from .detection_agent import DETECTION_AGENT_SPEC
-from .prediction_agent import PREDICTION_AGENT_SPEC
-from .resolution_agent import RESOLUTION_AGENT_SPEC
+from infrastructure.agentcore.agent_deployments.base import (
+    AgentCoreDeployer,
+    AgentCorePackageSpec,
+)
+from infrastructure.agentcore.agent_deployments.communication_agent import (
+    COMMUNICATION_AGENT_SPEC,
+)
+from infrastructure.agentcore.agent_deployments.detection_agent import DETECTION_AGENT_SPEC
+from infrastructure.agentcore.agent_deployments.diagnosis_agent import DIAGNOSIS_AGENT_SPEC
+from infrastructure.agentcore.agent_deployments.prediction_agent import PREDICTION_AGENT_SPEC
+from infrastructure.agentcore.agent_deployments.resolution_agent import RESOLUTION_AGENT_SPEC
 
 __all__ = [
-    "AgentCoreDeployer",
     "AgentCorePackageSpec",
-    "COMMUNICATION_AGENT_SPEC",
-    "DIAGNOSIS_AGENT_SPEC",
+    "AgentCoreDeployer",
     "DETECTION_AGENT_SPEC",
+    "DIAGNOSIS_AGENT_SPEC",
     "PREDICTION_AGENT_SPEC",
     "RESOLUTION_AGENT_SPEC",
+    "COMMUNICATION_AGENT_SPEC",
 ]
-

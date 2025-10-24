@@ -1,18 +1,110 @@
-version: 1
-collections:
-  incidents:
-    description: >-
-      Historical incident context synchronized from LangGraph state into AgentCore
-      Memory for retrieval-augmented prompts.
-    retention_days: 30
-    vector_store:
-      provider: dynamodb
-      table_name: agentcore_incident_memory
-      embedding_model: titan-embed-text-v1
+# AWS Bedrock AgentCore Memory Configuration
+# Configures persistent knowledge storage for incident response agents
+
+memory:
+  # Memory store configuration
+  store:
+    type: bedrock-agentcore-memory
+    region: us-east-1
+
+    # Memory retention policies
+    retention:
+      short_term_hours: 24
+      medium_term_days: 30
+      long_term_days: 365
+
+    # Memory indexing configuration
+    indexing:
+      enabled: true
+      embedding_model: amazon.titan-embed-text-v2:0
+      vector_dimension: 1024
+      similarity_threshold: 0.75
+
+  # Agent-specific memory configurations
+  agents:
+    detection:
+      memory_size_mb: 256
+      cache_duration_seconds: 300
+      knowledge_bases:
+        - name: incident-patterns
+          description: Historical incident patterns and signatures
+          type: vector
+        - name: telemetry-sources
+          description: Known telemetry sources and their characteristics
+          type: structured
+
+    diagnosis:
+      memory_size_mb: 512
+      cache_duration_seconds: 600
+      knowledge_bases:
+        - name: root-cause-library
+          description: Root cause analysis patterns and playbooks
+          type: vector
+        - name: log-patterns
+          description: Common log patterns and error signatures
+          type: structured
+
+    prediction:
+      memory_size_mb: 384
+      cache_duration_seconds: 900
+      knowledge_bases:
+        - name: business-impact-models
+          description: Business impact forecasting models
+          type: structured
+        - name: historical-incidents
+          description: Historical incident data for ML predictions
+          type: timeseries
+
+    resolution:
+      memory_size_mb: 512
+      cache_duration_seconds: 300
+      knowledge_bases:
+        - name: runbook-library
+          description: Automated remediation runbooks
+          type: structured
+        - name: action-outcomes
+          description: Historical action outcomes and success rates
+          type: structured
+
+    communication:
+      memory_size_mb: 256
+      cache_duration_seconds: 600
+      knowledge_bases:
+        - name: communication-templates
+          description: Stakeholder communication templates
+          type: structured
+        - name: escalation-paths
+          description: Escalation paths and contact information
+          type: structured
+
+  # Cross-agent shared memory
+  shared:
+    - name: incident-context
+      description: Shared incident context and state
+      type: ephemeral
+      ttl_seconds: 3600
+
+    - name: consensus-history
+      description: Historical consensus decisions
+      type: persistent
+      retention_days: 90
+
+# Memory synchronization configuration
+synchronization:
+  enabled: true
+  strategy: eventual_consistency
+  max_propagation_delay_ms: 5000
+  conflict_resolution: last_write_wins
+
+# Performance and monitoring
+monitoring:
+  enabled: true
   metrics:
-    description: Real-time KPI snapshots emitted from metrics collector.
-    retention_days: 14
-    vector_store:
-      provider: dynamodb
-      table_name: agentcore_metrics_memory
-      embedding_model: titan-embed-text-v1
+    - memory_usage
+    - cache_hit_rate
+    - query_latency
+    - embedding_quality
+  alerting:
+    high_memory_usage_threshold_percent: 85
+    low_cache_hit_rate_threshold_percent: 60
+    high_query_latency_threshold_ms: 500

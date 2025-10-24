@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: "https",
@@ -29,10 +30,8 @@ const nextConfig = {
       },
     ];
   },
-  // Enable static optimization for better performance
-  trailingSlash: false,
-  // Configure for AWS Amplify deployment
-  output: process.env.NODE_ENV === "production" ? "standalone" : undefined,
+  // Configure for production deployment with full SSR support
+  // Remove 'output' to enable server-side rendering
 };
 
 module.exports = nextConfig;

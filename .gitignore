@@ -205,6 +205,11 @@ dashboard/.next/cache/
 *.tsbuildinfo
 dashboard/tsconfig.tsbuildinfo
 
+# Production deployment files (sensitive)
+deployment-production.json
+*-production.json
+production-*.json
+
 # Deployment packages (too large for GitHub)
 deployment_package/
 
@@ -239,3 +244,19 @@ __pycache__/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Lambda deployment artifacts
+lambda-*.zip
+lambda_handler*.py
+lambda-app/
+lambda-layer/
+*.lambda.zip
+deployment-*.sample.json
+
+# Archive ZIP files
+incident-commander-*.zip
+simple_deployment/*.zip
+
+# Validation scripts (temporary)
+hackathon/validate_*.py
+hackathon/*_validation_*.json

@@ -8,13 +8,14 @@ from .base import AgentCorePackageSpec
 RESOLUTION_AGENT_SPEC = AgentCorePackageSpec(
     name="incident-resolution",
     entrypoint="src.langgraph_orchestrator.agents.resolution_node:ResolutionNode",
-    description="Transforms consensus into executable remediation actions",
+    description="Translates consensus decisions into executable resolution actions",
     requirements=[
+        "boto3>=1.34.0",
         "pydantic>=2.5.0",
-        "langgraph>=0.0.40",
+        "langgraph>=1.0.0",
     ],
-    memory_mb=1024,
-    timeout_seconds=240,
+    memory_mb=768,
+    timeout_seconds=180,
     environment={
         "AGENT_ROLE": "resolution",
         "RUNTIME_MODE": "agentcore",
@@ -23,4 +24,3 @@ RESOLUTION_AGENT_SPEC = AgentCorePackageSpec(
 )
 
 __all__ = ["RESOLUTION_AGENT_SPEC"]
-

@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
-import { Inter } from "next/font/google";
+// Font import temporarily disabled due to network restrictions
+// import { Inter } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import "../src/styles/globals.css";
 import { StyleNonceProvider } from "../src/lib/nonce-context";
 
-const inter = Inter({ subsets: ["latin"] });
+// Using system font fallback
+// const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "SwarmAI - Autonomous Incident Commander",
@@ -38,7 +40,7 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={inter.className}
+        className="font-sans"
         data-style-nonce={styleNonce ?? undefined}
       >
         <StyleNonceProvider nonce={styleNonce}>

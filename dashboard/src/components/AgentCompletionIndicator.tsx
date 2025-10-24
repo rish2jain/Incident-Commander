@@ -177,8 +177,8 @@ const CompletionItem = ({
   completion: AgentCompletionEvent;
   index: number;
 }) => {
-  const config = AGENT_CONFIGS[completion.agentType];
-  const Icon = AGENT_ICONS[completion.agentType];
+  const config = AGENT_CONFIGS[completion.agentName];
+  const Icon = AGENT_ICONS[completion.agentName as AgentType];
 
   const formatTime = (ms: number) => {
     if (ms < 1000) return `${ms}ms`;
@@ -217,27 +217,16 @@ const CompletionItem = ({
         <div
           className={`
             relative flex items-center justify-center w-10 h-10 rounded-full border-2
-            ${config.bgColor} ${config.borderColor} ${config.color}
+            ${config.bgColor} ${config.borderColor} ${config.textColor}
           `}
         >
           <Icon className="w-5 h-5" />
 
-          {/* Success/Failure indicator */}
+          {/* Success indicator */}
           <div
-            className={`
-              absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center
-              ${
-                completion.success
-                  ? "bg-green-500 text-white"
-                  : "bg-red-500 text-white"
-              }
-            `}
+            className="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center bg-green-500 text-white"
           >
-            {completion.success ? (
-              <CheckCircle className="w-3 h-3" />
-            ) : (
-              <XCircle className="w-3 h-3" />
-            )}
+            <CheckCircle className="w-3 h-3" />
           </div>
         </div>
 

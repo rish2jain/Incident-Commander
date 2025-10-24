@@ -673,7 +673,284 @@ class EnhancedDemoRecorder:
                 # Show service integration
                 await asyncio.sleep(3)
                 await self.take_screenshot(f"{scenario['name']}_integration", "Complete AWS AI portfolio integration", scenario)
-                
+
+            # === PHASE 0: Predictive Prevention Hook (0-20s) ===
+            elif action == "navigate_to_transparency":
+                print("   🎯 Navigating to AI Transparency Dashboard...")
+                await self.page.goto(f"{RECORDING_CONFIG['base_url']}/transparency")
+                await self.wait_for_dashboard_ready()
+                await asyncio.sleep(2)
+
+            elif action == "locate_predictive_prevention_module":
+                print("   🔍 Locating Predictive Prevention System module...")
+                await asyncio.sleep(1)
+                await self.take_screenshot(f"{scenario['name']}_prevention_module", "Predictive Prevention System module", scenario)
+
+            elif action == "trigger_predictive_alert":
+                print("   ⚠️  Triggering predictive alert...")
+                await asyncio.sleep(2)
+                await self.take_screenshot(f"{scenario['name']}_alert_triggered", "Predictive alert triggered", scenario)
+
+            elif action == "watch_countdown_animation":
+                print("   ⏱️  Watching countdown animation...")
+                await asyncio.sleep(3)
+                await self.take_screenshot(f"{scenario['name']}_countdown", "Time to impact countdown", scenario)
+
+            elif action == "show_prevention_success":
+                print("   ✅ Showing prevention success...")
+                await asyncio.sleep(2)
+                await self.take_screenshot(f"{scenario['name']}_prevented", "Incident prevented successfully", scenario)
+
+            # === PHASE 1: Homepage Why (20-35s) ===
+            elif action == "navigate_to_homepage":
+                print("   🏠 Navigating to homepage...")
+                await self.page.goto(f"{RECORDING_CONFIG['base_url']}/")
+                await self.wait_for_dashboard_ready()
+                await asyncio.sleep(2)
+
+            elif action == "show_key_features":
+                print("   ⭐ Showing key features...")
+                await asyncio.sleep(2)
+                await self.take_screenshot(f"{scenario['name']}_features", "Key features display", scenario)
+
+            elif action == "highlight_persona_descriptions":
+                print("   👥 Highlighting persona-based links...")
+                await asyncio.sleep(2)
+                await self.take_screenshot(f"{scenario['name']}_personas", "Persona-based dashboard links", scenario)
+
+            elif action == "click_operations_dashboard":
+                print("   🖱️  Clicking Operations Dashboard link...")
+                ops_link_selectors = [
+                    "a[href='/ops']",
+                    "a:has-text('Operations')",
+                    ".operations-link"
+                ]
+                for selector in ops_link_selectors:
+                    try:
+                        ops_link = await self.page.query_selector(selector)
+                        if ops_link:
+                            await ops_link.click()
+                            await self.wait_for_dashboard_ready()
+                            break
+                    except:
+                        continue
+                await asyncio.sleep(2)
+
+            # === PHASE 2: Operations Incident Trigger (35-50s) ===
+            elif action == "show_operations_ready_state":
+                print("   📊 Showing operations dashboard ready state...")
+                await asyncio.sleep(2)
+                await self.take_screenshot(f"{scenario['name']}_ready", "Operations dashboard ready", scenario)
+
+            elif action == "click_trigger_demo_incident":
+                print("   🚨 Clicking Trigger Demo Incident button...")
+                trigger_selectors = [
+                    "button:has-text('Trigger Demo Incident')",
+                    "button:has-text('Trigger')",
+                    "[data-testid='demo-trigger']"
+                ]
+                for selector in trigger_selectors:
+                    try:
+                        trigger_btn = await self.page.query_selector(selector)
+                        if trigger_btn:
+                            await trigger_btn.click()
+                            await asyncio.sleep(3)
+                            break
+                    except:
+                        continue
+
+            elif action == "wait_for_incident_appearance":
+                print("   ⏳ Waiting for incident to appear...")
+                await asyncio.sleep(3)
+                await self.take_screenshot(f"{scenario['name']}_incident_appeared", "Database Cascade incident appeared", scenario)
+
+            elif action == "hover_incident_card":
+                print("   👆 Hovering over incident card...")
+                card_selectors = [
+                    ".incident-card",
+                    "[data-testid='incident-card']",
+                    ".active-incident"
+                ]
+                for selector in card_selectors:
+                    try:
+                        card = await self.page.query_selector(selector)
+                        if card:
+                            await card.hover()
+                            await asyncio.sleep(1.5)
+                            break
+                    except:
+                        continue
+                await self.take_screenshot(f"{scenario['name']}_hover", "Incident card hover state", scenario)
+
+            elif action == "click_incident_navigate_to_transparency":
+                print("   🖱️  Clicking incident to navigate to transparency dashboard...")
+                card_selectors = [
+                    ".incident-card",
+                    "[data-testid='incident-card']",
+                    ".active-incident"
+                ]
+                for selector in card_selectors:
+                    try:
+                        card = await self.page.query_selector(selector)
+                        if card:
+                            await card.click()
+                            await self.wait_for_dashboard_ready()
+                            await asyncio.sleep(2)
+                            break
+                    except:
+                        continue
+
+            # === PHASE 3: Byzantine Fault Tolerance (50-75s) ===
+            elif action == "scroll_to_byzantine_module":
+                print("   📜 Scrolling to Byzantine Fault Tolerance module...")
+                await self.page.evaluate("window.scrollTo({top: 400, behavior: 'smooth'})")
+                await asyncio.sleep(2)
+                await self.take_screenshot(f"{scenario['name']}_bft_module", "Byzantine FT module visible", scenario)
+
+            elif action == "show_initial_consensus_90_5":
+                print("   📊 Showing initial consensus 90.5%...")
+                await asyncio.sleep(2)
+                await self.take_screenshot(f"{scenario['name']}_consensus_initial", "Initial consensus 90.5%", scenario)
+
+            elif action == "watch_prediction_agent_compromise":
+                print("   ⚠️  Watching Prediction Agent compromise...")
+                await asyncio.sleep(3)
+                await self.take_screenshot(f"{scenario['name']}_agent_compromised", "Prediction Agent compromised", scenario)
+
+            elif action == "observe_consensus_drop_65_8":
+                print("   📉 Observing consensus drop to 65.8%...")
+                await asyncio.sleep(2)
+                await self.take_screenshot(f"{scenario['name']}_consensus_drop", "Consensus dropped to 65.8%", scenario)
+
+            elif action == "show_auto_recovery_72_8":
+                print("   ✅ Showing auto-recovery to 72.8%...")
+                await asyncio.sleep(3)
+                await self.take_screenshot(f"{scenario['name']}_consensus_recovery", "Consensus recovered to 72.8%", scenario)
+
+            elif action == "highlight_resilience_message":
+                print("   💪 Highlighting system resilience message...")
+                await asyncio.sleep(1)
+                await self.take_screenshot(f"{scenario['name']}_resilience", "System resilience maintained", scenario)
+
+            # === PHASE 4: AWS Prize Proof (75-100s) ===
+            elif action == "scroll_to_agent_reasoning_process":
+                print("   📜 Scrolling to Agent Reasoning Process...")
+                await self.page.evaluate("window.scrollTo({top: 600, behavior: 'smooth'})")
+                await asyncio.sleep(2)
+
+            elif action == "show_amazon_q_analysis_module":
+                print("   💜 Showing Amazon Q Business Analysis module...")
+                await asyncio.sleep(3)
+                await self.take_screenshot(f"{scenario['name']}_amazon_q", "Amazon Q Business analysis", scenario)
+
+            elif action == "show_rag_evidence_sources_module":
+                print("   📚 Showing RAG Evidence & Sources module...")
+                await asyncio.sleep(3)
+                await self.take_screenshot(f"{scenario['name']}_rag_sources", "RAG Evidence & Sources", scenario)
+
+            elif action == "click_decisions_tab":
+                print("   🖱️  Clicking Decisions tab...")
+                tab_selectors = [
+                    "button:has-text('Decisions')",
+                    "[data-testid='tab-decisions']",
+                    ".decisions-tab"
+                ]
+                for selector in tab_selectors:
+                    try:
+                        tab = await self.page.query_selector(selector)
+                        if tab:
+                            await tab.click()
+                            await asyncio.sleep(2)
+                            break
+                    except:
+                        continue
+
+            elif action == "show_nova_act_action_plan_module":
+                print("   🟠 Showing Nova Act Action Plan module...")
+                await asyncio.sleep(3)
+                await self.take_screenshot(f"{scenario['name']}_nova_act", "Nova Act action plan", scenario)
+
+            elif action == "show_strands_sdk_lifecycle_module":
+                print("   🟢 Showing Strands SDK Lifecycle module...")
+                await asyncio.sleep(3)
+                await self.take_screenshot(f"{scenario['name']}_strands_sdk", "Strands SDK agent lifecycle", scenario)
+
+            # === PHASE 5: Business Impact Payoff (100-120s) ===
+            elif action == "click_see_business_impact_breadcrumb":
+                print("   🖱️  Clicking 'See Business Impact' breadcrumb...")
+                breadcrumb_selectors = [
+                    "a:has-text('See Business Impact')",
+                    "a[href='/demo']",
+                    ".breadcrumb-business-impact"
+                ]
+                for selector in breadcrumb_selectors:
+                    try:
+                        breadcrumb = await self.page.query_selector(selector)
+                        if breadcrumb:
+                            await breadcrumb.click()
+                            await self.wait_for_dashboard_ready()
+                            await asyncio.sleep(2)
+                            break
+                    except:
+                        # Fallback: navigate directly
+                        await self.page.goto(f"{RECORDING_CONFIG['base_url']}/demo")
+                        await self.wait_for_dashboard_ready()
+                        await asyncio.sleep(2)
+                        break
+
+            elif action == "show_impact_comparison_30_2m_vs_2_5m":
+                print("   📊 Showing impact comparison: 30.2m vs 2.5m...")
+                await asyncio.sleep(3)
+                await self.take_screenshot(f"{scenario['name']}_comparison", "MTTR comparison 30.2m vs 2.5m", scenario)
+
+            elif action == "show_business_impact_277k_saved":
+                print("   💰 Showing business impact: $277K saved...")
+                await asyncio.sleep(2)
+                await self.take_screenshot(f"{scenario['name']}_277k_saved", "$277K saved (Projected)", scenario)
+
+            elif action == "highlight_91_8_percent_reduction":
+                print("   📈 Highlighting 91.8% cost reduction...")
+                await asyncio.sleep(2)
+                await self.take_screenshot(f"{scenario['name']}_reduction", "91.8% cost reduction", scenario)
+
+            elif action == "show_32s_resolution_time":
+                print("   ⏱️  Showing 32s resolution time...")
+                await asyncio.sleep(1)
+                await self.take_screenshot(f"{scenario['name']}_resolution_time", "32s total resolution time", scenario)
+
+            # === PHASE 6: Industry Firsts Closer (120-150s) ===
+            elif action == "scroll_to_industry_firsts_module":
+                print("   📜 Scrolling to Industry Firsts module...")
+                await self.page.evaluate("window.scrollTo({top: 800, behavior: 'smooth'})")
+                await asyncio.sleep(2)
+
+            elif action == "show_6_checkmarks":
+                print("   ✅ Showing 6 industry-first checkmarks...")
+                await asyncio.sleep(3)
+                await self.take_screenshot(f"{scenario['name']}_industry_firsts", "Industry firsts with checkmarks", scenario)
+
+            elif action == "show_vs_competitors_module":
+                print("   🆚 Showing VS. Competitors module...")
+                await asyncio.sleep(3)
+                await self.take_screenshot(f"{scenario['name']}_competitors", "Competitive comparison", scenario)
+
+            elif action == "show_live_savings_counters":
+                print("   💵 Showing live savings counters...")
+                await asyncio.sleep(2)
+                await self.take_screenshot(f"{scenario['name']}_savings", "Live savings counters", scenario)
+
+            elif action == "show_multi_agent_status_panel":
+                print("   🤖 Showing multi-agent status panel...")
+                await asyncio.sleep(2)
+                await self.take_screenshot(f"{scenario['name']}_agents_status", "Multi-agent system status", scenario)
+
+            elif action == "zoom_out_full_dashboard":
+                print("   🔍 Zooming out to show full dashboard...")
+                await self.page.evaluate("document.body.style.zoom = '0.9'")
+                await asyncio.sleep(2)
+                await self.take_screenshot(f"{scenario['name']}_full_view", "Complete dashboard overview", scenario)
+                await self.page.evaluate("document.body.style.zoom = '1.0'")  # Reset zoom
+
         except Exception as e:
             print(f"⚠️  Action '{action}' failed: {e}")
             # Take screenshot of current state even if action failed

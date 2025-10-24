@@ -38,12 +38,14 @@ from typing import List, Dict, Any, Optional
 try:
     from playwright.async_api import async_playwright, Page, Browser, BrowserContext
     import requests
+    import subprocess
 except ImportError:
     print("❌ Required packages not installed. Installing...")
     os.system("pip install playwright requests")
     os.system("playwright install")
     from playwright.async_api import async_playwright, Page, Browser, BrowserContext
     import requests
+    import subprocess
 
 # Enhanced recording configuration for hackathon submission
 RECORDING_CONFIG = {
@@ -256,30 +258,35 @@ AWS_AI_SERVICES = [
 
 class EnhancedDemoRecorder:
     """Enhanced demo recorder optimized for hackathon submission."""
-    
+
     def __init__(self):
         self.session_id = datetime.now().strftime("%Y%m%d_%H%M%S")
         self.output_dir = Path("demo_recordings")
         self.videos_dir = self.output_dir / "videos"
         self.screenshots_dir = self.output_dir / "screenshots"
         self.metrics_dir = self.output_dir / "metrics"
-        
+        self.mp4_dir = self.output_dir / "videos_mp4"
+
         # Create directories
         self.output_dir.mkdir(exist_ok=True)
         self.videos_dir.mkdir(exist_ok=True)
         self.screenshots_dir.mkdir(exist_ok=True)
         self.metrics_dir.mkdir(exist_ok=True)
-        
+        self.mp4_dir.mkdir(exist_ok=True)
+
         self.browser: Optional[Browser] = None
         self.context: Optional[BrowserContext] = None
+        self.contexts: List[BrowserContext] = []  # Store multiple contexts for phase-based recording
         self.page: Optional[Page] = None
         self.screenshot_count = 0
         self.recording_start_time = None
         self.scenario_metrics = []
-        
+        self.phase_videos = []  # Track individual phase video paths
+
         print(f"🎬 Enhanced Demo Recorder initialized - Session: {self.session_id}")
         print(f"📁 Output directory: {self.output_dir}")
         print(f"🎯 Optimized for hackathon submission with comprehensive documentation")
+        print(f"📹 Each phase will be recorded as a separate video file")
         
     async def setup_browser(self):
         """Initialize browser with enhanced recording capabilities for hackathon demo."""
@@ -959,56 +966,170 @@ class EnhancedDemoRecorder:
     async def record_complete_demo(self):
         """Record the complete enhanced demo experience optimized for hackathon submission."""
         self.recording_start_time = time.time()
-        
+
         print(f"\n🎬 Starting Enhanced Hackathon Demo Recording")
         print(f"   📅 Session: {self.session_id}")
         print(f"   🎯 Optimized for: AWS AI Agent Global Hackathon 2025")
         print(f"   💰 Prize Categories: Best Bedrock, Amazon Q, Nova Act, Strands SDK")
         print(f"   📊 Business Impact: {BUSINESS_METRICS['annual_savings']} savings, {BUSINESS_METRICS['roi_percentage']} ROI")
+        print(f"   📹 Recording Strategy: Separate video per phase (6 videos total)")
         print("=" * 80)
-        
-        # Record each enhanced scenario
+
+        # Record each enhanced scenario with separate video context
         total_scenarios = len(DEMO_SCENARIOS)
         for i, scenario in enumerate(DEMO_SCENARIOS, 1):
-            print(f"\n📋 Scenario {i}/{total_scenarios}: {scenario['name'].upper()}")
+            print(f"\n📋 Phase {scenario['phase']} ({i}/{total_scenarios}): {scenario['name'].upper()}")
+            print(f"   🎥 Creating separate video context for this phase...")
+
+            # Create new context with video recording for this phase
+            phase_context = await self.browser.new_context(
+                viewport=RECORDING_CONFIG["viewport"],
+                record_video_dir=str(self.videos_dir),
+                record_video_size=RECORDING_CONFIG["viewport"],
+                device_scale_factor=1,
+                has_touch=False,
+                is_mobile=False,
+                locale="en-US",
+                timezone_id="America/New_York"
+            )
+
+            # Create new page for this phase
+            phase_page = await phase_context.new_page()
+
+            # Set up logging for this page
+            phase_page.on("console", lambda msg: self._log_console_message(msg))
+            phase_page.on("pageerror", lambda error: self._log_page_error(error))
+
+            # Temporarily use this page for recording
+            original_page = self.page
+            self.page = phase_page
+
+            # Record the scenario
             await self.record_scenario(scenario)
-            
+
+            # Close the phase-specific context to finalize the video
+            print(f"   ✅ Phase {scenario['phase']} recording complete - finalizing video...")
+            await phase_page.close()
+            await phase_context.close()
+
+            # Wait for video to be saved
+            await asyncio.sleep(2)
+
+            # Find the most recent video file (just created)
+            video_files = sorted(self.videos_dir.glob("*.webm"), key=lambda x: x.stat().st_mtime, reverse=True)
+            if video_files:
+                latest_video = video_files[0]
+                # Rename to phase-specific name
+                phase_video_name = f"phase_{scenario['phase']}_{scenario['name']}_{self.session_id}.webm"
+                phase_video_path = self.videos_dir / phase_video_name
+                latest_video.rename(phase_video_path)
+                self.phase_videos.append(phase_video_path)
+                print(f"   📹 Video saved: {phase_video_name}")
+
+            # Restore original page for screenshot operations between phases
+            self.page = original_page
+
             # Brief pause between scenarios with progress update
             if i < total_scenarios:
-                print(f"   ⏸️  Brief pause before next scenario...")
-                await asyncio.sleep(3)
-        
-        # Take final comprehensive overview
+                print(f"   ⏸️  Brief pause before next phase...")
+                await asyncio.sleep(2)
+
+        # Take final comprehensive overview (using original page/context)
         print(f"\n🎯 Recording final system overview...")
         await self.page.goto(f"{RECORDING_CONFIG['base_url']}/")
         await self.wait_for_dashboard_ready()
         await self.take_screenshot("final_overview", "Complete system overview - All dashboards and capabilities", {"name": "final", "business_focus": "Complete system demonstration"})
-        
+
+        # Convert all phase videos to MP4
+        print(f"\n🔄 Converting {len(self.phase_videos)} videos to MP4 format...")
+        await self.convert_videos_to_mp4()
+
         # Record completion metrics
         total_recording_time = time.time() - self.recording_start_time
-        
+
         print(f"\n🎉 Enhanced Demo Recording Complete!")
         print(f"   📅 Session: {self.session_id}")
         print(f"   ⏱️  Total Duration: {total_recording_time:.1f}s ({total_recording_time/60:.1f} minutes)")
         print(f"   📸 Screenshots: {self.screenshot_count} captured")
-        print(f"   🎬 Scenarios: {len(self.scenario_metrics)} recorded")
+        print(f"   🎬 Phase Videos: {len(self.phase_videos)} recorded (WebM + MP4)")
         print(f"   📁 Output: {self.output_dir}")
-        
+
         return {
             "session_id": self.session_id,
             "total_duration": total_recording_time,
             "screenshots_captured": self.screenshot_count,
             "scenarios_recorded": len(self.scenario_metrics),
+            "phase_videos": len(self.phase_videos),
             "business_metrics": BUSINESS_METRICS,
             "aws_services": AWS_AI_SERVICES
         }
         
+    async def convert_videos_to_mp4(self):
+        """Convert all WebM videos to MP4 format using ffmpeg."""
+        try:
+            # Check if ffmpeg is available
+            result = subprocess.run(['ffmpeg', '-version'], capture_output=True, text=True)
+            if result.returncode != 0:
+                print("⚠️  ffmpeg not found. Skipping MP4 conversion.")
+                print("   Install ffmpeg: brew install ffmpeg (macOS) or apt-get install ffmpeg (Linux)")
+                return
+        except FileNotFoundError:
+            print("⚠️  ffmpeg not found. Skipping MP4 conversion.")
+            print("   Install ffmpeg: brew install ffmpeg (macOS) or apt-get install ffmpeg (Linux)")
+            return
+
+        converted_count = 0
+        for webm_path in self.phase_videos:
+            if not webm_path.exists():
+                continue
+
+            # Create MP4 output path
+            mp4_filename = webm_path.stem + ".mp4"
+            mp4_path = self.mp4_dir / mp4_filename
+
+            print(f"   🔄 Converting {webm_path.name} → {mp4_filename}...")
+
+            try:
+                # Convert using ffmpeg with high quality settings
+                result = subprocess.run([
+                    'ffmpeg',
+                    '-i', str(webm_path),
+                    '-c:v', 'libx264',           # H.264 codec
+                    '-preset', 'medium',          # Encoding preset (faster/slower trade-off)
+                    '-crf', '18',                 # Quality (18 = high quality, 23 = default)
+                    '-c:a', 'aac',                # AAC audio codec
+                    '-b:a', '192k',               # Audio bitrate
+                    '-movflags', '+faststart',    # Enable fast start for web playback
+                    '-y',                         # Overwrite output file if exists
+                    str(mp4_path)
+                ], capture_output=True, text=True, timeout=300)
+
+                if result.returncode == 0:
+                    file_size_mb = mp4_path.stat().st_size / (1024 * 1024)
+                    print(f"   ✅ Converted: {mp4_filename} ({file_size_mb:.1f} MB)")
+                    converted_count += 1
+                else:
+                    print(f"   ❌ Conversion failed for {webm_path.name}")
+                    print(f"      Error: {result.stderr[:200]}")
+
+            except subprocess.TimeoutExpired:
+                print(f"   ❌ Conversion timeout for {webm_path.name}")
+            except Exception as e:
+                print(f"   ❌ Conversion error for {webm_path.name}: {e}")
+
+        if converted_count > 0:
+            print(f"\n✅ Successfully converted {converted_count}/{len(self.phase_videos)} videos to MP4")
+            print(f"   📁 MP4 files location: {self.mp4_dir}")
+        else:
+            print(f"\n⚠️  No videos were converted to MP4")
+
     async def generate_comprehensive_summary(self):
         """Generate comprehensive recording summary optimized for hackathon submission."""
         recording_duration = time.time() - self.recording_start_time if self.recording_start_time else 0
-        
+
         # Get video files
         video_files = list(self.videos_dir.glob("*.webm"))
+        mp4_files = list(self.mp4_dir.glob("*.mp4"))
         screenshot_files = list(self.screenshots_dir.glob("*.png"))
         
         summary = {
@@ -1023,7 +1144,9 @@ class EnhancedDemoRecorder:
                 "total_duration_minutes": recording_duration / 60,
                 "screenshots_captured": self.screenshot_count,
                 "scenarios_recorded": len(self.scenario_metrics),
-                "video_files": len(video_files),
+                "video_files_webm": len(video_files),
+                "video_files_mp4": len(mp4_files),
+                "phase_based_videos": len(self.phase_videos),
                 "recording_quality": "HD 1920x1080"
             },
             "business_impact_demonstrated": BUSINESS_METRICS,
@@ -1050,9 +1173,10 @@ class EnhancedDemoRecorder:
                 "metrics_directory": str(self.metrics_dir)
             },
             "generated_files": {
-                "videos": [f.name for f in video_files],
+                "videos_webm": [f.name for f in video_files],
+                "videos_mp4": [f.name for f in mp4_files],
                 "screenshots": [f.name for f in screenshot_files],
-                "total_files": len(video_files) + len(screenshot_files)
+                "total_files": len(video_files) + len(mp4_files) + len(screenshot_files)
             },
             "judge_evaluation_guide": {
                 "recommended_viewing_order": [
@@ -1127,10 +1251,21 @@ class EnhancedDemoRecorder:
         md += f"""
 ## 📁 Generated Files
 
-**Videos:** {len(summary['generated_files']['videos'])} files  
-**Screenshots:** {len(summary['generated_files']['screenshots'])} files  
+**Phase Videos (WebM):** {len(summary['generated_files']['videos_webm'])} files
+**Phase Videos (MP4):** {len(summary['generated_files']['videos_mp4'])} files
+**Screenshots:** {len(summary['generated_files']['screenshots'])} files
 **Total Files:** {summary['generated_files']['total_files']}
 
+### Video Files (by Phase)
+"""
+        for video in sorted(summary['generated_files']['videos_webm']):
+            md += f"- {video}\n"
+
+        md += "\n### MP4 Conversions\n"
+        for video in sorted(summary['generated_files']['videos_mp4']):
+            md += f"- {video}\n"
+
+        md += """
 ## 🎯 Judge Evaluation Guide
 
 ### Recommended Viewing Order
@@ -1176,13 +1311,21 @@ class EnhancedDemoRecorder:
         try:
             # List all generated files
             video_files = list(self.videos_dir.glob("*.webm"))
+            mp4_files = list(self.mp4_dir.glob("*.mp4"))
             screenshot_files = list(self.screenshots_dir.glob("*.png"))
-            
+
             if video_files:
-                print(f"\n🎥 Video files:")
-                for video in video_files:
-                    print(f"   {video.name}")
-                    
+                print(f"\n🎥 Phase Video files (WebM) - {len(video_files)} files:")
+                for video in sorted(video_files):
+                    size_mb = video.stat().st_size / (1024 * 1024)
+                    print(f"   {video.name} ({size_mb:.1f} MB)")
+
+            if mp4_files:
+                print(f"\n🎬 Phase Video files (MP4) - {len(mp4_files)} files:")
+                for video in sorted(mp4_files):
+                    size_mb = video.stat().st_size / (1024 * 1024)
+                    print(f"   {video.name} ({size_mb:.1f} MB)")
+
             if screenshot_files:
                 print(f"\n📸 Screenshots ({len(screenshot_files)}):")
                 # Show first 5 and last 5 if more than 10
@@ -1195,7 +1338,7 @@ class EnhancedDemoRecorder:
                     print(f"   ... and {len(screenshot_files) - 10} more ...")
                     for screenshot in sorted(screenshot_files)[-5:]:
                         print(f"   {screenshot.name}")
-                        
+
         except Exception as e:
             print(f"⚠️  File organization warning: {e}")
 
@@ -1286,15 +1429,16 @@ async def main():
         print(f"📅 Session ID: {recording_results['session_id']}")
         print(f"⏱️  Duration: {recording_results['total_duration']:.1f}s ({recording_results['total_duration']/60:.1f} min)")
         print(f"📸 Screenshots: {recording_results['screenshots_captured']} captured")
-        print(f"🎬 Scenarios: {recording_results['scenarios_recorded']} recorded")
+        print(f"🎬 Phase Videos: {recording_results['phase_videos']} separate videos (WebM + MP4)")
         print(f"💰 Business Value: {recording_results['business_metrics']['annual_savings']} savings")
         print(f"🏆 Prize Categories: {len(recording_results['aws_services'])} AWS AI services showcased")
-        
+
         print(f"\n📁 Output Location: {recorder.output_dir}")
         print("📋 Files generated:")
         print(f"   • Comprehensive JSON summary")
         print(f"   • Markdown summary for easy reading")
-        print(f"   • HD video recording (WebM format)")
+        print(f"   • {recording_results['phase_videos']} phase videos (WebM format)")
+        print(f"   • {recording_results['phase_videos']} phase videos (MP4 format)")
         print(f"   • {recording_results['screenshots_captured']} professional screenshots")
         print(f"   • Individual screenshot metadata files")
         

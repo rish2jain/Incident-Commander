@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
 import {
   DashboardLayout,
   DashboardSection,
@@ -25,6 +26,12 @@ import PredictivePreventionDemo from "../../src/components/PredictivePreventionD
 import { ReasoningPanel } from "../../src/components/enhanced/ReasoningPanel";
 import { CommunicationPanel } from "../../src/components/enhanced/CommunicationPanel";
 import { DecisionTreeVisualization } from "../../src/components/enhanced/DecisionTreeVisualization";
+import {
+  AmazonQModule,
+  RAGEvidenceModule,
+  NovaActModule,
+  StrandsSDKModule,
+} from "../../src/components/AWSPrizeModules";
 
 /**
  * Consolidated Transparency Dashboard
@@ -674,6 +681,22 @@ export default function TransparencyDashboardPage() {
       showLogo={true}
       logoVariant="logo-only"
     >
+      {/* Navigation Breadcrumbs */}
+      <div className="flex items-center justify-between mb-4">
+        <Link
+          href="/ops"
+          className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
+        >
+          &lt;&lt; Back to Operations
+        </Link>
+        <Link
+          href="/demo"
+          className="text-sm text-green-400 hover:text-green-300 transition-colors"
+        >
+          See Business Impact &gt;&gt;
+        </Link>
+      </div>
+
       {/* Status Bar */}
       <DashboardSection variant="glass" className="mb-4">
         <div className="flex items-center justify-between">
@@ -946,60 +969,78 @@ export default function TransparencyDashboardPage() {
           </TabsTrigger>
         </TabsList>
 
-        {/* Reasoning Tab - Enhanced with new ReasoningPanel */}
+        {/* Reasoning Tab - Enhanced with AWS Prize Modules */}
         <TabsContent value="reasoning" data-testid="panel-reasoning">
-          <ReasoningPanel
-            reasoningSteps={agentReasonings.map((reasoning) => ({
-              ...reasoning,
-              step: reasoning.step || "Processing",
-            }))}
-            onStepClick={(step) => {
-              // Could track reasoning step interactions for analytics
-            }}
-            className="w-full"
-          />
+          <div className="space-y-4">
+            {/* Amazon Q Business Analysis */}
+            <AmazonQModule />
+
+            {/* RAG Evidence & Sources */}
+            <RAGEvidenceModule />
+
+            {/* Agent Reasoning Steps */}
+            <ReasoningPanel
+              reasoningSteps={agentReasonings.map((reasoning) => ({
+                ...reasoning,
+                step: reasoning.step || "Processing",
+              }))}
+              onStepClick={(step) => {
+                // Could track reasoning step interactions for analytics
+              }}
+              className="w-full"
+            />
+          </div>
         </TabsContent>
 
-        {/* Decision Trees Tab - Enhanced with new DecisionTreeVisualization */}
+        {/* Decisions Tab - Enhanced with AWS Prize Modules */}
         <TabsContent value="decisions" data-testid="panel-decisions">
-          {decisionTree ? (
-            <Card className="card-glass">
-              <CardHeader>
-                <CardTitle>🌳 Decision Tree Analysis</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center text-status-neutral">
-                  <div className="text-4xl mb-3">🌳</div>
-                  <h3 className="text-lg font-medium mb-2">
-                    Decision Tree Available
-                  </h3>
-                  <p className="text-sm">Root: {decisionTree.rootNode.label}</p>
-                  <p className="text-xs mt-2 text-slate-500">
-                    Confidence:{" "}
-                    {(decisionTree.rootNode.confidence * 100).toFixed(1)}%
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          ) : (
-            <Card className="card-glass">
-              <CardContent className="py-12">
-                <div className="text-center text-status-neutral">
-                  <div className="text-4xl mb-3">🌳</div>
-                  <h3 className="text-lg font-medium mb-2">
-                    No Decision Tree Yet
-                  </h3>
-                  <p className="text-sm">
-                    Decision tree will appear during analysis phase
-                  </p>
-                  <p className="text-xs mt-2 text-slate-500">
-                    Click '🚨 Trigger Demo&apos; to see interactive decision
-                    tree visualization
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+          <div className="space-y-4">
+            {/* Nova Act Action Plan */}
+            <NovaActModule />
+
+            {/* Strands SDK Agent Lifecycle */}
+            <StrandsSDKModule />
+
+            {/* Decision Tree Analysis */}
+            {decisionTree ? (
+              <Card className="card-glass">
+                <CardHeader>
+                  <CardTitle>🌳 Decision Tree Analysis</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-center text-status-neutral">
+                    <div className="text-4xl mb-3">🌳</div>
+                    <h3 className="text-lg font-medium mb-2">
+                      Decision Tree Available
+                    </h3>
+                    <p className="text-sm">Root: {decisionTree.rootNode.label}</p>
+                    <p className="text-xs mt-2 text-slate-500">
+                      Confidence:{" "}
+                      {(decisionTree.rootNode.confidence * 100).toFixed(1)}%
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="card-glass">
+                <CardContent className="py-12">
+                  <div className="text-center text-status-neutral">
+                    <div className="text-4xl mb-3">🌳</div>
+                    <h3 className="text-lg font-medium mb-2">
+                      No Decision Tree Yet
+                    </h3>
+                    <p className="text-sm">
+                      Decision tree will appear during analysis phase
+                    </p>
+                    <p className="text-xs mt-2 text-slate-500">
+                      Click '🚨 Trigger Demo&apos; to see interactive decision
+                      tree visualization
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
         </TabsContent>
 
         {/* Confidence Tab */}

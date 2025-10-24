@@ -3,15 +3,27 @@
 Enhanced Demo Recording Script for Incident Commander - Hackathon 2025
 
 Creates professional HD video recording and comprehensive screenshots optimized for hackathon submission.
-Aligned with MASTER_SUBMISSION_GUIDE.md and COMPREHENSIVE_JUDGE_GUIDE.md requirements.
+Aligned with VIDEO_RECORDING_SCRIPT.md, MASTER_SUBMISSION_GUIDE.md and COMPREHENSIVE_JUDGE_GUIDE.md requirements.
+
+🎬 UPDATED: Now follows the 6-phase, 150-second recording structure from VIDEO_RECORDING_SCRIPT.md
 
 Features:
 - Professional HD recording (1920x1080)
+- 6-phase narrative structure (150 seconds total)
 - Comprehensive screenshot capture with descriptions
 - Hackathon-optimized demo flow
 - Business impact visualization
-- AWS AI services showcase
+- AWS AI services showcase with prize proof modules
 - Judge-ready presentation format
+
+Recording Flow:
+Phase 0 (0-20s):   Predictive Prevention Hook
+Phase 1 (20-35s):  Homepage "Why"
+Phase 2 (35-50s):  Operations Incident Trigger
+Phase 3 (50-75s):  Byzantine Fault Tolerance
+Phase 4 (75-100s): AWS Prize Proof (Amazon Q, RAG, Nova Act, Strands)
+Phase 5 (100-120s): Business Impact Payoff
+Phase 6 (120-150s): Industry Firsts Closer
 """
 
 import os
@@ -41,85 +53,179 @@ RECORDING_CONFIG = {
     "viewport": {"width": 1920, "height": 1080},
     "base_url": "http://localhost:3000",
     "backend_url": "http://localhost:8000",
-    "recording_duration": 240,  # 4 minutes for comprehensive demo
+    "recording_duration": 150,  # 2.5 minutes (150 seconds) for hackathon demo
     "screenshot_quality": 100,
     "full_page_screenshots": True,
     "wait_for_animations": True,
 }
 
-# Enhanced demo scenarios optimized for hackathon submission
+# 6-Phase Demo Scenarios - Aligned with VIDEO_RECORDING_SCRIPT.md
+# Total: 150 seconds (2 minutes 30 seconds)
 DEMO_SCENARIOS = [
     {
-        "name": "homepage",
-        "url": "/",
-        "duration": 20,
-        "description": "Homepage navigation with 3-dashboard architecture showcase",
-        "business_focus": "System overview and strategic positioning",
-        "actions": ["wait", "hover_cards", "highlight_navigation"],
-        "key_points": [
-            "Three specialized dashboards",
-            "Professional glassmorphism design",
-            "Strategic architecture overview"
-        ]
-    },
-    {
-        "name": "power_demo",
-        "url": "/demo",
-        "duration": 60,
-        "description": "PowerDashboard - Executive presentation with business metrics",
-        "business_focus": "$2.8M annual savings, 458% ROI, 95.2% MTTR improvement",
-        "actions": ["wait", "trigger_demo", "show_business_metrics", "demonstrate_roi"],
-        "key_points": [
-            "Real-time business impact calculation",
-            "Interactive demo controls",
-            "Executive-ready presentation",
-            "Quantified cost savings"
-        ]
-    },
-    {
-        "name": "transparency",
+        "phase": 0,
+        "name": "predictive_prevention_hook",
         "url": "/transparency",
-        "duration": 80,
-        "description": "AI Transparency Dashboard - Complete explainability system",
-        "business_focus": "5-tab AI explainability, agent reasoning, decision transparency",
-        "actions": ["wait", "trigger_demo", "navigate_key_tabs", "show_reasoning", "demonstrate_consensus"],
+        "start_time": 0,
+        "duration": 20,
+        "description": "Phase 0: The 'Hook' - Predictive Prevention",
+        "business_focus": "Prevent incidents before they happen - $45K saved",
+        "actions": [
+            "navigate_to_transparency",
+            "locate_predictive_prevention_module",
+            "trigger_predictive_alert",
+            "watch_countdown_animation",
+            "show_prevention_success"
+        ],
         "key_points": [
-            "5-tab explainability system",
-            "Agent reasoning visualization",
-            "Byzantine consensus demonstration",
-            "Decision tree analysis"
-        ]
+            "Predictive alert triggered 3 minutes before cascade",
+            "85% confidence score",
+            "Incident prevented successfully",
+            "$45K downtime prevented"
+        ],
+        "screenshot_name": "01_predictive_prevention_success"
     },
     {
-        "name": "operations",
+        "phase": 1,
+        "name": "homepage_why",
+        "url": "/",
+        "start_time": 20,
+        "duration": 15,
+        "description": "Phase 1: The 'Why' - Homepage Overview",
+        "business_focus": "$2.8M annual savings, 8/8 AWS AI services",
+        "actions": [
+            "navigate_to_homepage",
+            "show_key_features",
+            "highlight_persona_descriptions",
+            "click_operations_dashboard"
+        ],
+        "key_points": [
+            "Sub-3 minute MTTR with 95%+ improvement",
+            "$2.8M annual cost savings (Projected)",
+            "All 8 AWS AI services integrated",
+            "Three persona-based dashboards"
+        ],
+        "screenshot_name": "02_homepage_overview"
+    },
+    {
+        "phase": 2,
+        "name": "operations_incident_trigger",
         "url": "/ops",
-        "duration": 40,
-        "description": "Operations Dashboard - Production monitoring and WebSocket integration",
-        "business_focus": "Real-time monitoring, agent health, system performance",
-        "actions": ["wait", "check_websocket", "monitor_agents"],
+        "start_time": 35,
+        "duration": 15,
+        "description": "Phase 2: The 'Problem' - Incident Trigger",
+        "business_focus": "Real-time incident detection and navigation",
+        "actions": [
+            "show_operations_ready_state",
+            "click_trigger_demo_incident",
+            "wait_for_incident_appearance",
+            "hover_incident_card",
+            "click_incident_navigate_to_transparency"
+        ],
         "key_points": [
-            "Real-time WebSocket connectivity",
-            "Agent health monitoring",
-            "Performance metrics",
-            "Production-ready interface"
-        ]
+            "Database Cascade Failure detected",
+            "CRITICAL severity incident",
+            "Clickable incident cards",
+            "Auto-navigation to AI analysis"
+        ],
+        "screenshot_name": "03_operations_incident_trigger"
     },
     {
-        "name": "aws_ai_showcase",
-        "url": "/demo",
-        "duration": 30,
-        "description": "AWS AI Services Integration Showcase",
-        "business_focus": "Complete 8/8 AWS AI services integration",
-        "actions": ["wait", "show_aws_services", "demonstrate_integration"],
+        "phase": 3,
+        "name": "byzantine_fault_tolerance",
+        "url": "/transparency",
+        "start_time": 50,
+        "duration": 25,
+        "description": "Phase 3: The 'Core Tech' - Byzantine Fault Tolerance",
+        "business_focus": "World-first Byzantine consensus for AI reliability",
+        "actions": [
+            "scroll_to_byzantine_module",
+            "show_initial_consensus_90_5",
+            "watch_prediction_agent_compromise",
+            "observe_consensus_drop_65_8",
+            "show_auto_recovery_72_8",
+            "highlight_resilience_message"
+        ],
         "key_points": [
-            "Amazon Bedrock AgentCore",
-            "Claude 3.5 Sonnet & Haiku",
-            "Amazon Q Business",
-            "Nova Act integration",
-            "Strands SDK",
-            "Titan Embeddings",
-            "Bedrock Guardrails"
-        ]
+            "Total Weighted Consensus: 90.5% → 65.8% → 72.8%",
+            "Prediction agent compromised and quarantined",
+            "Byzantine quorum maintained (3/5 agents)",
+            "System resilient despite compromise"
+        ],
+        "screenshot_name": "04_byzantine_fault_tolerance"
+    },
+    {
+        "phase": 4,
+        "name": "aws_prize_proof",
+        "url": "/transparency",
+        "start_time": 75,
+        "duration": 25,
+        "description": "Phase 4: The 'Prize Proof' - AWS AI Services",
+        "business_focus": "Visual proof of 8/8 AWS AI services integration",
+        "actions": [
+            "scroll_to_agent_reasoning_process",
+            "show_amazon_q_analysis_module",
+            "show_rag_evidence_sources_module",
+            "click_decisions_tab",
+            "show_nova_act_action_plan_module",
+            "show_strands_sdk_lifecycle_module"
+        ],
+        "key_points": [
+            "Amazon Q Business: 94.2% confidence analysis",
+            "RAG Evidence: 4 sources from 15,000+ incidents (96%, 89%, 92%, 87% matches)",
+            "Nova Act: 5-step action plan with status",
+            "AWS Strands SDK: Agent lifecycle management"
+        ],
+        "screenshot_name": "05_aws_prize_proof_reasoning",
+        "screenshot_name_2": "06_aws_prize_proof_decisions"
+    },
+    {
+        "phase": 5,
+        "name": "business_impact_payoff",
+        "url": "/demo",
+        "start_time": 100,
+        "duration": 20,
+        "description": "Phase 5: The 'Payoff' - Business Impact",
+        "business_focus": "$277K saved in single incident, 91.8% cost reduction",
+        "actions": [
+            "click_see_business_impact_breadcrumb",
+            "show_impact_comparison_30_2m_vs_2_5m",
+            "show_business_impact_277k_saved",
+            "highlight_91_8_percent_reduction",
+            "show_32s_resolution_time"
+        ],
+        "key_points": [
+            "Manual Response: 30.2m (red)",
+            "AI Response: 2.5m (green)",
+            "91.8% faster resolution",
+            "$277K saved (Projected) in single critical incident"
+        ],
+        "screenshot_name": "07_business_impact_payoff"
+    },
+    {
+        "phase": 6,
+        "name": "industry_firsts_closer",
+        "url": "/demo",
+        "start_time": 120,
+        "duration": 30,
+        "description": "Phase 6: The 'Closer' - Industry Firsts",
+        "business_focus": "Comprehensive system capabilities and competitive advantage",
+        "actions": [
+            "scroll_to_industry_firsts_module",
+            "show_6_checkmarks",
+            "show_vs_competitors_module",
+            "show_live_savings_counters",
+            "show_multi_agent_status_panel",
+            "zoom_out_full_dashboard"
+        ],
+        "key_points": [
+            "Byzantine fault-tolerant consensus ✓",
+            "Predictive incident prevention ✓",
+            "8/8 AWS AI services integrated ✓",
+            "Complete decision transparency ✓",
+            "47 incidents resolved today, 0 human interventions"
+        ],
+        "screenshot_name": "08_industry_firsts_final"
     }
 ]
 

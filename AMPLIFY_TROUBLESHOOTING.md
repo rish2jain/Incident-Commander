@@ -146,6 +146,38 @@ build:
 
 ---
 
+## Build Failure #4: Turbopack Compatibility Issues
+
+### Error
+```
+Error: Turbopack build failed with 15 errors:
+./src/components/ui/alert.tsx:4:1
+[... 14 more component errors]
+```
+
+### Root Cause
+Next.js 16 introduced Turbopack as the default bundler, but it has compatibility issues with some UI components. The build errors occur in UI components that work perfectly with webpack.
+
+### Evidence
+- ✅ `npm ci` completed successfully (858 packages installed)
+- ✅ Next.js 16.0.0 started building
+- ❌ Turbopack failed with 15 component errors
+- All affected components use standard React patterns
+
+### Fix Applied
+Disable Turbopack and use stable webpack bundler:
+```json
+"scripts": {
+  "build": "next build --no-turbo"
+}
+```
+
+**Commit**: `8d4946c8` - "fix: Disable Turbopack for production builds"
+
+**Result**: 🔄 Build triggered automatically (monitoring)
+
+---
+
 ## Deployment Timeline
 
 | Time | Event | Status |
@@ -157,7 +189,9 @@ build:
 | Build 2 | Module not found errors | ❌ Failed |
 | Fix 2 | Chain with `&&` operator | ⚠️ Incomplete fix |
 | Build 3 | cd dashboard fails (already there) | ❌ Failed |
-| Fix 3 | Remove cd from build phase | 🔄 Testing |
+| Fix 3 | Remove cd from build phase | ⚠️ Incomplete fix |
+| Build 4 | Turbopack compatibility errors | ❌ Failed |
+| Fix 4 | Disable Turbopack (--no-turbo) | 🔄 Testing |
 
 ---
 
@@ -165,8 +199,8 @@ build:
 
 **Amplify App**: d1o5cfrpl0kgt3
 **Branch**: main
-**Latest Commit**: af16f169
-**Build Status**: 🔄 Rebuilding (Fix #3: directory context)
+**Latest Commit**: 8d4946c8
+**Build Status**: 🔄 Rebuilding (Fix #4: Turbopack disabled)
 
 **Monitor Build**: https://console.aws.amazon.com/amplify/home?region=us-east-1#/d1o5cfrpl0kgt3
 

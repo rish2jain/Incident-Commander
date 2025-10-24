@@ -164,15 +164,26 @@ Next.js 16 introduced Turbopack as the default bundler, but it has compatibility
 - ❌ Turbopack failed with 15 component errors
 - All affected components use standard React patterns
 
-### Fix Applied
-Disable Turbopack and use stable webpack bundler:
+### Fix Applied (Attempt 1 - Failed)
+Tried using CLI flag `--no-turbo`:
 ```json
 "scripts": {
   "build": "next build --no-turbo"
 }
 ```
+**Result**: ❌ Failed - flag doesn't exist in Next.js 16
 
-**Commit**: `8d4946c8` - "fix: Disable Turbopack for production builds"
+### Fix Applied (Attempt 2 - Correct)
+Disable Turbopack via next.config.js:
+```javascript
+experimental: {
+  turbo: false,
+}
+```
+
+**Commits**:
+- `8d4946c8` - CLI flag attempt (failed)
+- `f44d4dc4` - Config file method (correct)
 
 **Result**: 🔄 Build triggered automatically (monitoring)
 
@@ -191,7 +202,9 @@ Disable Turbopack and use stable webpack bundler:
 | Build 3 | cd dashboard fails (already there) | ❌ Failed |
 | Fix 3 | Remove cd from build phase | ⚠️ Incomplete fix |
 | Build 4 | Turbopack compatibility errors | ❌ Failed |
-| Fix 4 | Disable Turbopack (--no-turbo) | 🔄 Testing |
+| Fix 4a | Disable Turbopack (--no-turbo flag) | ❌ Failed (flag doesn't exist) |
+| Build 5 | Unknown option --no-turbo | ❌ Failed |
+| Fix 4b | Disable via next.config.js | 🔄 Testing |
 
 ---
 
@@ -199,8 +212,8 @@ Disable Turbopack and use stable webpack bundler:
 
 **Amplify App**: d1o5cfrpl0kgt3
 **Branch**: main
-**Latest Commit**: 8d4946c8
-**Build Status**: 🔄 Rebuilding (Fix #4: Turbopack disabled)
+**Latest Commit**: f44d4dc4
+**Build Status**: 🔄 Rebuilding (Fix #4b: Turbopack disabled via config)
 
 **Monitor Build**: https://console.aws.amazon.com/amplify/home?region=us-east-1#/d1o5cfrpl0kgt3
 

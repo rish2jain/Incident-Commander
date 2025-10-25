@@ -40,7 +40,7 @@ python test_enhanced_recorder.py
 # Dashboard 1: PowerDashboard Demo - Interactive Business Value
 https://d2j5829zuijr97.cloudfront.net/demo
 
-# Dashboard 2: Technical Transparency - AI Explainability Deep-Dive  
+# Dashboard 2: Technical Transparency - AI Explainability Deep-Dive
 https://d2j5829zuijr97.cloudfront.net/transparency
 
 # Dashboard 3: Production Operations - Live System Monitoring
@@ -54,6 +54,7 @@ https://h8xlzr74h8.execute-api.us-east-1.amazonaws.com/real-aws-ai/integration-s
 **✅ What you'll see:**
 
 **Dashboard 1 - PowerDashboard (/demo)**:
+
 - 4-column interactive layout with live agent coordination
 - Auto-incrementing savings counter ($2.8M annual value)
 - Real-time incident timeline with agent status
@@ -63,6 +64,7 @@ https://h8xlzr74h8.execute-api.us-east-1.amazonaws.com/real-aws-ai/integration-s
 - Transparent mock data labeling for demo clarity
 
 **Dashboard 2 - Technical Transparency (/transparency)**:
+
 - 15-minute AI explainability technical deep-dive
 - Pre-generated content using REAL AWS services
 - Service attribution badges showing AWS integration
@@ -71,6 +73,7 @@ https://h8xlzr74h8.execute-api.us-east-1.amazonaws.com/real-aws-ai/integration-s
 - Multi-agent communication visualization
 
 **Dashboard 3 - Production Operations (/ops)**:
+
 - Real operational monitoring dashboard
 - Live WebSocket connection to backend
 - Actual incident management interface
@@ -481,12 +484,14 @@ cd scripts && ./run_demo_recording.sh
 **Primary Evaluation Method - Review Live AWS Dashboards:**
 
 1. **PowerDashboard Demo** (https://d2j5829zuijr97.cloudfront.net/demo)
+
    - Review business value visualization ($2.8M savings, 458% ROI)
    - Observe interactive incident timeline and agent coordination
    - Test replay/restart controls for demo interaction
    - Verify transparent mock data labeling
 
 2. **Technical Transparency** (https://d2j5829zuijr97.cloudfront.net/transparency)
+
    - Examine AI explainability and agent reasoning
    - Review AWS service attribution badges
    - Analyze decision-making processes and confidence calibration
@@ -626,7 +631,7 @@ python test_demo_recorder.py
 ### **Live AWS Dashboards (PRIMARY)**
 
 - **PowerDashboard Demo**: https://d2j5829zuijr97.cloudfront.net/demo
-- **Technical Transparency Dashboard**: https://d2j5829zuijr97.cloudfront.net/transparency  
+- **Technical Transparency Dashboard**: https://d2j5829zuijr97.cloudfront.net/transparency
 - **Production Operations Dashboard**: https://d2j5829zuijr97.cloudfront.net/ops
 
 ### **API Backend Endpoints**
@@ -642,6 +647,7 @@ python test_demo_recorder.py
 ### **Local Development URLs (Optional)**
 
 Only if running local setup:
+
 - Auto-Demo Dashboard: http://localhost:3000/demo?auto-demo=true
 - Transparency Dashboard: http://localhost:3000/transparency
 - Operations Dashboard: http://localhost:3000/ops
@@ -848,7 +854,13 @@ curl https://h8xlzr74h8.execute-api.us-east-1.amazonaws.com/real-aws-ai/strands/
 
 **EVALUATION STATUS**: ✅ **READY FOR IMMEDIATE TESTING**
 
-System demonstrates real AWS AI integrations in under 30 seconds using the live deployment, with comprehensive local setup options and multiple evaluation presets available.# SwarmAI - Hackathon Architecture Document
+System demonstrates real AWS AI integrations in under 30 seconds using the live deployment, with comprehensive local setup options and multiple evaluation presets available.
+
+---
+
+# SwarmAI - Hackathon Architecture Document
+
+_For the complete judge evaluation guide, see [COMPREHENSIVE_JUDGE_GUIDE.md](COMPREHENSIVE_JUDGE_GUIDE.md)_
 
 **Project**: SwarmAI - Autonomous Incident Commander
 **Hackathon**: AWS Generative AI Hackathon
@@ -2025,7 +2037,7 @@ class CryptographicAuditLogger:
     """
 
     def __init__(self):
-        self.previous_hash = "0" _ 64  # Genesis hash
+        self.previous_hash = "0" * 64  # Genesis hash
         self.hash_algorithm = "sha256"
 
     async def log_action(
@@ -2069,7 +2081,7 @@ class CryptographicAuditLogger:
         """
         logs = await self.get_audit_logs(incident_id)
 
-        expected_hash = "0" _ 64  # Genesis
+        expected_hash = "0" * 64  # Genesis
         for log in logs:
             # Recompute hash
             log_without_hash = {k: v for k, v in log.items() if k != "hash"}

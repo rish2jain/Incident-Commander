@@ -296,18 +296,27 @@ def convert_markdown_to_pdf(input_md: str, output_pdf: str):
         return False
 
 if __name__ == "__main__":
-    input_file = "hackathon/COMBINED_HACKATHON_SUBMISSION.md"
-    output_file = "hackathon/SwarmAI_Hackathon_Submission.pdf"
+    import argparse
+    
+    parser = argparse.ArgumentParser(description="Convert Markdown to PDF with Mermaid diagram support")
+    parser.add_argument("input_file", help="Input markdown file path")
+    parser.add_argument("-o", "--output", help="Output PDF file path (optional)")
+    
+    args = parser.parse_args()
+    
+    input_file = args.input_file
+    output_file = args.output or input_file.replace('.md', '.pdf')
 
     if not os.path.exists(input_file):
         print(f"❌ Input file not found: {input_file}")
+        print(f"Usage: python {sys.argv[0]} <input_file.md> [-o output_file.pdf]")
         sys.exit(1)
 
     print("🚀 Starting PDF conversion with Mermaid diagram support...")
     success = convert_markdown_to_pdf(input_file, output_file)
 
     if success:
-        print("\n✅ PDF submission ready!")
+        print("\n✅ PDF conversion complete!")
         print(f"📄 Location: {os.path.abspath(output_file)}")
 
     sys.exit(0 if success else 1)

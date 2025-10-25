@@ -17,9 +17,20 @@ def render_mermaid_to_png(mermaid_code: str, output_path: str) -> bool:
             f.write(mermaid_code)
             mmd_file = f.name
 
-        # Render using mermaid-cli (mmdc)
+        # Render using mermaid-cli (mmdc) - prefer local binary, fallback to pinned npx
+        import shutil
+        
+        mermaid_version = os.environ.get('MERMAID_CLI_VERSION', '10.6.1')
+        
+        if shutil.which('mmdc'):
+            # Use local mmdc binary
+            cmd = ['mmdc', '-i', mmd_file, '-o', output_path, '-b', 'transparent']
+        else:
+            # Use pinned npx version
+            cmd = ['npx', '-y', f'@mermaid-js/mermaid-cli@{mermaid_version}', '-i', mmd_file, '-o', output_path, '-b', 'transparent']
+        
         result = subprocess.run(
-            ['npx', '-y', '@mermaid-js/mermaid-cli', '-i', mmd_file, '-o', output_path, '-b', 'transparent'],
+            cmd,
             capture_output=True,
             text=True,
             timeout=30

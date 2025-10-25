@@ -17,13 +17,37 @@ def render_mermaid_to_png(mermaid_code: str, output_path: str) -> bool:
             f.write(mermaid_code)
             mmd_file = f.name
 
-        # Render using mermaid-cli (mmdc)
-        result = subprocess.run(
-            ['npx', '-y', '@mermaid-js/mermaid-cli', '-i', mmd_file, '-o', output_path, '-b', 'transparent', '-w', '1200'],
-            capture_output=True,
-            text=True,
-            timeout=30
-        )
+        # Render using mermaid-cli (mmdc) - prefer local binary, fallback to pinned npx
+        import shutil
+        
+        mermaid_version = os.environ.get('MERMAID_CLI_VERSION', '10.6.1')
+        skip_mermaid = os.environ.get('SKIP_MERMAID', '').lower() in ('true', '1', 'yes')
+        
+        if skip_mermaid:
+            # Skip mermaid rendering for CI/offline environments
+            print("⚠️  Skipping Mermaid rendering (SKIP_MERMAID set)")
+            return False
+        
+        if shutil.which('mmdc'):
+            # Use local mmdc binary
+            cmd = ['mmdc', '-i', mmd_file, '-o', output_path, '-b', 'transparent', '-w', '1200']
+        else:
+            # Use pinned npx version
+            cmd = ['npx', '-y', f'@mermaid-js/mermaid-cli@{mermaid_version}', '-i', mmd_file, '-o', output_path, '-b', 'transparent', '-w', '1200']
+        
+        try:
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                timeout=30
+            )
+        except subprocess.TimeoutExpired:
+            print(f"Warning: Mermaid rendering timed out")
+            return False
+        except Exception as e:
+            print(f"Warning: Mermaid rendering failed: {e}")
+            return False
 
         os.unlink(mmd_file)
 
@@ -340,11 +364,27 @@ def convert_markdown_to_pdf(input_md: str, output_pdf: str):
         return False
 
 if __name__ == "__main__":
-    input_file = "hackathon/SIMPLIFIED_JUDGE_GUIDE.md"
-    output_file = "hackathon/SwarmAI_Judge_Guide_Simple.pdf"
+    import argparse
+    
+    parser = argparse.ArgumentParser(description="Create simplified judge-friendly PDF")
+    parser.add_argument("--input", default="hackathon/COMPREHENSIVE_JUDGE_GUIDE.md", 
+                       help="Input markdown file path (default: hackathon/COMPREHENSIVE_JUDGE_GUIDE.md)")
+    parser.add_argument("--output", help="Output PDF file path (optional)")
+    parser.add_argument("--skip-mermaid", action="store_true", 
+                       help="Skip Mermaid diagram rendering for CI environments")
+    
+    args = parser.parse_args()
+    
+    # Set environment variable for skip-mermaid flag
+    if args.skip_mermaid:
+        os.environ['SKIP_MERMAID'] = 'true'
+    
+    input_file = args.input
+    output_file = args.output or input_file.replace('.md', '_Simple.pdf')
 
     if not os.path.exists(input_file):
         print(f"❌ Input file not found: {input_file}")
+        print(f"Usage: python {sys.argv[0]} [--input <file.md>] [--output <file.pdf>] [--skip-mermaid]")
         sys.exit(1)
 
     print("🚀 Creating simplified judge-friendly PDF...")

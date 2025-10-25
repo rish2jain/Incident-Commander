@@ -8,6 +8,8 @@ suitable for judges, evaluators, and reviewers.
 
 import os
 import subprocess
+import tempfile
+import shutil
 from pathlib import Path
 from datetime import datetime
 
@@ -161,21 +163,37 @@ def combine_markdown_files(base_dir: Path, output_file: Path):
 def convert_to_pdf_pandoc(markdown_file: Path, pdf_file: Path):
     """Convert markdown to PDF using pandoc (if available)."""
     try:
-        cmd = [
-            'pandoc',
-            str(markdown_file),
-            '-o', str(pdf_file),
-            '--toc',
-            '--toc-depth=3',
-            '-V', 'geometry:margin=1in',
-            '-V', 'fontsize=11pt',
-            '--highlight-style=tango',
-            '--pdf-engine=xelatex'
-        ]
+        # Process Mermaid diagrams first
+        with open(markdown_file, 'r', encoding='utf-8') as f:
+            md_content = f.read()
+        
+        processed_content = _render_mermaid_blocks(md_content)
+        
+        # Create temporary file with processed content
+        import tempfile
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.md', delete=False) as temp_file:
+            temp_file.write(processed_content)
+            temp_markdown = temp_file.name
+        
+        try:
+            cmd = [
+                'pandoc',
+                temp_markdown,
+                '-o', str(pdf_file),
+                '--toc',
+                '--toc-depth=3',
+                '-V', 'geometry:margin=1in',
+                '-V', 'fontsize=11pt',
+                '--highlight-style=tango',
+                '--pdf-engine=xelatex'
+            ]
 
-        subprocess.run(cmd, check=True)
-        print(f"\n✅ PDF generated using pandoc: {pdf_file}")
-        return True
+            subprocess.run(cmd, check=True)
+            print(f"\n✅ PDF generated using pandoc: {pdf_file}")
+            return True
+        finally:
+            # Clean up temporary file
+            os.unlink(temp_markdown)
     except (subprocess.CalledProcessError, FileNotFoundError) as e:
         print(f"⚠️  Pandoc conversion failed: {e}")
         return False
@@ -190,6 +208,9 @@ def convert_to_pdf_markdown2(markdown_file: Path, pdf_file: Path):
         # Read markdown
         with open(markdown_file, 'r', encoding='utf-8') as f:
             md_content = f.read()
+        
+        # Process Mermaid diagrams before converting to HTML
+        md_content = _render_mermaid_blocks(md_content)
 
         # Convert to HTML
         html_content = markdown.markdown(
@@ -342,3 +363,66 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+def _render_mermaid_blocks(content: str) -> str:
+    """
+    Process Mermaid code blocks and replace them with image references.
+    
+    Args:
+        content: Markdown content containing Mermaid blocks
+        
+    Returns:
+        Processed content with Mermaid blocks replaced by images
+    """
+    import re
+    
+    def render_mermaid_block(match):
+        mermaid_code = match.group(1).strip()
+        
+        # Create temporary directory for mermaid files
+        temp_dir = tempfile.mkdtemp()
+        
+        try:
+            # Create temporary file for mermaid code
+            mmd_file = os.path.join(temp_dir, 'diagram.mmd')
+            with open(mmd_file, 'w') as f:
+                f.write(mermaid_code)
+            
+            # Output image path
+            img_file = os.path.join(temp_dir, 'diagram.png')
+            
+            # Render using mermaid-cli (prefer local binary, fallback to npx)
+            mermaid_version = os.environ.get('MERMAID_CLI_VERSION', '10.6.1')
+            skip_mermaid = os.environ.get('SKIP_MERMAID', '').lower() in ('true', '1', 'yes')
+            
+            if skip_mermaid:
+                return f"\n*[Mermaid diagram placeholder - rendering skipped]*\n"
+            
+            if shutil.which('mmdc'):
+                cmd = ['mmdc', '-i', mmd_file, '-o', img_file, '-b', 'white']
+            else:
+                cmd = ['npx', '-y', f'@mermaid-js/mermaid-cli@{mermaid_version}', '-i', mmd_file, '-o', img_file, '-b', 'white']
+            
+            try:
+                result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+                
+                if result.returncode == 0 and os.path.exists(img_file):
+                    # Return markdown image reference
+                    return f"\n![Mermaid Diagram]({img_file})\n"
+                else:
+                    print(f"Warning: Mermaid rendering failed: {result.stderr}")
+                    return f"\n```\n{mermaid_code}\n```\n*[Mermaid diagram - rendering failed]*\n"
+                    
+            except (subprocess.TimeoutExpired, Exception) as e:
+                print(f"Warning: Mermaid rendering error: {e}")
+                return f"\n```\n{mermaid_code}\n```\n*[Mermaid diagram - rendering error]*\n"
+                
+        finally:
+            # Clean up temporary directory
+            shutil.rmtree(temp_dir, ignore_errors=True)
+    
+    # Find and replace mermaid code blocks
+    mermaid_pattern = r'```mermaid\n(.*?)\n```'
+    processed_content = re.sub(mermaid_pattern, render_mermaid_block, content, flags=re.DOTALL)
+    
+    return processed_content

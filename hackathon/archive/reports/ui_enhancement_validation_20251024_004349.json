@@ -1,0 +1,53 @@
+{
+  "session_id": "20251024_004349",
+  "timestamp": "2025-10-24T00:43:49.733192",
+  "validation_type": "Latest UI Enhancements",
+  "categories": {
+    "Agent Completion Indicators": {
+      "name": "Agent Completion Indicators",
+      "tests": [
+        {
+          "name": "Agent Completion Indicators Error",
+          "passed": false,
+          "score": 0,
+          "max_score": 20,
+          "error": "Page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/transparency\nCall log:\n  - navigating to \"http://localhost:3000/transparency\", waiting until \"load\"\n"
+        }
+      ],
+      "score": 0.0,
+      "max_score": 100
+    },
+    "Dashboard Consistency": {
+      "name": "Dashboard Consistency",
+      "tests": [
+        {
+          "name": "Demo Dashboard Error",
+          "passed": false,
+          "score": 0,
+          "max_score": 20,
+          "error": "Page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/demo\nCall log:\n  - navigating to \"http://localhost:3000/demo\", waiting until \"load\"\n"
+        },
+        {
+          "name": "Transparency Dashboard Error",
+          "passed": false,
+          "score": 0,
+          "max_score": 20,
+          "error": "Page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/transparency\nCall log:\n  - navigating to \"http://localhost:3000/transparency\", waiting until \"load\"\n"
+        },
+        {
+          "name": "Operations Dashboard Error",
+          "passed": false,
+          "score": 0,
+          "max_score": 20,
+          "error": "Page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/ops\nCall log:\n  - navigating to \"http://localhost:3000/ops\", waiting until \"load\"\n"
+        }
+      ],
+      "score": 0.0,
+      "max_score": 100
+    }
+  },
+  "overall_score": 0.0,
+  "total_tests": 4,
+  "passed_tests": 0,
+  "failed_tests": 4
+}

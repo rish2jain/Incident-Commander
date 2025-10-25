@@ -1,0 +1,88 @@
+{
+  "session_id": "20251025_000554",
+  "timestamp": "2025-10-25T00:05:54.272846",
+  "validation_type": "DevPost Submission Features",
+  "categories": {
+    "3-Dashboard Architecture": {
+      "name": "3-Dashboard Architecture",
+      "tests": [
+        {
+          "name": "Power Demo Dashboard (/demo)",
+          "passed": false,
+          "score": 0,
+          "max_score": 25,
+          "error": "Page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/demo\nCall log:\n  - navigating to \"http://localhost:3000/demo\", waiting until \"load\"\n"
+        },
+        {
+          "name": "AI Transparency Dashboard (/transparency)",
+          "passed": false,
+          "score": 0,
+          "max_score": 25,
+          "error": "Page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/transparency\nCall log:\n  - navigating to \"http://localhost:3000/transparency\", waiting until \"load\"\n"
+        },
+        {
+          "name": "Operations Dashboard (/ops)",
+          "passed": false,
+          "score": 0,
+          "max_score": 25,
+          "error": "Page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/ops\nCall log:\n  - navigating to \"http://localhost:3000/ops\", waiting until \"load\"\n"
+        },
+        {
+          "name": "Dashboard Navigation",
+          "passed": false,
+          "score": 0,
+          "max_score": 25,
+          "error": "Page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/\nCall log:\n  - navigating to \"http://localhost:3000/\", waiting until \"load\"\n"
+        }
+      ],
+      "score": 0.0,
+      "max_score": 100
+    },
+    "Business Metrics": {
+      "name": "Business Metrics",
+      "tests": [
+        {
+          "name": "Business Metrics Display",
+          "passed": false,
+          "score": 0,
+          "max_score": 100,
+          "error": "Page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/demo\nCall log:\n  - navigating to \"http://localhost:3000/demo\", waiting until \"load\"\n"
+        }
+      ],
+      "score": 0.0,
+      "max_score": 100
+    },
+    "AWS AI Services Showcase": {
+      "name": "AWS AI Services Showcase",
+      "tests": [
+        {
+          "name": "AWS AI Services Display",
+          "passed": false,
+          "score": 0,
+          "max_score": 100,
+          "error": "Page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/transparency\nCall log:\n  - navigating to \"http://localhost:3000/transparency\", waiting until \"load\"\n"
+        }
+      ],
+      "score": 0.0,
+      "max_score": 100
+    },
+    "Byzantine Fault Tolerance": {
+      "name": "Byzantine Fault Tolerance",
+      "tests": [
+        {
+          "name": "Byzantine Consensus Features",
+          "passed": false,
+          "score": 0,
+          "max_score": 100,
+          "error": "Page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/transparency\nCall log:\n  - navigating to \"http://localhost:3000/transparency\", waiting until \"load\"\n"
+        }
+      ],
+      "score": 0.0,
+      "max_score": 100
+    }
+  },
+  "overall_score": 0.0,
+  "total_tests": 7,
+  "passed_tests": 0,
+  "failed_tests": 7
+}

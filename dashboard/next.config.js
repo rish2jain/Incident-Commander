@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'export',  // Enable static HTML export for CloudFront deployment
   images: {
     unoptimized: true,
     remotePatterns: [
@@ -9,24 +10,9 @@ const nextConfig = {
       },
     ],
   },
-  async redirects() {
-    return [];
-  },
-  async rewrites() {
-    // Use AWS API Gateway in production, localhost in development
-    const apiDestination =
-      process.env.NODE_ENV === "production"
-        ? "https://h8xlzr74h8.execute-api.us-east-1.amazonaws.com"
-        : "http://localhost:8000";
-
-    return [
-      {
-        source: "/api/:path*",
-        destination: `${apiDestination}/:path*`,
-      },
-    ];
-  },
-  // Configure for production deployment with full SSR support
+  // Note: redirects() and rewrites() are not supported with output: 'export'
+  // API calls will be made directly to the API Gateway URL from the client
+  // Configure for production deployment with static export
   // All path aliases have been replaced with relative imports
   // No webpack configuration needed
 };

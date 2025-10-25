@@ -413,7 +413,8 @@ export function useIncidentWebSocket(
     return () => {
       disconnect();
     };
-  }, [autoConnect, connect, disconnect]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoConnect]); // Only depend on autoConnect to prevent reconnection loops
 
   return {
     connected,

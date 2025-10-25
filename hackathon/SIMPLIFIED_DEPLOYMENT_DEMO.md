@@ -12,7 +12,7 @@ The system now features a streamlined Lambda-optimized deployment that maintains
 - **Core Incident Management**: Essential endpoints for incident creation, tracking, and management
 - **Health Monitoring**: Comprehensive health checks and system status endpoints
 - **Demo Statistics**: Business metrics and ROI calculation endpoints
-- **Prize Eligibility**: AWS AI service integration status endpoints
+- **AWS AI Integration**: AWS AI service integration status endpoints
 
 ## 🎬 Demo Scenarios
 
@@ -35,7 +35,7 @@ The system now features a streamlined Lambda-optimized deployment that maintains
 - Essential incident management capabilities
 - Health monitoring and status checks
 - Business metrics calculation
-- Prize eligibility confirmation
+- AWS AI integration status
 
 ### Scenario 2: Dashboard Integration (60 seconds)
 
@@ -142,8 +142,8 @@ curl -X POST http://localhost:8000/incidents \
 # Get demo stats
 curl http://localhost:8000/demo/stats
 
-# Check prize eligibility
-curl http://localhost:8000/real-aws-ai/prize-eligibility
+# Check AWS AI integration status
+curl http://localhost:8000/real-aws-ai/integration-status
 ```
 
 ## 📊 Expected Results
@@ -174,18 +174,22 @@ curl http://localhost:8000/real-aws-ai/prize-eligibility
 }
 ```
 
-**Prize Eligibility**:
+**AWS AI Integration Status**:
 
 ```json
 {
-  "eligible": true,
-  "categories": [
-    "Best Amazon Bedrock Implementation",
-    "Amazon Q Business Prize",
-    "Nova Act Prize",
-    "Strands SDK Prize"
+  "production_ready": 2,
+  "planned": 6,
+  "services": [
+    "Amazon Bedrock AgentCore",
+    "Claude 3.5 Sonnet",
+    "Claude 3 Haiku (planned)",
+    "Titan Embeddings (planned)",
+    "Amazon Q Business (planned)",
+    "Nova Act (planned)",
+    "Strands SDK (planned)",
+    "Bedrock Guardrails (planned)"
   ],
-  "aws_services_integrated": 8,
   "deployment_status": "production"
 }
 ```

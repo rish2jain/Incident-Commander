@@ -1,6 +1,6 @@
 # 🏆 System Evaluation Guide - Autonomous Incident Commander
 
-**Complete evaluation guide with all interactive features demonstrated.**
+**Complete evaluation guide focused on live AWS deployments.**
 
 ## 🎬 **Segmented MP4 Recording System Available - October 23, 2025**
 
@@ -29,20 +29,73 @@ python test_enhanced_recorder.py
 - **Business Value**: $2.8M annual savings with 458% ROI, 95.2% MTTR improvement
 - **Technical Excellence**: Partial AWS AI integration (2/8 production-ready), Byzantine fault-tolerant system
 - **Competitive Advantages**: Honest AWS AI integration roadmap, first predictive prevention capability
+- **Enhanced UI Features**: Latest agent completion indicators with success/failure visualization
+- **Consistent Documentation**: Updated markdown formatting with proper emphasis (_italic_ instead of _italic_)
 
-## 🚀 **30-Second Quick Start**
+## 🚀 **30-Second Quick Start - Review Live Dashboards**
 
-### 🌐 **Option 1: Live AWS Testing (Instant)**
+### 🌐 **Primary Option: Review AWS-Deployed Dashboards (RECOMMENDED)**
+
+**Three live dashboards demonstrating progression from concept to production:**
 
 ```bash
-# Test live deployment immediately - no setup required
-curl https://h8xlzr74h8.execute-api.us-east-1.amazonaws.com/health
-curl https://h8xlzr74h8.execute-api.us-east-1.amazonaws.com/real-aws-ai/integration-status
+# Dashboard 1: PowerDashboard Demo - Interactive Business Value
+https://d2j5829zuijr97.cloudfront.net/demo
+
+# Dashboard 2: Technical Transparency - AI Explainability Deep-Dive
+https://d2j5829zuijr97.cloudfront.net/transparency
+
+# Dashboard 3: Production Operations - Live System Monitoring
+https://d2j5829zuijr97.cloudfront.net/ops
+
+# Supporting API Backend - System Health & Integration Status
+https://h8xlzr74h8.execute-api.us-east-1.amazonaws.com/health
+https://h8xlzr74h8.execute-api.us-east-1.amazonaws.com/real-aws-ai/integration-status
 ```
 
-**Live AWS URL:** `https://h8xlzr74h8.execute-api.us-east-1.amazonaws.com`
+**✅ What you'll see:**
 
-### 💻 **Option 2: Local Setup (30 seconds)**
+**Dashboard 1 - PowerDashboard (/demo)**:
+
+- 4-column interactive layout with live agent coordination
+- Auto-incrementing savings counter ($2.8M annual value)
+- Real-time incident timeline with agent status
+- Business impact visualization with ROI metrics
+- Functional replay/restart/speed controls
+- Visual showcase of all 8 AWS AI services
+- Transparent mock data labeling for demo clarity
+
+**Dashboard 2 - Technical Transparency (/transparency)**:
+
+- 15-minute AI explainability technical deep-dive
+- Pre-generated content using REAL AWS services
+- Service attribution badges showing AWS integration
+- Agent reasoning and decision-making processes
+- Confidence calibration and bias detection
+- Multi-agent communication visualization
+
+**Dashboard 3 - Production Operations (/ops)**:
+
+- Real operational monitoring dashboard
+- Live WebSocket connection to backend
+- Actual incident management interface
+- Production-ready Lambda deployment
+- Core AWS service integration
+
+### 🧪 **Option 2: Test Backend APIs Directly**
+
+```bash
+# System health check
+curl https://h8xlzr74h8.execute-api.us-east-1.amazonaws.com/health
+
+# AWS AI services integration status
+curl https://h8xlzr74h8.execute-api.us-east-1.amazonaws.com/real-aws-ai/integration-status
+
+# Demo statistics and metrics
+curl https://h8xlzr74h8.execute-api.us-east-1.amazonaws.com/demo/stats
+```
+
+### 💻 **Option 3: Local Setup (If Preferred)**
 
 ```bash
 # Automated setup with browser launch
@@ -50,21 +103,10 @@ git clone <repository-url>
 cd incident-commander
 make judge-quick-start
 
-# Browser automatically opens to: http://localhost:3000/agent_actions_dashboard.html?auto-demo=true
-# Cross-platform browser opening:
-# - macOS: Uses 'open' command
-# - Windows: Uses 'start' command
-# - Linux: Uses 'xdg-open' command
-# - Manual: Navigate to URL in any browser
+# Browser automatically opens to: http://localhost:3000/demo?auto-demo=true
 ```
 
-**✅ What happens automatically:**
-
-- All dependencies installed and validated
-- Demo environment initialized with health checks
-- Interactive dashboard launched with auto-demo enabled
-- WebSocket connectivity established for real-time updates
-- Demo incident automatically triggers after 3 seconds
+**Note**: Local setup takes ~30 seconds, AWS dashboards are instant access.
 
 ## 🎯 **Task 12: Interactive Demo Controller - ALL 7 SUBTASKS COMPLETE**
 
@@ -439,33 +481,63 @@ cd scripts && ./run_demo_recording.sh
 
 ## 🎮 **Judge Evaluation Workflow**
 
-### **Phase 1: Quick Setup (30 seconds)**
+### **Phase 1: Dashboard Review (2-5 minutes)**
 
-1. Run `make judge-quick-start`
-2. Browser opens automatically to interactive dashboard
-3. System validates all components automatically
-4. Judge controls become available immediately
+**Primary Evaluation Method - Review Live AWS Dashboards:**
 
-### **Phase 2: Technical Evaluation (5-10 minutes)**
+1. **PowerDashboard Demo** (https://d2j5829zuijr97.cloudfront.net/demo)
 
-1. **Test Multi-Agent Coordination**: Trigger database cascade scenario
-2. **Evaluate Fault Tolerance**: Use chaos engineering controls
-3. **Assess Performance**: Monitor MTTR and success rates
-4. **Verify AWS AI Integration**: Observe all 8 services working together
+   - Review business value visualization ($2.8M savings, 458% ROI)
+   - Observe interactive incident timeline and agent coordination
+   - Test replay/restart controls for demo interaction
+   - Verify transparent mock data labeling
 
-### **Phase 3: Business Value Assessment (3-5 minutes)**
+2. **Technical Transparency** (https://d2j5829zuijr97.cloudfront.net/transparency)
 
-1. **Review ROI Metrics**: $2.8M savings with 458% ROI
-2. **Analyze Cost Comparison**: $47 vs $5,600 per incident
-3. **Evaluate Compliance**: SOC2 dashboard and audit capabilities
-4. **Assess Market Position**: Competitive advantages and differentiation
+   - Examine AI explainability and agent reasoning
+   - Review AWS service attribution badges
+   - Analyze decision-making processes and confidence calibration
+   - Verify real AWS-generated content (pre-cached)
 
-### **Phase 4: Interactive Exploration (Unlimited)**
+3. **Production Operations** (https://d2j5829zuijr97.cloudfront.net/ops)
+   - Test live WebSocket connectivity
+   - Verify production-ready deployment
+   - Review incident management interface
+   - Confirm core AWS service integration
 
-1. **Create Custom Incidents**: Test with judge-defined parameters
-2. **Modify System Behavior**: Real-time parameter adjustment
-3. **Analyze Agent Decisions**: Conversation replay and reasoning analysis
-4. **Test Edge Cases**: Fault injection and recovery scenarios
+### **Phase 2: Backend API Testing (2-3 minutes - Optional)**
+
+Test the supporting API infrastructure:
+
+```bash
+# System health verification
+curl https://h8xlzr74h8.execute-api.us-east-1.amazonaws.com/health
+
+# AWS AI integration status
+curl https://h8xlzr74h8.execute-api.us-east-1.amazonaws.com/real-aws-ai/integration-status
+
+# Performance metrics
+curl https://h8xlzr74h8.execute-api.us-east-1.amazonaws.com/demo/stats
+```
+
+### **Phase 3: Technical Deep Dive (5-10 minutes - Optional)**
+
+For comprehensive technical evaluation:
+
+1. **Local Setup** (if desired): Run `make judge-quick-start`
+2. **Multi-Agent Coordination**: Trigger database cascade scenario
+3. **Fault Tolerance**: Use chaos engineering controls
+4. **Performance Assessment**: Monitor MTTR and success rates
+5. **AWS AI Verification**: Test all 8 service integrations
+
+### **Phase 4: Business Value Assessment (3-5 minutes)**
+
+Review quantified business impact:
+
+1. **ROI Metrics**: $2.8M savings with 458% ROI
+2. **Cost Comparison**: $47 vs $5,600 per incident
+3. **Compliance**: SOC2 dashboard and audit capabilities
+4. **Market Position**: Competitive advantages and differentiation
 
 ## 🏆 **Competitive Advantages for Judges**
 
@@ -558,13 +630,29 @@ python test_demo_recorder.py
 
 ## 🌐 **Key URLs for Judges**
 
-- **Auto-Demo Dashboard**: http://localhost:3000/agent_actions_dashboard.html?auto-demo=true
-- **Manual Demo Dashboard**: http://localhost:3000/agent_actions_dashboard.html
-- **Standalone Dashboard**: http://localhost:3000/standalone.html
-- **System Status**: http://localhost:8000/dashboard/system-status
-- **API Documentation**: http://localhost:8000/docs
-- **Health Check**: http://localhost:8000/health
-- **Real-Time Metrics**: http://localhost:8000/dashboard/demo/metrics/live
+### **Live AWS Dashboards (PRIMARY)**
+
+- **PowerDashboard Demo**: https://d2j5829zuijr97.cloudfront.net/demo
+- **Technical Transparency Dashboard**: https://d2j5829zuijr97.cloudfront.net/transparency
+- **Production Operations Dashboard**: https://d2j5829zuijr97.cloudfront.net/ops
+
+### **API Backend Endpoints**
+
+- **System Health**: https://h8xlzr74h8.execute-api.us-east-1.amazonaws.com/health
+- **AWS AI Integration Status**: https://h8xlzr74h8.execute-api.us-east-1.amazonaws.com/real-aws-ai/integration-status
+- **Demo Statistics**: https://h8xlzr74h8.execute-api.us-east-1.amazonaws.com/demo/stats
+
+### **API Documentation (if needed)**
+
+- **Interactive API Docs**: https://h8xlzr74h8.execute-api.us-east-1.amazonaws.com/docs
+
+### **Local Development URLs (Optional)**
+
+Only if running local setup:
+
+- Auto-Demo Dashboard: http://localhost:3000/demo?auto-demo=true
+- Transparency Dashboard: http://localhost:3000/transparency
+- Operations Dashboard: http://localhost:3000/ops
 
 ---
 

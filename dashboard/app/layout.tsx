@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { headers } from "next/headers";
 // Font import temporarily disabled due to network restrictions
 // import { Inter } from "next/font/google";
 import { ThemeProvider } from "next-themes";
@@ -29,19 +28,19 @@ export const viewport = {
   initialScale: 1,
 };
 
-export default async function RootLayout({
+// Static export compatible - no server-side headers
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const incomingHeaders = await headers();
-  const styleNonce = incomingHeaders.get("x-style-nonce");
+  // For static export, nonce is not used (CSP headers set at CloudFront level)
+  const styleNonce = null;
 
   return (
     <html lang="en" suppressHydrationWarning>
       <body
         className="font-sans"
-        data-style-nonce={styleNonce ?? undefined}
       >
         <StyleNonceProvider nonce={styleNonce}>
           <ThemeProvider

@@ -4,15 +4,20 @@
 
 ### Cloud Deployment (Recommended for Judges)
 
-**Interactive Dashboard URL**: `https://main.d3jy9k6riuse52.amplifyapp.com`
+**Dashboard URL**: `https://d2j5829zuijr97.cloudfront.net`
 
-**Static Dashboard URL**: `https://d2j5829zuijr97.cloudfront.net`
+**Three Interactive Dashboards**:
+- 💼 Power Demo: `https://d2j5829zuijr97.cloudfront.net/demo.html`
+- 🧠 AI Transparency: `https://d2j5829zuijr97.cloudfront.net/transparency.html`
+- ⚙️ Operations: `https://d2j5829zuijr97.cloudfront.net/ops.html`
 
 **API Endpoint**: `https://h8xlzr74h8.execute-api.us-east-1.amazonaws.com`
 
 **Access Method**: Direct browser access - no installation required
 
-**Features**: Full SSR, 3D visualizations, WebSocket real-time updates, animations
+**Features**: Static export with Next.js, WebSocket real-time updates, interactive animations
+
+**Status**: ✅ Live and operational
 
 ---
 

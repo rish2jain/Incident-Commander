@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Convert simplified judge guide to PDF with Mermaid diagrams
+Convert combined markdown to PDF with Mermaid diagram rendering
 """
 
 import sys
@@ -19,7 +19,7 @@ def render_mermaid_to_png(mermaid_code: str, output_path: str) -> bool:
 
         # Render using mermaid-cli (mmdc)
         result = subprocess.run(
-            ['npx', '-y', '@mermaid-js/mermaid-cli', '-i', mmd_file, '-o', output_path, '-b', 'transparent', '-w', '1200'],
+            ['npx', '-y', '@mermaid-js/mermaid-cli', '-i', mmd_file, '-o', output_path, '-b', 'transparent'],
             capture_output=True,
             text=True,
             timeout=30
@@ -48,13 +48,12 @@ def process_mermaid_diagrams(md_content: str, temp_dir: str) -> str:
 
         png_path = os.path.join(temp_dir, f"mermaid_diagram_{diagram_count}.png")
 
-        print(f"  📊 Rendering diagram {diagram_count}...")
         if render_mermaid_to_png(mermaid_code, png_path):
             # Convert to base64 for embedding
             import base64
             with open(png_path, 'rb') as img_file:
                 img_data = base64.b64encode(img_file.read()).decode('utf-8')
-            return f'<div style="page-break-inside: avoid; text-align: center; margin: 20px 0;"><img src="data:image/png;base64,{img_data}" style="max-width: 95%; height: auto;" /></div>'
+            return f'<img src="data:image/png;base64,{img_data}" style="max-width: 100%; height: auto;" />'
         else:
             # Fallback to code block if rendering fails
             return f'```\n{mermaid_code}\n```'
@@ -103,11 +102,6 @@ def convert_markdown_to_pdf(input_md: str, output_pdf: str):
         @page {
             size: letter;
             margin: 0.75in;
-            @bottom-center {
-                content: "SwarmAI - AWS Generative AI Hackathon";
-                font-size: 8pt;
-                color: #999;
-            }
             @bottom-right {
                 content: "Page " counter(page);
                 font-size: 9pt;
@@ -117,86 +111,81 @@ def convert_markdown_to_pdf(input_md: str, output_pdf: str):
 
         body {
             font-family: 'Helvetica', 'Arial', sans-serif;
-            font-size: 11pt;
-            line-height: 1.6;
+            font-size: 10pt;
+            line-height: 1.5;
             color: #333;
         }
 
         h1 {
             color: #0066cc;
-            font-size: 24pt;
-            margin-top: 24pt;
-            margin-bottom: 12pt;
+            font-size: 22pt;
+            margin-top: 20pt;
+            margin-bottom: 10pt;
             page-break-after: avoid;
-            border-bottom: 3px solid #0066cc;
-            padding-bottom: 8pt;
+            border-bottom: 2px solid #0066cc;
+            padding-bottom: 5pt;
         }
 
         h2 {
             color: #0066cc;
-            font-size: 18pt;
-            margin-top: 20pt;
-            margin-bottom: 10pt;
-            page-break-after: avoid;
-            background-color: #f0f8ff;
-            padding: 8px 12px;
-            border-left: 4px solid #0066cc;
-        }
-
-        h3 {
-            color: #333;
-            font-size: 14pt;
-            margin-top: 14pt;
+            font-size: 16pt;
+            margin-top: 16pt;
             margin-bottom: 8pt;
             page-break-after: avoid;
         }
 
-        h4 {
+        h3 {
             color: #333;
-            font-size: 12pt;
+            font-size: 13pt;
             margin-top: 12pt;
             margin-bottom: 6pt;
             page-break-after: avoid;
         }
 
+        h4 {
+            color: #333;
+            font-size: 11pt;
+            margin-top: 10pt;
+            margin-bottom: 5pt;
+            page-break-after: avoid;
+        }
+
         code {
             background-color: #f5f5f5;
-            padding: 2px 5px;
+            padding: 1px 4px;
             border-radius: 3px;
             font-family: 'Courier New', monospace;
-            font-size: 10pt;
-            color: #c7254e;
+            font-size: 9pt;
         }
 
         pre {
             background-color: #f8f8f8;
-            padding: 12px;
+            padding: 8px;
             border-radius: 4px;
             border-left: 3px solid #0066cc;
             overflow-x: auto;
-            font-size: 9pt;
+            font-size: 8pt;
             line-height: 1.4;
-            margin: 12px 0;
+            margin: 10px 0;
             page-break-inside: avoid;
         }
 
         pre code {
             background-color: transparent;
             padding: 0;
-            color: #333;
         }
 
         table {
             border-collapse: collapse;
             width: 100%;
-            margin: 15px 0;
-            font-size: 10pt;
+            margin: 12px 0;
+            font-size: 9pt;
             page-break-inside: avoid;
         }
 
         th, td {
             border: 1px solid #ddd;
-            padding: 8px;
+            padding: 6px;
             text-align: left;
         }
 
@@ -212,11 +201,11 @@ def convert_markdown_to_pdf(input_md: str, output_pdf: str):
 
         blockquote {
             border-left: 4px solid #0066cc;
-            padding-left: 15px;
+            padding-left: 12px;
             margin-left: 0;
             color: #666;
             font-style: italic;
-            margin: 12px 0;
+            margin: 10px 0;
         }
 
         a {
@@ -225,19 +214,18 @@ def convert_markdown_to_pdf(input_md: str, output_pdf: str):
         }
 
         ul, ol {
-            margin: 10px 0;
-            padding-left: 30px;
+            margin: 8px 0;
+            padding-left: 25px;
         }
 
         li {
-            margin: 5px 0;
+            margin: 4px 0;
         }
 
         hr {
             border: none;
             border-top: 2px solid #ddd;
-            margin: 20px 0;
-            page-break-after: avoid;
+            margin: 15px 0;
         }
 
         img {
@@ -245,58 +233,34 @@ def convert_markdown_to_pdf(input_md: str, output_pdf: str):
             height: auto;
             display: block;
             margin: 15px auto;
+            page-break-inside: avoid;
         }
 
         strong {
             color: #000;
-            font-weight: bold;
         }
 
         em {
             font-style: italic;
         }
-
-        /* Checkboxes */
-        input[type="checkbox"] {
-            margin-right: 8px;
-        }
-
-        /* Highlight boxes */
-        .highlight {
-            background-color: #d4edda;
-            border-left: 4px solid #28a745;
-            padding: 12px;
-            margin: 12px 0;
-        }
         """
 
-        # Wrap HTML with proper structure and cover page
+        # Wrap HTML with proper structure
         full_html = f"""
         <!DOCTYPE html>
         <html>
         <head>
             <meta charset="UTF-8">
-            <title>SwarmAI - Judge Evaluation Guide</title>
+            <title>SwarmAI - AWS Hackathon Submission</title>
         </head>
         <body>
-            <div style="page-break-after: always; text-align: center; padding-top: 200px;">
-                <h1 style="font-size: 36pt; color: #0066cc; border: none; margin-bottom: 20pt;">
-                    SwarmAI
-                </h1>
-                <p style="font-size: 18pt; color: #666; margin-bottom: 40pt;">
-                    Autonomous Incident Commander
-                </p>
-                <p style="font-size: 14pt; color: #333; margin-bottom: 60pt;">
-                    <strong>AWS Generative AI Hackathon</strong><br/>
-                    Judge Evaluation Guide
-                </p>
-                <div style="background-color: #f0f8ff; padding: 20px; border-radius: 8px; display: inline-block; text-align: left;">
-                    <p style="margin: 5px 0;"><strong>✅ Live Dashboards:</strong> d2j5829zuijr97.cloudfront.net</p>
-                    <p style="margin: 5px 0;"><strong>🎯 MTTR Reduction:</strong> 95.2% (30min → 1.4min)</p>
-                    <p style="margin: 5px 0;"><strong>💰 Annual Savings:</strong> $2.8M (458% ROI)</p>
-                    <p style="margin: 5px 0;"><strong>🤖 AWS AI Services:</strong> 2/8 Production, 6/8 Planned</p>
-                </div>
-            </div>
+            <h1 style="text-align: center; color: #0066cc; font-size: 28pt; margin-bottom: 30pt;">
+                SwarmAI - Autonomous Incident Commander
+            </h1>
+            <p style="text-align: center; font-size: 14pt; color: #666; margin-bottom: 40pt;">
+                AWS Generative AI Hackathon Submission<br/>
+                <em>Byzantine Fault-Tolerant Multi-Agent System</em>
+            </p>
             {html_content}
         </body>
         </html>
@@ -320,14 +284,6 @@ def convert_markdown_to_pdf(input_md: str, output_pdf: str):
         size_mb = os.path.getsize(output_pdf) / (1024 * 1024)
         print(f"📦 File size: {size_mb:.2f} MB")
 
-        # Count pages (approximate)
-        from PyPDF2 import PdfReader
-        try:
-            reader = PdfReader(output_pdf)
-            print(f"📄 Pages: {len(reader.pages)}")
-        except:
-            pass
-
         return True
 
     except ImportError as e:
@@ -340,24 +296,27 @@ def convert_markdown_to_pdf(input_md: str, output_pdf: str):
         return False
 
 if __name__ == "__main__":
-    input_file = "hackathon/SIMPLIFIED_JUDGE_GUIDE.md"
-    output_file = "hackathon/SwarmAI_Judge_Guide_Simple.pdf"
+    import argparse
+    
+    parser = argparse.ArgumentParser(description="Convert Markdown to PDF with Mermaid diagram support")
+    parser.add_argument("input_file", help="Input markdown file path")
+    parser.add_argument("-o", "--output", help="Output PDF file path (optional)")
+    
+    args = parser.parse_args()
+    
+    input_file = args.input_file
+    output_file = args.output or input_file.replace('.md', '.pdf')
 
     if not os.path.exists(input_file):
         print(f"❌ Input file not found: {input_file}")
+        print(f"Usage: python {sys.argv[0]} <input_file.md> [-o output_file.pdf]")
         sys.exit(1)
 
-    print("🚀 Creating simplified judge-friendly PDF...")
+    print("🚀 Starting PDF conversion with Mermaid diagram support...")
     success = convert_markdown_to_pdf(input_file, output_file)
 
     if success:
-        print("\n✅ Judge-friendly PDF ready!")
+        print("\n✅ PDF conversion complete!")
         print(f"📄 Location: {os.path.abspath(output_file)}")
-        print("\nThis PDF includes:")
-        print("  ✓ Quick summary and access links")
-        print("  ✓ Architecture diagrams (visual)")
-        print("  ✓ Key innovations explained")
-        print("  ✓ Evaluation checklist")
-        print("  ✓ Testing instructions")
 
     sys.exit(0 if success else 1)

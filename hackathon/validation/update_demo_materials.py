@@ -35,6 +35,10 @@ class DemoMaterialsUpdater:
             # Use negative lookbehind and lookahead to avoid matching **bold**
             content = re.sub(r'(?<!\*)\*(?!\*)([^*]+?)(?<!\*)\*(?!\*)', r'_\1_', content)
             
+            # Fix specific formatting issues mentioned in the diff
+            content = content.replace('(_italic_ instead of _italic_)', '(use _italic_ instead of _italic_)')
+            content = content.replace('(_italic_ instead of *italic*)', '(use _italic_ instead of *italic*)')
+            
             if content != original_content:
                 file_path.write_text(content, encoding='utf-8')
                 self.updates_made.append(f"Updated markdown formatting in {file_path}")
@@ -57,9 +61,9 @@ class DemoMaterialsUpdater:
             # Add latest UI features if not present
             latest_features = [
                 "Enhanced Agent Completion Indicators",
-                "Smart Success/Failure Indicators", 
-                "Professional UI Polish",
-                "Consistent Markdown Formatting"
+                "Smart Success/Failure Indicators with XCircle/CheckCircle visual feedback", 
+                "Professional UI Polish with improved visual hierarchy",
+                "Consistent Markdown Formatting (use _italic_ instead of _italic_)"
             ]
             
             # Check if we need to add latest features section

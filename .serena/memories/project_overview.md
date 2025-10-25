@@ -118,7 +118,7 @@ python src/main.py  # Backend in separate terminal
 # - API: http://localhost:8000/docs
 
 # Classic Demo (Legacy)
-python start_demo.py  # Opens http://localhost:8000
+python demo/start_demo.py  # Opens http://localhost:8000
 
 # Development Setup
 docker-compose up -d  # Start LocalStack + Redis

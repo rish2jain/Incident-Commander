@@ -55,7 +55,7 @@ cd ..
 python -m uvicorn src.main:app --reload --port 8000
 
 # Or use the demo script
-python start_demo.py
+python demo/start_demo.py
 
 # Start frontend (separate terminal)
 cd dashboard
@@ -236,22 +236,22 @@ python hackathon/test_complete_deployment_system.py \
   --environment production
 
 # Check system status
-python check_system_status.py --environment production
+python scripts/monitoring/check_system_status.py --environment production
 ```
 
 ### Core System Deployment Scripts
 ```bash
 # Deploy core system (Phase 1-4)
-python deploy_core_system.py --environment production
+python deployment/deploy_core_system.py --environment production
 
 # Deploy complete system (Phase 1-8)
-python deploy_complete_system.py --environment production
+python deployment/deploy_complete_system.py --environment production
 
 # Deploy with validation
-python deploy_validated_system.py --environment production
+python deployment/deploy_validated_system.py --environment production
 
 # Production deployment with all checks
-python deploy_production.py --environment production
+python deployment/deploy_production.py --environment production
 ```
 
 ## Monitoring & Debugging
@@ -321,13 +321,13 @@ python -c "from src.main import app; import IPython; IPython.embed()"
 ### Demo Recording
 ```bash
 # Quick demo recording
-python quick_demo_record.py
+python demo/quick_demo_record.py
 
 # Comprehensive demo recording
-python record_demo.py
+python demo/record_demo.py
 
 # Enhanced demo recorder
-python test_enhanced_recorder.py
+python demo/test_enhanced_recorder.py
 
 # Comprehensive demo recorder with all features
 cd scripts
@@ -337,10 +337,10 @@ python comprehensive_demo_recorder.py
 ### Demo Execution
 ```bash
 # Start simple demo
-python start_simple.py
+python demo/start_simple.py
 
 # Start full demo with dashboard
-python start_demo.py
+python demo/start_demo.py
 
 # Run specific demo scenario
 curl -X POST http://localhost:8000/demo/scenarios/database_outage
@@ -494,9 +494,9 @@ alias gp="git push"
 alias gc="git commit -m"
 
 # SwarmAI specific
-alias demo="python start_demo.py"
+alias demo="python demo/start_demo.py"
 alias test-all="pytest && cd dashboard && npm test && cd .."
-alias deploy-prod="python deploy_production.py --environment production"
+alias deploy-prod="python deployment/deploy_production.py --environment production"
 ```
 
 ## Performance Profiling

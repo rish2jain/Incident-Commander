@@ -1,15 +1,11 @@
 #!/usr/bin/env python3
-
-
-October 24, 2025 - Updated to validate latest UI enhancements
 """
 Architecture Updates Validation Script
 
+October 24, 2025 - Updated to validate latest UI enhancements
+
 Validates that the hackathon demo files are consistent with the updated
 HACKATHON_ARCHITECTURE.md honest assessment of AWS AI service integration.
-
-
-October 24, 2025 - Updated to validate latest UI enhancements
 """
 
 import json

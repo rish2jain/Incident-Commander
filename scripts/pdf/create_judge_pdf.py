@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Convert combined markdown to PDF with Mermaid diagram rendering
+Convert judge guide and architecture to PDF with Mermaid diagrams
 """
 
 import sys
@@ -17,9 +17,20 @@ def render_mermaid_to_png(mermaid_code: str, output_path: str) -> bool:
             f.write(mermaid_code)
             mmd_file = f.name
 
-        # Render using mermaid-cli (mmdc)
+        # Render using mermaid-cli (mmdc) - prefer local binary, fallback to pinned npx
+        import shutil
+        
+        mermaid_version = os.environ.get('MERMAID_CLI_VERSION', '10.6.1')
+        
+        if shutil.which('mmdc'):
+            # Use local mmdc binary
+            cmd = ['mmdc', '-i', mmd_file, '-o', output_path, '-b', 'transparent']
+        else:
+            # Use pinned npx version
+            cmd = ['npx', '-y', f'@mermaid-js/mermaid-cli@{mermaid_version}', '-i', mmd_file, '-o', output_path, '-b', 'transparent']
+        
         result = subprocess.run(
-            ['npx', '-y', '@mermaid-js/mermaid-cli', '-i', mmd_file, '-o', output_path, '-b', 'transparent'],
+            cmd,
             capture_output=True,
             text=True,
             timeout=30
@@ -48,6 +59,7 @@ def process_mermaid_diagrams(md_content: str, temp_dir: str) -> str:
 
         png_path = os.path.join(temp_dir, f"mermaid_diagram_{diagram_count}.png")
 
+        print(f"  📊 Rendering diagram {diagram_count}...")
         if render_mermaid_to_png(mermaid_code, png_path):
             # Convert to base64 for embedding
             import base64
@@ -251,14 +263,14 @@ def convert_markdown_to_pdf(input_md: str, output_pdf: str):
         <html>
         <head>
             <meta charset="UTF-8">
-            <title>SwarmAI - AWS Hackathon Submission</title>
+            <title>SwarmAI - Judge Evaluation Guide</title>
         </head>
         <body>
-            <h1 style="text-align: center; color: #0066cc; font-size: 28pt; margin-bottom: 30pt;">
+            <h1 style="text-align: center; color: #0066cc; font-size: 28pt; margin-bottom: 15pt;">
                 SwarmAI - Autonomous Incident Commander
             </h1>
             <p style="text-align: center; font-size: 14pt; color: #666; margin-bottom: 40pt;">
-                AWS Generative AI Hackathon Submission<br/>
+                <strong>AWS Generative AI Hackathon - Judge Evaluation Guide</strong><br/>
                 <em>Byzantine Fault-Tolerant Multi-Agent System</em>
             </p>
             {html_content}
@@ -296,18 +308,18 @@ def convert_markdown_to_pdf(input_md: str, output_pdf: str):
         return False
 
 if __name__ == "__main__":
-    input_file = "hackathon/COMBINED_HACKATHON_SUBMISSION.md"
-    output_file = "hackathon/SwarmAI_Hackathon_Submission.pdf"
+    input_file = "hackathon/JUDGE_GUIDE_AND_ARCHITECTURE.md"
+    output_file = "hackathon/SwarmAI_Judge_Guide_And_Architecture.pdf"
 
     if not os.path.exists(input_file):
         print(f"❌ Input file not found: {input_file}")
         sys.exit(1)
 
-    print("🚀 Starting PDF conversion with Mermaid diagram support...")
+    print("🚀 Creating Judge Guide + Architecture PDF with Mermaid diagrams...")
     success = convert_markdown_to_pdf(input_file, output_file)
 
     if success:
-        print("\n✅ PDF submission ready!")
+        print("\n✅ PDF ready for judges!")
         print(f"📄 Location: {os.path.abspath(output_file)}")
 
     sys.exit(0 if success else 1)

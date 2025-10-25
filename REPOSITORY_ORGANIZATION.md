@@ -31,14 +31,14 @@ incident-commander/
 │
 ├── 📄 Core Documentation
 │   ├── README.md                           # Main project overview
-│   ├── JUDGE_REVIEW_INSTRUCTIONS.md        # 🆕 Judge evaluation guide
-│   ├── SYSTEM_ARCHITECTURE_DIAGRAMS.md     # 🆕 Interactive architecture diagrams
-│   ├── SwarmAI_Architecture_Diagrams.pdf   # 🆕 Printable architecture PDF
-│   ├── REPOSITORY_ORGANIZATION.md          # 🆕 This file
+│   ├── JUDGE_REVIEW_INSTRUCTIONS.md        # Judge evaluation guide
+│   ├── SYSTEM_ARCHITECTURE_DIAGRAMS.md     # Interactive architecture diagrams
+│   ├── SwarmAI_Architecture_Diagrams.pdf   # Printable architecture PDF
+│   ├── REPOSITORY_ORGANIZATION.md          # This file
 │   ├── ARCHITECTURE.md                     # Technical architecture
 │   ├── DEPLOYMENT.md                       # Deployment guide
 │   ├── API.md                              # API documentation
-│   └── MODERNIZATION_PLAN.md               # System evolution roadmap
+│   └── DOCUMENTATION_INDEX.md              # Documentation index
 │
 ├── 🎨 Branding Assets
 │   ├── SwarmAI solid.png                   # Logo - solid background
@@ -50,9 +50,20 @@ incident-commander/
 │       ├── README.md                       # Hackathon overview
 │       ├── MASTER_SUBMISSION_GUIDE.md      # Complete submission package
 │       ├── COMPREHENSIVE_JUDGE_GUIDE.md    # Detailed evaluation guide
-│       ├── HACKATHON_ARCHITECTURE.md       # Architecture for judges
-│       ├── DEPLOYMENT_CAPABILITIES_SUMMARY.md
-│       └── [Additional submission materials]
+│       ├── JUDGE_GUIDE_AND_ARCHITECTURE.md # Architecture for judges
+│       ├── SIMPLIFIED_JUDGE_GUIDE.md       # Quick judge guide
+│       ├── HACKATHON_ARCHITECTURE.md       # Technical architecture
+│       ├── DOCUMENTATION.md                # Hackathon documentation
+│       ├── DEVPOST_SUBMISSION.md           # Devpost submission
+│       ├── SwarmAI_Judge_Guide_Simple.pdf  # PDF guide
+│       ├── validation/                     # Validation scripts
+│       │   ├── README.md                   # Validation guide
+│       │   ├── test_complete_deployment_system.py
+│       │   ├── validate_*.py               # Various validators
+│       │   └── update_demo_materials.py
+│       └── archive/                        # Historical materials
+│           ├── reports/                    # JSON validation reports
+│           └── summaries/                  # Status summaries
 │
 ├── 💻 Source Code
 │   ├── src/                                # Backend Python code
@@ -61,8 +72,7 @@ incident-commander/
 │   │   ├── services/                       # Core services and agents
 │   │   ├── models/                         # Data models
 │   │   ├── schemas/                        # Pydantic schemas
-│   │   ├── utils/                          # Utilities and helpers
-│   │   └── [Additional modules]
+│   │   └── utils/                          # Utilities and helpers
 │   │
 │   ├── agents/                             # Multi-agent system
 │   │   ├── detection/                      # Detection agent
@@ -76,71 +86,91 @@ incident-commander/
 │       │   ├── demo/                       # PowerDashboard (executive view)
 │       │   ├── transparency/               # AI Transparency dashboard
 │       │   └── ops/                        # Operations dashboard
-│       ├── src/components/                 # React components
-│       ├── package.json                    # Node dependencies
-│       └── [Additional frontend files]
+│       └── src/components/                 # React components
 │
 ├── 🧪 Tests
 │   └── tests/
 │       ├── unit/                           # Unit tests
 │       ├── integration/                    # Integration tests
 │       ├── contract/                       # Contract tests
-│       ├── benchmarks/                     # Performance benchmarks
-│       └── [Additional test suites]
+│       └── benchmarks/                     # Performance benchmarks
 │
 ├── 🏗️ Infrastructure
 │   └── infrastructure/
 │       ├── cdk/                            # AWS CDK deployment
 │       │   ├── app.py                      # CDK app entry point
-│       │   ├── incident_commander_stack.py # Main stack
-│       │   └── [Additional stacks]
+│       │   └── incident_commander_stack.py # Main stack
 │       └── stacks/                         # Modular stack components
 │
-├── 📊 Demo & Recordings
-│   └── demo_recordings/
-│       ├── videos/                         # Demo video recordings
-│       ├── screenshots/                    # Demo screenshots
-│       └── [Recording metadata]
+├── 🚀 Deployment
+│   └── deployment/                         # 🆕 All deployment scripts
+│       ├── README.md                       # Deployment guide
+│       ├── deploy_production.py            # Production deployment
+│       ├── deploy_complete_system.py       # Complete system
+│       ├── deploy_core_system.py           # Core system only
+│       ├── deploy_validated_system.py      # Validated deployment
+│       ├── deploy_dashboard_to_aws.py      # Dashboard deployment
+│       ├── deploy_simple_dashboard.py      # Simple dashboard
+│       ├── validate_deployment.py          # Validation
+│       └── *.sh                            # Shell deployment scripts
 │
-├── 🚀 Deployment Scripts
-│   ├── deploy_complete_system.py           # Complete deployment orchestration
-│   ├── deploy_production.py                # Production deployment
-│   ├── setup_monitoring.py                 # Monitoring setup
-│   ├── validate_deployment.py              # Deployment validation
-│   └── [Additional deployment tools]
+├── 🎬 Demo & Testing
+│   └── demo/                               # 🆕 Demo and testing
+│       ├── README.md                       # Demo guide
+│       ├── start_demo.py                   # Classic demo launcher
+│       ├── record_demo.py                  # Professional recorder
+│       ├── quick_demo_record.py            # Quick recording
+│       ├── start_simple.py                 # Simplified demo
+│       ├── test_aws_integration.py         # AWS tests
+│       ├── test_enhanced_recorder.py       # Recorder tests
+│       └── test_transparency_features.py   # Transparency tests
 │
-├── 🎬 Demo & Testing Scripts
-│   ├── start_demo.py                       # Classic demo launcher
-│   ├── record_demo.py                      # Professional demo recorder
-│   ├── quick_demo_record.py                # Quick demo recording
-│   └── [Additional demo tools]
+├── 🔧 Utility Scripts
+│   └── scripts/                            # Organized utilities
+│       ├── README.md                       # Scripts guide
+│       ├── pdf/                            # 🆕 PDF generation
+│       │   ├── generate_combined_pdf.py
+│       │   ├── generate_architecture_pdf.py
+│       │   ├── generate_judge_instructions_pdf.py
+│       │   ├── create_judge_pdf.py
+│       │   └── create_simple_judge_pdf.py
+│       ├── monitoring/                     # 🆕 Monitoring tools
+│       │   ├── check_system_status.py
+│       │   └── setup_monitoring.py
+│       ├── utilities/                      # 🆕 General utilities
+│       │   ├── add_dashboard_to_api.py
+│       │   ├── dashboard_lambda.py
+│       │   └── simple_dashboard_lambda.py
+│       └── archive/                        # Deprecated scripts
+│           ├── convert_md_to_pdf.py
+│           └── convert_md_to_pdf_v2.py
+│
+├── 📚 Documentation
+│   └── docs/
+│       ├── README.md                       # Documentation index
+│       ├── SwarmAI_Documentation_Combined.md
+│       └── SwarmAI_Documentation_Latest.pdf
+│
+├── 🤖 Claude Analysis
+│   └── claudedocs/                         # Claude Code analysis
+│       ├── REPOSITORY_CLEANUP_PLAN.md      # This cleanup plan
+│       ├── CHANGES_REVIEW_AND_RECOMMENDATIONS.md
+│       ├── COMPREHENSIVE_CODE_ANALYSIS.md
+│       └── [Other analysis documents]
 │
 ├── 📦 Configuration
 │   ├── .env.example                        # Environment template
-│   ├── .env.hackathon                      # Hackathon configuration
 │   ├── requirements.txt                    # Python dependencies
 │   ├── pyproject.toml                      # Python project config
 │   ├── docker-compose.yml                  # Docker services
 │   ├── Dockerfile                          # Container image
 │   └── Makefile                            # Build automation
 │
-├── 🗄️ Archive (Consolidated Old Files)
-│   └── archive/
-│       └── old_documentation/              # Historical documents
-│           ├── README.md                   # Archive index
-│           ├── MODERNIZATION_PLAN_.md      # Old version
-│           ├── claudedocs/                 # Historical analysis
-│           └── [Other archived files]
-│
-└── 🤖 AI Assistant Configuration
-    ├── .kiro/                              # Kiro IDE settings
-    │   └── steering/                       # AI steering rules
-    │       ├── architecture.md
-    │       ├── tech.md
-    │       ├── security.md
-    │       └── [Other steering docs]
-    └── .serena/                            # Serena memory
-        └── memories/                       # AI memory storage
+└── 🗄️ Archive
+    └── archive/                            # Consolidated old files
+        ├── docs/                           # Historical documentation
+        ├── scripts/                        # Old scripts
+        └── [Other archived materials]
 ```
 
 ---
@@ -206,9 +236,21 @@ incident-commander/
 
 ---
 
-## 📋 Recent Changes (October 23, 2025)
+## 📋 Recent Changes
 
-### 🆕 New Files
+### October 25, 2025 - Major Repository Reorganization ✨
+**Complete restructuring for professional organization:**
+- **Reorganized root directory** - Moved 40+ scripts to organized subdirectories
+- **Created /deployment/** - All deployment scripts consolidated with README
+- **Created /demo/** - Demo and testing scripts in one location with README
+- **Reorganized /scripts/** - PDF generation, monitoring, utilities properly categorized
+- **Cleaned /hackathon/** - Validation scripts and historical reports organized
+- **Added comprehensive READMEs** - Navigation guides for all new directories
+- **Professional structure** - Easy navigation for judges, developers, and stakeholders
+
+### October 23, 2025
+
+#### 🆕 New Files
 - **JUDGE_REVIEW_INSTRUCTIONS.md** - Comprehensive judge evaluation guide
 - **SYSTEM_ARCHITECTURE_DIAGRAMS.md** - Interactive architecture diagrams with Mermaid
 - **SwarmAI_Architecture_Diagrams.pdf** - Printable architecture reference
@@ -337,6 +379,6 @@ All files consolidated, duplicate content archived, and comprehensive navigation
 
 ---
 
-**Last Updated**: October 23, 2025
-**Version**: 1.0
+**Last Updated**: October 25, 2025
+**Version**: 2.0 (Major Reorganization)
 **Maintained By**: SwarmAI Development Team

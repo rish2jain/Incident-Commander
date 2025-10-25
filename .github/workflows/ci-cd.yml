@@ -213,7 +213,7 @@ jobs:
 
       - name: Run smoke tests
         run: |
-          python scripts/smoke_tests.py --environment staging
+          python scripts/monitoring/smoke_tests.py --environment staging
 
   # Deploy to production
   deploy-production:
@@ -267,7 +267,7 @@ jobs:
 
       - name: Run smoke tests
         run: |
-          python scripts/smoke_tests.py --environment production
+          python scripts/monitoring/smoke_tests.py --environment production
 
       - name: Notify deployment success
         uses: 8398a7/action-slack@v3

@@ -360,7 +360,7 @@ jobs:
 
       - name: Run health checks
         run: |
-          python scripts/health-check.py --url $API_BASE_URL --timeout 300
+          python scripts/monitoring/check_system_status.py --url $API_BASE_URL --timeout 300
 
       - name: Run smoke tests
         run: |
